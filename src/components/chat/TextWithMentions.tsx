@@ -4,48 +4,16 @@ import type CCHubPlugin from "../../plugin";
 interface TextWithMentionsProps {
 	text: string;
 	plugin: CCHubPlugin;
-	autoMentionContext?: {
-		noteName: string;
-		notePath: string;
-		selection?: {
-			fromLine: number;
-			toLine: number;
-		};
-	};
 }
 
-// Function to render text with @mentions and optional auto-mention
+// Function to render text with @mentions
 export function TextWithMentions({
 	text,
 	plugin,
-	autoMentionContext,
 }: TextWithMentionsProps): React.ReactElement {
 	// Match @[[filename]] format only
 	const mentionRegex = /@\[\[([^\]]+)\]\]/g;
 	const parts: React.ReactNode[] = [];
-
-	// Add auto-mention badge first if provided
-	if (autoMentionContext) {
-		const displayText = autoMentionContext.selection
-			? `@${autoMentionContext.noteName}:${autoMentionContext.selection.fromLine}-${autoMentionContext.selection.toLine}`
-			: `@${autoMentionContext.noteName}`;
-
-		parts.push(
-			<span
-				key="auto-mention"
-				className="cchub-text-mention"
-				onClick={() => {
-					void plugin.app.workspace.openLinkText(
-						autoMentionContext.notePath,
-						"",
-					);
-				}}
-			>
-				{displayText}
-			</span>,
-		);
-		parts.push("\n");
-	}
 
 	let lastIndex = 0;
 	let match;

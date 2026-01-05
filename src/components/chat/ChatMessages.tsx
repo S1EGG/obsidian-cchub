@@ -114,6 +114,9 @@ export function ChatMessages({
 		checkIfAtBottom();
 	}, [view, checkIfAtBottom]);
 
+	const lastMessageId =
+		messages.length > 0 ? messages[messages.length - 1]?.id : null;
+
 	return (
 		<div ref={containerRef} className="cchub-chat-view-messages">
 			{errorInfo ? (
@@ -137,10 +140,7 @@ export function ChatMessages({
 					</button>
 				</div>
 			) : messages.length === 0 ? (
-				<div
-					className="cchub-chat-empty-state"
-					aria-hidden="true"
-				/>
+				<div className="cchub-chat-empty-state" aria-hidden="true" />
 			) : (
 				<>
 					{messages.map((message) => (
@@ -149,6 +149,8 @@ export function ChatMessages({
 							message={message}
 							plugin={plugin}
 							acpClient={acpClient}
+							isLatest={message.id === lastMessageId}
+							isSending={isSending}
 							onApprovePermission={onApprovePermission}
 						/>
 					))}

@@ -14,6 +14,7 @@ interface MessageContentRendererProps {
 	messageId?: string;
 	messageRole?: "user" | "assistant";
 	acpClient?: IAcpClient;
+	isThinkingActive?: boolean;
 	/** Callback to approve a permission request */
 	onApprovePermission?: (
 		requestId: string,
@@ -27,6 +28,7 @@ export function MessageContentRenderer({
 	messageId,
 	messageRole,
 	acpClient,
+	isThinkingActive,
 	onApprovePermission,
 }: MessageContentRendererProps) {
 	switch (content.type) {
@@ -40,18 +42,14 @@ export function MessageContentRenderer({
 				<MarkdownTextRenderer text={content.text} app={plugin.app} />
 			);
 
-		case "text_with_context":
-			// User messages with auto-mention context
+		case "agent_thought":
 			return (
-				<TextWithMentions
+				<CollapsibleThought
 					text={content.text}
-					autoMentionContext={content.autoMentionContext}
 					plugin={plugin}
+					isActive={Boolean(isThinkingActive)}
 				/>
 			);
-
-		case "agent_thought":
-			return <CollapsibleThought text={content.text} plugin={plugin} />;
 
 		case "tool_call":
 			return (
@@ -66,14 +64,9 @@ export function MessageContentRenderer({
 		case "plan":
 			return (
 				<div className="cchub-message-plan">
-					<div className="cchub-message-plan-title">
-						📋 Plan
-					</div>
+					<div className="cchub-message-plan-title">📋 Plan</div>
 					{content.entries.map((entry, idx) => (
-						<div
-							key={idx}
-							className="cchub-message-plan-entry"
-						>
+						<div key={idx} className="cchub-message-plan-entry">
 							<span
 								className={`cchub-message-plan-entry-icon cchub-status-${entry.status}`}
 							>

@@ -132,10 +132,8 @@ If your plugin does not need CSS, delete this file.
 }
 
 @media (prefers-reduced-motion: reduce) {
-	.cchub-agent-badge.cchub-agent-badge--loading
-		.cchub-agent-logo,
-	.cchub-agent-badge.cchub-agent-badge--loading
-		.cchub-agent-monogram {
+	.cchub-agent-badge.cchub-agent-badge--loading .cchub-agent-logo,
+	.cchub-agent-badge.cchub-agent-badge--loading .cchub-agent-monogram {
 		animation: none;
 	}
 }
@@ -185,12 +183,15 @@ If your plugin does not need CSS, delete this file.
 
 /* Tool Call */
 .cchub-message-tool-call {
-	padding: 8px;
-	margin-top: 4px;
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	padding: 0;
+	margin: 0;
 	background-color: transparent;
-	border: 1px solid var(--background-modifier-border);
-	border-radius: 4px;
-	font-size: 12px;
+	border: none;
+	border-radius: 0;
+	font-size: 13px;
 	user-select: text;
 	overflow-wrap: break-word;
 	word-wrap: break-word;
@@ -198,41 +199,50 @@ If your plugin does not need CSS, delete this file.
 	max-width: 100%;
 }
 
-.cchub-message-tool-call-title {
-	font-weight: bold;
-	margin-bottom: 4px;
-	user-select: text;
-	overflow-wrap: break-word;
-	word-wrap: break-word;
-	word-break: break-word;
-}
-
-.cchub-message-tool-call-locations {
+.cchub-tool-row {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	line-height: 1.4;
 	color: var(--text-muted);
-	user-select: text;
-	overflow-wrap: break-word;
-	word-wrap: break-word;
-	word-break: break-word;
 }
 
-.cchub-message-tool-call-location {
+.cchub-tool-icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 14px;
+	height: 14px;
+	font-size: 12px;
+	color: var(--text-muted);
+	border: none;
+	background: transparent;
+	box-shadow: none;
+}
+
+.cchub-tool-icon svg {
 	display: block;
-	font-family: var(--font-monospace);
-	font-size: 0.9em;
 }
 
-.cchub-message-tool-call-status {
-	color: var(--text-muted);
-	user-select: text;
-	overflow-wrap: break-word;
-	word-wrap: break-word;
-	word-break: break-word;
+.cchub-tool-icon.cchub-tool-icon--active {
+	animation: cchubPulse 1.6s ease-in-out infinite;
+}
+
+.cchub-tool-label {
+	color: var(--text-normal);
+	font-weight: 600;
+}
+
+.cchub-tool-details {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	margin-left: 22px;
 }
 
 /* Plan */
 .cchub-message-plan {
 	padding: 8px;
-	margin-top: 4px;
 	border: 1px solid var(--background-modifier-border);
 	border-radius: 4px;
 	font-size: 12px;
@@ -280,7 +290,6 @@ If your plugin does not need CSS, delete this file.
 /* Permission Request */
 .cchub-message-permission-request {
 	padding: 6px 0px;
-	margin-top: 4px;
 	background-color: var(--background-secondary);
 	font-size: 14px;
 	user-select: text;
@@ -362,9 +371,7 @@ If your plugin does not need CSS, delete this file.
 	cursor: not-allowed !important;
 }
 
-.cchub-permission-option.cchub-disabled:not(
-		.cchub-selected
-	) {
+.cchub-permission-option.cchub-disabled:not(.cchub-selected) {
 	opacity: 0.5;
 }
 
@@ -394,11 +401,11 @@ If your plugin does not need CSS, delete this file.
 }
 
 /* Normal option button hover (no kind specified) */
-.cchub-permission-option:not(
-		.cchub-permission-kind-allow_always
-	):not(.cchub-permission-kind-reject_once):not(
-		.cchub-permission-kind-allow_once
-	):not(.cchub-disabled):not(.cchub-selected):hover {
+.cchub-permission-option:not(.cchub-permission-kind-allow_always):not(
+		.cchub-permission-kind-reject_once
+	):not(.cchub-permission-kind-allow_once):not(.cchub-disabled):not(
+		.cchub-selected
+	):hover {
 	background-color: var(--background-modifier-hover) !important;
 }
 
@@ -474,10 +481,8 @@ If your plugin does not need CSS, delete this file.
 	background: none;
 }
 
-.cchub-agent-badge.cchub-agent-badge--loading
-	.cchub-agent-logo,
-.cchub-agent-badge.cchub-agent-badge--loading
-	.cchub-agent-monogram {
+.cchub-agent-badge.cchub-agent-badge--loading .cchub-agent-logo,
+.cchub-agent-badge.cchub-agent-badge--loading .cchub-agent-monogram {
 	animation: cchubBreath 1.8s ease-in-out infinite;
 	transform-origin: center;
 }
@@ -629,84 +634,6 @@ If your plugin does not need CSS, delete this file.
 
 .cchub-chat-input-box.cchub-dragging-over {
 	background-color: var(--background-secondary);
-}
-
-/* Auto-mention inline display */
-.cchub-auto-mention-inline {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	gap: 4px;
-	padding: 4px 10px;
-	border-bottom: 1px solid var(--background-modifier-border);
-	background-color: var(--background-primary);
-}
-
-.cchub-mention-badge {
-	background-color: var(--background-modifier-hover);
-	color: var(--text-muted);
-	border-radius: 6px;
-	font-size: 12px;
-	font-weight: 500;
-	padding: 2px 6px;
-	line-height: var(--line-height-normal);
-	cursor: default;
-	user-select: none;
-	white-space: nowrap;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	max-width: calc(100% - 24px);
-}
-
-.cchub-mention-badge.cchub-disabled {
-	color: var(--text-faint);
-	text-decoration: line-through;
-}
-
-.cchub-auto-mention-toggle-btn {
-	background: none;
-	background-color: transparent !important;
-	border: none !important;
-	color: var(--text-faint);
-	cursor: pointer;
-	padding: 0 !important;
-	margin: 0 !important;
-	pointer-events: auto;
-	transition:
-		color 0.2s,
-		background-color 0.2s,
-		transform 0.2s;
-	outline: none !important;
-	appearance: none;
-	box-shadow: none !important;
-	width: 18px;
-	height: 18px;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	flex-shrink: 0;
-	border-radius: 6px;
-}
-
-.cchub-auto-mention-toggle-btn svg {
-	width: 14px;
-	height: 14px;
-	color: inherit;
-}
-
-.cchub-auto-mention-toggle-btn:hover {
-	background: none;
-	box-shadow: none;
-	color: var(--text-normal);
-	background-color: var(--background-modifier-hover);
-	transform: scale(1.04);
-}
-
-.cchub-auto-mention-toggle-btn:active,
-.cchub-auto-mention-toggle-btn:focus {
-	background: none;
-	box-shadow: none;
-	outline: none;
 }
 
 .cchub-chat-input-textarea {
@@ -1006,48 +933,41 @@ If your plugin does not need CSS, delete this file.
 /* Collapsible Thought */
 .cchub-collapsible-thought {
 	color: var(--text-muted);
-	background-color: var(--background-secondary);
-	font-size: 12px;
+	background-color: transparent;
+	font-size: 13px;
 	cursor: pointer;
 	overflow-wrap: break-word;
 	word-wrap: break-word;
 	word-break: break-word;
 	max-width: 100%;
-	margin-top: 6px;
-	padding: 6px 8px;
-	border-left: 2px solid var(--background-modifier-border);
-	border-radius: 6px;
+	margin: 0;
+	padding: 0;
+	border: none;
 }
 
 .cchub-collapsible-thought-header {
 	display: flex;
 	align-items: center;
-	gap: 6px;
-}
-
-.cchub-collapsible-thought-indicator {
-	width: 6px;
-	height: 6px;
-	border-radius: 50%;
-	background: var(--interactive-accent);
-	box-shadow: 0 0 0 2px var(--background-secondary);
-	animation: cchubPulse 1.6s ease-in-out infinite;
-}
-
-.cchub-collapsible-thought-label {
-	font-weight: 600;
-	letter-spacing: 0.02em;
 }
 
 .cchub-collapsible-thought-icon {
-	font-size: 11px;
-	opacity: 0.6;
+	font-size: 12px;
+	opacity: 0;
+	visibility: hidden;
 	margin-left: auto;
+	transition:
+		opacity 0.15s ease,
+		visibility 0.15s ease;
+}
+
+.cchub-collapsible-thought:hover .cchub-collapsible-thought-icon {
+	opacity: 0.7;
+	visibility: visible;
 }
 
 .cchub-collapsible-thought-content {
 	margin-top: 6px;
-	padding-left: 12px;
+	padding-left: 22px;
 	user-select: text;
 	overflow-wrap: break-word;
 	word-wrap: break-word;
@@ -1102,7 +1022,7 @@ If your plugin does not need CSS, delete this file.
 /* Terminal Renderer */
 .cchub-terminal-renderer {
 	padding: 12px;
-	margin-top: 4px;
+	margin-top: 0;
 	background-color: var(--background-secondary);
 	border: 1px solid var(--background-modifier-border);
 	border-radius: 8px;
@@ -1182,6 +1102,10 @@ If your plugin does not need CSS, delete this file.
 	box-sizing: border-box;
 }
 
+.cchub-message-block {
+	margin: 8px 0;
+}
+
 .cchub-message-renderer.cchub-message-user {
 	background-color: var(--background-primary);
 	border: 1px solid var(--background-modifier-border);
@@ -1247,7 +1171,7 @@ If your plugin does not need CSS, delete this file.
 
 /* Tool Call Diff Renderer */
 .cchub-tool-call-diff {
-	margin-top: 8px;
+	margin-top: 0;
 	border: 1px solid var(--background-modifier-border);
 	border-radius: 4px;
 	overflow: hidden;

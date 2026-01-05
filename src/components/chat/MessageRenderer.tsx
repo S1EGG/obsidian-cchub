@@ -11,6 +11,8 @@ interface MessageRendererProps {
 	message: ChatMessage;
 	plugin: CCHubPlugin;
 	acpClient?: IAcpClient;
+	isLatest?: boolean;
+	isSending?: boolean;
 	/** Callback to approve a permission request */
 	onApprovePermission?: (
 		requestId: string,
@@ -60,9 +62,14 @@ export function MessageRenderer({
 	message,
 	plugin,
 	acpClient,
+	isLatest,
+	isSending,
 	onApprovePermission,
 }: MessageRendererProps) {
 	const groups = groupContent(message.content);
+	const isThinkingActive = Boolean(
+		isLatest && isSending && message.role === "assistant",
+	);
 
 	return (
 		<div
@@ -72,10 +79,7 @@ export function MessageRenderer({
 				if (group.type === "images") {
 					// Render images in horizontal scroll container
 					return (
-						<div
-							key={idx}
-							className="cchub-message-images-strip"
-						>
+						<div key={idx} className="cchub-message-images-strip">
 							{group.items.map((content, imgIdx) => (
 								<MessageContentRenderer
 									key={imgIdx}
@@ -92,13 +96,14 @@ export function MessageRenderer({
 				} else {
 					// Render single non-image content
 					return (
-						<div key={idx}>
+						<div key={idx} className="cchub-message-block">
 							<MessageContentRenderer
 								content={group.item}
 								plugin={plugin}
 								messageId={message.id}
 								messageRole={message.role}
 								acpClient={acpClient}
+								isThinkingActive={isThinkingActive}
 								onApprovePermission={onApprovePermission}
 							/>
 						</div>

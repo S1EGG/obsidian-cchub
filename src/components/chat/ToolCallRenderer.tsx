@@ -5,8 +5,8 @@ import type { IAcpClient } from "../../adapters/acp/acp.adapter";
 import type CCHubPlugin from "../../plugin";
 import { TerminalRenderer } from "./TerminalRenderer";
 import { PermissionRequestSection } from "./PermissionRequestSection";
-import { toRelativePath } from "../../shared/path-utils";
 import * as Diff from "diff";
+import { ToolIcon } from "./ToolIcon";
 // import { MarkdownTextRenderer } from "./MarkdownTextRenderer";
 
 interface ToolCallRendererProps {
@@ -29,11 +29,8 @@ export function ToolCallRenderer({
 	const {
 		kind,
 		title,
-		status,
 		toolCallId,
 		permissionRequest,
-		locations,
-		// rawInput,
 		content: toolContent,
 	} = content;
 
@@ -49,64 +46,25 @@ export function ToolCallRenderer({
 		}
 	}, [permissionRequest?.selectedOptionId]);
 
-	// Get vault path for relative path display
-	const vaultPath = useMemo(() => {
-		const adapter = plugin.app.vault.adapter as { basePath?: string };
-		return adapter.basePath || "";
-	}, [plugin]);
-
-	// Get icon based on kind
-	const getKindIcon = (kind?: string) => {
-		switch (kind) {
-			case "read":
-				return "📖";
-			case "edit":
-				return "✏️";
-			case "delete":
-				return "🗑️";
-			case "move":
-				return "📦";
-			case "search":
-				return "🔍";
-			case "execute":
-				return "💻";
-			case "think":
-				return "💭";
-			case "fetch":
-				return "🌐";
-			case "switch_mode":
-				return "🔄";
-			default:
-				return "🔧";
-		}
-	};
+	const kindLabel = getKindLabel(kind);
+	const trimmedTitle = title?.trim() || "";
+	const headerLabel =
+		trimmedTitle.length > 0
+			? kind
+				? trimmedTitle.startsWith(kindLabel)
+					? trimmedTitle
+					: `${kindLabel} ${trimmedTitle}`
+				: trimmedTitle
+			: kindLabel;
 
 	return (
 		<div className="cchub-message-tool-call">
 			{/* Header */}
-			<div className="cchub-message-tool-call-header">
-				<div className="cchub-message-tool-call-title">
-					<span className="cchub-message-tool-call-icon">
-						{getKindIcon(kind)}
-					</span>
-					{title}
-				</div>
-				{locations && locations.length > 0 && (
-					<div className="cchub-message-tool-call-locations">
-						{locations.map((loc, idx) => (
-							<span
-								key={idx}
-								className="cchub-message-tool-call-location"
-							>
-								{toRelativePath(loc.path, vaultPath)}
-								{loc.line != null && `:${loc.line}`}
-							</span>
-						))}
-					</div>
-				)}
-				<div className="cchub-message-tool-call-status">
-					Status: {status}
-				</div>
+			<div className="cchub-message-tool-call-header cchub-tool-row">
+				<span className="cchub-tool-icon" aria-hidden="true">
+					<ToolIcon kind={kind || "other"} />
+				</span>
+				<span className="cchub-tool-label">{headerLabel}</span>
 			</div>
 
 			{/* Kind-specific details */}
@@ -122,59 +80,89 @@ export function ToolCallRenderer({
 			)*/}
 
 			{/* Tool call content (diffs, terminal output, etc.) */}
-			{toolContent &&
-				toolContent.map((item, index) => {
-					if (item.type === "terminal") {
-						return (
-							<TerminalRenderer
-								key={index}
-								terminalId={item.terminalId}
-								acpClient={acpClient || null}
-								plugin={plugin}
-							/>
-						);
-					}
-					if (item.type === "diff") {
-						return (
-							<DiffRenderer
-								key={index}
-								diff={item}
-								plugin={plugin}
-							/>
-						);
-					}
-					/*
-					if (item.type === "content") {
-						// Handle content blocks (text, image, etc.)
-						if ("text" in item.content) {
+			{toolContent && toolContent.length > 0 && (
+				<div className="cchub-tool-details">
+					{toolContent.map((item, index) => {
+						if (item.type === "terminal") {
 							return (
-								<div key={index} className="cchub-tool-call-content">
-									<MarkdownTextRenderer
-										text={item.content.text}
-										app={plugin.app}
-									/>
-								</div>
+								<TerminalRenderer
+									key={index}
+									terminalId={item.terminalId}
+									acpClient={acpClient || null}
+									plugin={plugin}
+								/>
 							);
 						}
-						}*/
-					return null;
-				})}
+						if (item.type === "diff") {
+							return (
+								<DiffRenderer
+									key={index}
+									diff={item}
+									plugin={plugin}
+								/>
+							);
+						}
+						/*
+						if (item.type === "content") {
+							// Handle content blocks (text, image, etc.)
+							if ("text" in item.content) {
+								return (
+									<div key={index} className="cchub-tool-call-content">
+										<MarkdownTextRenderer
+											text={item.content.text}
+											app={plugin.app}
+										/>
+									</div>
+								);
+							}
+							}*/
+						return null;
+					})}
+				</div>
+			)}
 
 			{/* Permission request section */}
 			{permissionRequest && (
-				<PermissionRequestSection
-					permissionRequest={{
-						...permissionRequest,
-						selectedOptionId: selectedOptionId,
-					}}
-					toolCallId={toolCallId}
-					plugin={plugin}
-					onApprovePermission={onApprovePermission}
-					onOptionSelected={setSelectedOptionId}
-				/>
+				<div className="cchub-tool-details">
+					<PermissionRequestSection
+						permissionRequest={{
+							...permissionRequest,
+							selectedOptionId: selectedOptionId,
+						}}
+						toolCallId={toolCallId}
+						plugin={plugin}
+						onApprovePermission={onApprovePermission}
+						onOptionSelected={setSelectedOptionId}
+					/>
+				</div>
 			)}
 		</div>
 	);
+}
+
+function getKindLabel(kind?: string) {
+	switch (kind) {
+		case "read":
+			return "Read";
+		case "edit":
+			return "Edit";
+		case "delete":
+			return "Delete";
+		case "move":
+			return "Move";
+		case "search":
+			return "Search";
+		case "execute":
+			return "Execute";
+		case "think":
+			return "Thinking";
+		case "fetch":
+			return "Fetch";
+		case "switch_mode":
+			return "Switch mode";
+		default:
+			return "Tool";
+	}
 }
 
 /*
@@ -452,19 +440,13 @@ function renderWordDiff(
 			{filteredParts.map((part, partIdx) => {
 				if (part.type === "added") {
 					return (
-						<span
-							key={partIdx}
-							className="cchub-diff-word-added"
-						>
+						<span key={partIdx} className="cchub-diff-word-added">
 							{part.value}
 						</span>
 					);
 				} else if (part.type === "removed") {
 					return (
-						<span
-							key={partIdx}
-							className="cchub-diff-word-removed"
-						>
+						<span key={partIdx} className="cchub-diff-word-removed">
 							{part.value}
 						</span>
 					);

@@ -27,7 +27,6 @@ import { ObsidianVaultAdapter } from "../../adapters/obsidian/vault.adapter";
 import { useSettings } from "../../hooks/useSettings";
 import { useMentions } from "../../hooks/useMentions";
 import { useSlashCommands } from "../../hooks/useSlashCommands";
-import { useAutoMention } from "../../hooks/useAutoMention";
 import { useAgentSession } from "../../hooks/useAgentSession";
 import { useChat } from "../../hooks/useChat";
 import { usePermission } from "../../hooks/usePermission";
@@ -137,11 +136,7 @@ function ChatComponent({
 	const permission = usePermission(cchubClient, messages);
 
 	const mentions = useMentions(vaultAccessAdapter, plugin);
-	const autoMention = useAutoMention(vaultAccessAdapter);
-	const slashCommands = useSlashCommands(
-		session.availableCommands || [],
-		autoMention.toggle,
-	);
+	const slashCommands = useSlashCommands(session.availableCommands || []);
 
 	const autoExport = useAutoExport(plugin);
 
@@ -222,19 +217,10 @@ function ChatComponent({
 				await agentSession.switchAgent(requestedAgentId);
 			}
 
-			autoMention.toggle(false);
 			chat.clearMessages();
 			await agentSession.restartSession();
 		},
-		[
-			messages,
-			session,
-			logger,
-			autoExport,
-			autoMention,
-			chat,
-			agentSession,
-		],
+		[messages, session, logger, autoExport, chat, agentSession],
 	);
 
 	const handleExportChat = useCallback(async () => {
@@ -275,15 +261,13 @@ function ChatComponent({
 			images?: import("../../domain/models/prompt-content").ImagePromptContent[],
 		) => {
 			await chat.sendMessage(content, {
-				activeNote: autoMention.activeNote,
 				vaultBasePath:
 					(plugin.app.vault.adapter as VaultAdapterWithBasePath)
 						.basePath || "",
-				isAutoMentionDisabled: autoMention.isDisabled,
 				images,
 			});
 		},
-		[chat, autoMention, plugin],
+		[chat, plugin],
 	);
 
 	const handleStopGeneration = useCallback(async () => {
@@ -393,46 +377,8 @@ function ChatComponent({
 	}, [acpAdapter, chat.updateMessage]);
 
 	// ============================================================
-	// Effects - Auto-mention Active Note Tracking
-	// ============================================================
-	useEffect(() => {
-		let isMounted = true;
-
-		const refreshActiveNote = async () => {
-			if (!isMounted) return;
-			await autoMention.updateActiveNote();
-		};
-
-		const unsubscribe = vaultAccessAdapter.subscribeSelectionChanges(() => {
-			void refreshActiveNote();
-		});
-
-		void refreshActiveNote();
-
-		return () => {
-			isMounted = false;
-			unsubscribe();
-		};
-	}, [autoMention.updateActiveNote, vaultAccessAdapter]);
-
-	// ============================================================
 	// Effects - Workspace Events (Hotkeys)
 	// ============================================================
-	useEffect(() => {
-		const workspace = plugin.app.workspace;
-
-		const eventRef = workspace.on(
-			"cchub:toggle-auto-mention" as "quit",
-			() => {
-				autoMention.toggle();
-			},
-		);
-
-		return () => {
-			workspace.offref(eventRef);
-		};
-	}, [plugin.app.workspace, autoMention.toggle]);
-
 	// Handle new chat request from plugin commands (e.g., "New chat with [Agent]")
 	useEffect(() => {
 		const workspace = plugin.app.workspace;

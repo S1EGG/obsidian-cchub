@@ -6,7 +6,6 @@ import type {
 import type { SessionUpdate } from "../domain/models/session-update";
 import type { ICCHubClient } from "../domain/ports/cchub.port";
 import type { IVaultAccess } from "../domain/ports/vault-access.port";
-import type { NoteMetadata } from "../domain/ports/vault-access.port";
 import type { AuthenticationMethod } from "../domain/models/chat-session";
 import type { ErrorInfo } from "../domain/models/agent-error";
 import type { ImagePromptContent } from "../domain/models/prompt-content";
@@ -25,12 +24,8 @@ type ToolCallMessageContent = Extract<MessageContent, { type: "tool_call" }>;
  * Options for sending a message.
  */
 export interface SendMessageOptions {
-	/** Currently active note for auto-mention */
-	activeNote: NoteMetadata | null;
 	/** Vault base path for mention resolution */
 	vaultBasePath: string;
-	/** Whether auto-mention is temporarily disabled */
-	isAutoMentionDisabled?: boolean;
 	/** Attached images */
 	images?: ImagePromptContent[];
 }
@@ -441,9 +436,7 @@ export function useChat(
 				{
 					message: content,
 					images: options.images,
-					activeNote: options.activeNote,
 					vaultBasePath: options.vaultBasePath,
-					isAutoMentionDisabled: options.isAutoMentionDisabled,
 					convertToWsl: shouldConvertToWsl,
 				},
 				vaultAccess,
@@ -453,19 +446,11 @@ export function useChat(
 			// Phase 2: Build user message for UI
 			const userMessageContent: MessageContent[] = [];
 
-			// Text part (with or without auto-mention context)
-			if (prepared.autoMentionContext) {
-				userMessageContent.push({
-					type: "text_with_context",
-					text: content,
-					autoMentionContext: prepared.autoMentionContext,
-				});
-			} else {
-				userMessageContent.push({
-					type: "text",
-					text: content,
-				});
-			}
+			// Text part
+			userMessageContent.push({
+				type: "text",
+				text: content,
+			});
 
 			// Image parts
 			if (options.images && options.images.length > 0) {

@@ -38,7 +38,6 @@ export interface CCHubPluginSettings {
 	autoApproveRead: boolean;
 	autoApproveList: boolean;
 	autoApproveExecute: boolean;
-	autoMentionActiveNote: boolean;
 	debugMode: boolean;
 	nodePath: string;
 	workingDirectory: string;
@@ -89,7 +88,6 @@ const DEFAULT_SETTINGS: CCHubPluginSettings = {
 	autoApproveRead: false,
 	autoApproveList: false,
 	autoApproveExecute: false,
-	autoMentionActiveNote: true,
 	debugMode: false,
 	nodePath: "",
 	workingDirectory: "",
@@ -275,15 +273,6 @@ export default class CCHubPlugin extends Plugin {
 			callback: async () => {
 				await this.activateView();
 				this.app.workspace.trigger("cchub:reject-active-permission");
-			},
-		});
-
-		this.addCommand({
-			id: "toggle-auto-mention",
-			name: "Toggle auto-mention",
-			callback: async () => {
-				await this.activateView();
-				this.app.workspace.trigger("cchub:toggle-auto-mention");
 			},
 		});
 
@@ -609,10 +598,6 @@ export default class CCHubPlugin extends Plugin {
 				typeof rawSettings.autoApproveExecute === "boolean"
 					? rawSettings.autoApproveExecute
 					: legacyAutoAllow || DEFAULT_SETTINGS.autoApproveExecute,
-			autoMentionActiveNote:
-				typeof rawSettings.autoMentionActiveNote === "boolean"
-					? rawSettings.autoMentionActiveNote
-					: DEFAULT_SETTINGS.autoMentionActiveNote,
 			debugMode:
 				typeof rawSettings.debugMode === "boolean"
 					? rawSettings.debugMode

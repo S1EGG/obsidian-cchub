@@ -32,12 +32,9 @@ export interface UseSlashCommandsReturn {
  * Hook for managing slash command dropdown state and logic.
  *
  * @param availableCommands - Available slash commands from the agent session
- * @param onAutoMentionToggle - Callback to enable/disable auto-mention
- *        (slash commands require auto-mention to be disabled so "/" stays at the start)
  */
 export function useSlashCommands(
 	availableCommands: SlashCommand[],
-	onAutoMentionToggle?: (disabled: boolean) => void,
 ): UseSlashCommandsReturn {
 	const [suggestions, setSuggestions] = useState<SlashCommand[]>([]);
 	const [selectedIndex, setSelectedIndex] = useState(0);
@@ -46,15 +43,8 @@ export function useSlashCommands(
 
 	const updateSuggestions = useCallback(
 		(input: string, cursorPosition: number) => {
-			const wasOpen = suggestions.length > 0;
-
 			// Slash commands only trigger at the very beginning of input
 			if (!input.startsWith("/")) {
-				// Re-enable auto-mention only if dropdown was showing
-				// (meaning it was disabled by slash command detection)
-				if (wasOpen) {
-					onAutoMentionToggle?.(false);
-				}
 				setSuggestions([]);
 				setSelectedIndex(0);
 				return;
@@ -65,12 +55,10 @@ export function useSlashCommands(
 			const afterSlash = textUpToCursor.slice(1); // Remove leading '/'
 
 			// If there's a space, the command is complete and user is typing arguments
-			// Close dropdown but keep auto-mention disabled
+			// Close dropdown but keep command active
 			if (afterSlash.includes(" ")) {
 				setSuggestions([]);
 				setSelectedIndex(0);
-				// Keep auto-mention disabled (slash command is still active)
-				onAutoMentionToggle?.(true);
 				return;
 			}
 
@@ -83,11 +71,8 @@ export function useSlashCommands(
 
 			setSuggestions(filtered);
 			setSelectedIndex(0);
-			// Disable auto-mention when slash command is detected
-			// (ACP requires slash commands to be at the very beginning)
-			onAutoMentionToggle?.(true);
 		},
-		[availableCommands, onAutoMentionToggle, suggestions.length],
+		[availableCommands],
 	);
 
 	const selectSuggestion = useCallback(

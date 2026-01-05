@@ -112,20 +112,6 @@ export class CCHubSettingTab extends PluginSettingTab {
 		new Setting(containerEl).setName("Behavior").setHeading();
 
 		new Setting(containerEl)
-			.setName("Auto-mention active note")
-			.setDesc(
-				"Include the current note in your messages automatically. The agent will have access to its content without typing @notename.",
-			)
-			.addToggle((toggle) =>
-				toggle
-					.setValue(this.plugin.settings.autoMentionActiveNote)
-					.onChange(async (value) => {
-						this.plugin.settings.autoMentionActiveNote = value;
-						await this.plugin.saveSettings();
-					}),
-			);
-
-		new Setting(containerEl)
 			.setName("Send message shortcut")
 			.setDesc(
 				"Choose the keyboard shortcut to send messages. Note: If using Cmd/Ctrl+Enter, you may need to remove any hotkeys assigned to Cmd/Ctrl+Enter (Settings → Hotkeys).",

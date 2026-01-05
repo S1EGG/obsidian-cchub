@@ -6,18 +6,13 @@
  *
  * Responsibilities:
  * - Process mentions (@[[note]] syntax)
- * - Add auto-mention for active note
  * - Convert mentions to file paths
  * - Send prompt to agent via ICCHubClient
  * - Handle authentication errors with retry logic
  */
 
 import type { ICCHubClient } from "../domain/ports/cchub.port";
-import type {
-	IVaultAccess,
-	NoteMetadata,
-	EditorPosition,
-} from "../domain/ports/vault-access.port";
+import type { IVaultAccess } from "../domain/ports/vault-access.port";
 import type { AgentError } from "../domain/models/agent-error";
 import type { AuthenticationMethod } from "../domain/models/chat-session";
 import type {
@@ -41,14 +36,8 @@ export interface PreparePromptInput {
 	/** Attached images */
 	images?: ImagePromptContent[];
 
-	/** Currently active note (for auto-mention feature) */
-	activeNote?: NoteMetadata | null;
-
 	/** Vault base path for converting mentions to absolute paths */
 	vaultBasePath: string;
-
-	/** Whether auto-mention is temporarily disabled */
-	isAutoMentionDisabled?: boolean;
 
 	/** Whether to convert paths to WSL format (Windows + WSL mode) */
 	convertToWsl?: boolean;
@@ -63,16 +52,6 @@ export interface PreparePromptResult {
 
 	/** Content to send to agent (processed text + images) */
 	agentContent: PromptContent[];
-
-	/** Auto-mention context metadata (if auto-mention is active) */
-	autoMentionContext?: {
-		noteName: string;
-		notePath: string;
-		selection?: {
-			fromLine: number;
-			toLine: number;
-		};
-	};
 }
 
 /**
@@ -120,8 +99,6 @@ export interface SendPromptResult {
 // ============================================================================
 
 const MAX_NOTE_LENGTH = 10000; // Maximum characters per note
-const MAX_SELECTION_LENGTH = 10000; // Maximum characters for selection
-
 // ============================================================================
 // Prompt Preparation Functions
 // ============================================================================
@@ -131,7 +108,6 @@ const MAX_SELECTION_LENGTH = 10000; // Maximum characters for selection
  *
  * Processes the message by:
  * - Building context blocks for mentioned notes
- * - Adding auto-mention context for active note
  * - Creating agent content with context + user message + images
  */
 export async function preparePrompt(
@@ -176,25 +152,13 @@ export async function preparePrompt(
 		}
 	}
 
-	// Step 3: Build context from active note (for agent only)
-	if (input.activeNote && !input.isAutoMentionDisabled) {
-		const autoMentionContextBlock = await buildAutoMentionContext(
-			input.activeNote.path,
-			input.vaultBasePath,
-			vaultAccess,
-			input.convertToWsl ?? false,
-			input.activeNote.selection,
-		);
-		contextBlocks.push(autoMentionContextBlock);
-	}
-
-	// Step 4: Build agent message text (context blocks + original message)
+	// Step 3: Build agent message text (context blocks + original message)
 	const agentMessageText =
 		contextBlocks.length > 0
 			? contextBlocks.join("\n") + "\n\n" + input.message
 			: input.message;
 
-	// Step 5: Build content arrays
+	// Step 4: Build content arrays
 	// Only include text block if there's actual text content
 	// (API rejects empty text blocks)
 	const displayContent: PromptContent[] = [
@@ -211,81 +175,10 @@ export async function preparePrompt(
 		...(input.images || []),
 	];
 
-	// Step 6: Build auto-mention context metadata
-	const autoMentionContext =
-		input.activeNote && !input.isAutoMentionDisabled
-			? {
-					noteName: input.activeNote.name,
-					notePath: input.activeNote.path,
-					selection: input.activeNote.selection
-						? {
-								fromLine:
-									input.activeNote.selection.from.line + 1,
-								toLine: input.activeNote.selection.to.line + 1,
-							}
-						: undefined,
-				}
-			: undefined;
-
 	return {
 		displayContent,
 		agentContent,
-		autoMentionContext,
 	};
-}
-
-/**
- * Build context from auto-mentioned note.
- */
-async function buildAutoMentionContext(
-	notePath: string,
-	vaultPath: string,
-	vaultAccess: IVaultAccess,
-	convertToWsl: boolean,
-	selection?: {
-		from: EditorPosition;
-		to: EditorPosition;
-	},
-): Promise<string> {
-	let absolutePath = vaultPath ? `${vaultPath}/${notePath}` : notePath;
-
-	if (convertToWsl) {
-		absolutePath = convertWindowsPathToWsl(absolutePath);
-	}
-
-	if (selection) {
-		const fromLine = selection.from.line + 1;
-		const toLine = selection.to.line + 1;
-
-		try {
-			const content = await vaultAccess.readNote(notePath);
-			const lines = content.split("\n");
-			const selectedLines = lines.slice(
-				selection.from.line,
-				selection.to.line + 1,
-			);
-			let selectedText = selectedLines.join("\n");
-
-			let truncationNote = "";
-			if (selectedText.length > MAX_SELECTION_LENGTH) {
-				selectedText = selectedText.substring(0, MAX_SELECTION_LENGTH);
-				truncationNote = `\n\n[Note: The selection was truncated. Original length: ${selectedLines.join("\n").length} characters, showing first ${MAX_SELECTION_LENGTH} characters]`;
-			}
-
-			return `<obsidian_opened_note selection="lines ${fromLine}-${toLine}">
-The user opened the note ${absolutePath} in Obsidian and selected the following text (lines ${fromLine}-${toLine}):
-
-${selectedText}${truncationNote}
-
-This is what the user is currently focusing on.
-</obsidian_opened_note>`;
-		} catch (error) {
-			console.error(`Failed to read selection from ${notePath}:`, error);
-			return `<obsidian_opened_note selection="lines ${fromLine}-${toLine}">The user opened the note ${absolutePath} in Obsidian and is focusing on lines ${fromLine}-${toLine}. This may or may not be related to the current conversation. If it seems relevant, consider using the Read tool to examine the specific lines.</obsidian_opened_note>`;
-		}
-	}
-
-	return `<obsidian_opened_note>The user opened the note ${absolutePath} in Obsidian. This may or may not be related to the current conversation. If it seems relevant, consider using the Read tool to examine the content.</obsidian_opened_note>`;
 }
 
 // ============================================================================
