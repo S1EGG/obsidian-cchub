@@ -32,10 +32,10 @@ export interface UseAgentSessionReturn {
 	/** Error information if session operation failed */
 	errorInfo: SessionErrorInfo | null;
 
-	/** Create a new session with the current active agent */
-	createSession: () => Promise<void>;
+	/** Create a new session (optionally overriding the agent) */
+	createSession: (agentIdOverride?: string) => Promise<void>;
 	/** Restart the current session */
-	restartSession: () => Promise<void>;
+	restartSession: (agentIdOverride?: string) => Promise<void>;
 	/** Close the current session and disconnect from agent */
 	closeSession: () => Promise<void>;
 	/** Cancel the current agent operation */

@@ -208,15 +208,10 @@ export default class CCHubPlugin extends Plugin {
 	 * Open chat view and switch to specified agent
 	 */
 	private async openChatWithAgent(agentId: string): Promise<void> {
-		// 1. Switch agent in settings (if different from current)
-		if (this.settings.activeAgentId !== agentId) {
-			await this.settingsStore.updateSettings({ activeAgentId: agentId });
-		}
-
-		// 2. Activate view (create new or focus existing)
+		// 1. Activate view (create new or focus existing)
 		await this.activateView();
 
-		// Trigger new chat with specific agent
+		// 2. Trigger new chat with specific agent
 		// Pass agentId so ChatComponent knows to force new session even if empty
 		this.app.workspace.trigger(
 			"cchub:new-chat-requested" as "quit",

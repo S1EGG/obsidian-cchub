@@ -33,6 +33,7 @@ import { usePermission } from "../../hooks/usePermission";
 import { useAutoExport } from "../../hooks/useAutoExport";
 import {
 	getActiveAgentId,
+	getAvailableAgentsFromSettings,
 	getAgentDisplayName,
 	getAgentModuleId,
 } from "../../hooks/session/session-helpers";
@@ -165,6 +166,14 @@ function ChatComponent({
 		return getAgentModuleId(plugin.settings, session.agentId);
 	}, [session.agentId, plugin.settings]);
 
+	const availableAgents = useMemo(() => {
+		return getAvailableAgentsFromSettings(settings);
+	}, [settings]);
+
+	const defaultAgentId = useMemo(() => {
+		return getActiveAgentId(settings);
+	}, [settings]);
+
 	// ============================================================
 	// Callbacks
 	// ============================================================
@@ -174,8 +183,9 @@ function ChatComponent({
 	 */
 	const handleNewChat = useCallback(
 		async (requestedAgentId?: string) => {
-			const isAgentSwitch =
-				requestedAgentId && requestedAgentId !== session.agentId;
+			const targetAgentId =
+				requestedAgentId ?? getActiveAgentId(settings);
+			const isAgentSwitch = targetAgentId !== session.agentId;
 
 			// Skip if already empty AND not switching agents
 			if (messages.length === 0 && !isAgentSwitch) {
@@ -190,7 +200,7 @@ function ChatComponent({
 			}
 
 			logger.log(
-				`[Debug] Creating new session${isAgentSwitch ? ` with agent: ${requestedAgentId}` : ""}...`,
+				`[Debug] Creating new session${isAgentSwitch ? ` with agent: ${targetAgentId}` : ""}...`,
 			);
 
 			// Auto-export current chat before starting new one (if has messages)
@@ -204,13 +214,15 @@ function ChatComponent({
 
 			// Switch agent if requested
 			if (isAgentSwitch) {
-				await agentSession.switchAgent(requestedAgentId);
+				chat.clearMessages();
+				await agentSession.restartSession(targetAgentId);
+				return;
 			}
 
 			chat.clearMessages();
 			await agentSession.restartSession();
 		},
-		[messages, session, logger, autoExport, chat, agentSession],
+		[messages, session, logger, autoExport, chat, agentSession, settings],
 	);
 
 	const handleExportChat = useCallback(async () => {
@@ -282,11 +294,11 @@ function ChatComponent({
 	// ============================================================
 	// Effects - Session Lifecycle
 	// ============================================================
-	// Initialize session on mount or when agent changes
+	// Initialize session on mount
 	useEffect(() => {
 		logger.log("[Debug] Starting connection setup via useAgentSession...");
 		void agentSession.createSession();
-	}, [session.agentId, agentSession.createSession]);
+	}, [agentSession.createSession, logger]);
 
 	// Refs for cleanup (to access latest values in cleanup function)
 	const messagesRef = useRef(messages);
@@ -314,19 +326,6 @@ function ChatComponent({
 		};
 		// Empty dependency array - only run on unmount
 	}, []);
-
-	// Monitor agent changes from settings when messages are empty
-	useEffect(() => {
-		const newActiveAgentId = getActiveAgentId(settings);
-		if (messages.length === 0 && newActiveAgentId !== session.agentId) {
-			void agentSession.switchAgent(newActiveAgentId);
-		}
-	}, [
-		settings.activeAgentId,
-		messages.length,
-		session.agentId,
-		agentSession.switchAgent,
-	]);
 
 	// ============================================================
 	// Effects - ACP Adapter Callbacks
@@ -444,8 +443,10 @@ function ChatComponent({
 				agentId={session.agentId}
 				agentLabel={activeAgentLabel}
 				agentModuleId={activeAgentModuleId}
+				availableAgents={availableAgents}
+				defaultAgentId={defaultAgentId}
 				isSessionReady={isSessionReady}
-				onNewChat={() => void handleNewChat()}
+				onNewChat={(agentId) => void handleNewChat(agentId)}
 				onExportChat={() => void handleExportChat()}
 				onOpenSettings={handleOpenSettings}
 			/>

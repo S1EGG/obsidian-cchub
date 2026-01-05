@@ -390,8 +390,10 @@ export class CCHubSettingTab extends PluginSettingTab {
 		this.plugin.ensureActiveAgentId();
 
 		new Setting(containerEl)
-			.setName("Active agent")
-			.setDesc("Choose which agent handles new chat sessions.")
+			.setName("Default agent")
+			.setDesc(
+				"Choose which agent handles new chat sessions by default. Changes apply when starting a new chat.",
+			)
 			.addDropdown((dropdown) => {
 				this.agentSelector = dropdown;
 				this.populateAgentDropdown(dropdown);
