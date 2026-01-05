@@ -7,7 +7,12 @@ import type CCHubPlugin from "../../plugin";
 
 // Component imports
 import { ChatHeader } from "./ChatHeader";
-import { ChatMessages } from "./ChatMessages";
+import {
+	ChatMessages,
+	type ErrorAction,
+	type ErrorDisplayInfo,
+	type ErrorSource,
+} from "./ChatMessages";
 import { ChatInput } from "./ChatInput";
 
 // Service imports
@@ -29,6 +34,7 @@ import { useAgentSession } from "../../hooks/useAgentSession";
 import { useChat } from "../../hooks/useChat";
 import { usePermission } from "../../hooks/usePermission";
 import { useAutoExport } from "../../hooks/useAutoExport";
+import type { ErrorInfo as BaseErrorInfo } from "../../domain/models/agent-error";
 import {
 	getActiveAgentId,
 	getAvailableAgentsFromSettings,
@@ -139,10 +145,6 @@ function ChatComponent({
 	const slashCommands = useSlashCommands(session.availableCommands || []);
 
 	const autoExport = useAutoExport(plugin);
-
-	// Combined error info (session errors take precedence)
-	const errorInfo =
-		sessionErrorInfo || chat.errorInfo || permission.errorInfo;
 
 	// ============================================================
 	// Local State
@@ -279,7 +281,139 @@ function ChatComponent({
 
 	const handleClearError = useCallback(() => {
 		chat.clearError();
-	}, [chat]);
+		permission.clearError();
+		agentSession.clearError();
+	}, [chat, permission, agentSession]);
+
+	const handleRestoreLastMessage = useCallback(() => {
+		if (!chat.lastUserMessage) {
+			return;
+		}
+		setRestoredMessage(chat.lastUserMessage);
+		handleClearError();
+	}, [chat.lastUserMessage, handleClearError]);
+
+	const handleRetrySession = useCallback(() => {
+		handleClearError();
+		void agentSession.restartSession();
+	}, [agentSession, handleClearError]);
+
+	const shouldOfferSettings = useCallback((info: BaseErrorInfo) => {
+		const combined = `${info.title} ${info.message} ${info.suggestion ?? ""}`;
+		return /auth|api key|configuration|settings/i.test(combined);
+	}, []);
+
+	const buildErrorActions = useCallback(
+		(source: ErrorSource, info: BaseErrorInfo): ErrorAction[] => {
+			const actions: ErrorAction[] = [];
+
+			if (source === "session") {
+				actions.push({
+					label: "Retry connection",
+					onClick: handleRetrySession,
+					variant: "primary",
+				});
+				actions.push({
+					label: "Open settings",
+					onClick: handleOpenSettings,
+					variant: "secondary",
+				});
+			}
+
+			if (source === "chat") {
+				if (chat.lastUserMessage) {
+					actions.push({
+						label: "Restore draft",
+						onClick: handleRestoreLastMessage,
+						variant: "primary",
+					});
+				}
+				if (!isSessionReady) {
+					actions.push({
+						label: "Retry connection",
+						onClick: handleRetrySession,
+						variant: actions.length > 0 ? "secondary" : "primary",
+					});
+				}
+				if (shouldOfferSettings(info)) {
+					actions.push({
+						label: "Open settings",
+						onClick: handleOpenSettings,
+						variant: "secondary",
+					});
+				}
+			}
+
+			if (source === "permission") {
+				// No direct action here; user can retry from the permission card.
+			}
+
+			actions.push({
+				label: "Dismiss",
+				onClick: handleClearError,
+				variant:
+					source === "permission" && actions.length === 0
+						? "primary"
+						: "secondary",
+			});
+
+			return actions;
+		},
+		[
+			handleRetrySession,
+			handleOpenSettings,
+			handleRestoreLastMessage,
+			handleClearError,
+			chat.lastUserMessage,
+			isSessionReady,
+			shouldOfferSettings,
+		],
+	);
+
+	const buildErrorDisplay = useCallback(
+		(source: ErrorSource, info: BaseErrorInfo): ErrorDisplayInfo => {
+			const sourceLabels: Record<ErrorSource, string> = {
+				session: "Session error",
+				chat: "Message error",
+				permission: "Permission error",
+			};
+
+			const fallbackSuggestions: Record<ErrorSource, string> = {
+				session:
+					"Check the agent command and working directory, then retry the connection.",
+				chat: "Wait for the session to be ready, then try again.",
+				permission:
+					"Dismiss this banner to return to the permission card and retry the action.",
+			};
+
+			return {
+				...info,
+				source,
+				sourceLabel: sourceLabels[source],
+				suggestion: info.suggestion || fallbackSuggestions[source],
+				actions: buildErrorActions(source, info),
+			};
+		},
+		[buildErrorActions],
+	);
+
+	const errorDisplay = useMemo<ErrorDisplayInfo | null>(() => {
+		if (sessionErrorInfo) {
+			return buildErrorDisplay("session", sessionErrorInfo);
+		}
+		if (chat.errorInfo) {
+			return buildErrorDisplay("chat", chat.errorInfo);
+		}
+		if (permission.errorInfo) {
+			return buildErrorDisplay("permission", permission.errorInfo);
+		}
+		return null;
+	}, [
+		sessionErrorInfo,
+		chat.errorInfo,
+		permission.errorInfo,
+		buildErrorDisplay,
+	]);
 
 	const handleRestoredMessageConsumed = useCallback(() => {
 		setRestoredMessage(null);
@@ -449,12 +583,11 @@ function ChatComponent({
 				messages={messages}
 				isSending={isSending}
 				isAwaitingResponse={isAwaitingResponse}
-				errorInfo={errorInfo}
+				errorInfo={errorDisplay}
 				plugin={plugin}
 				view={view}
 				acpClient={acpClientRef.current}
 				onApprovePermission={permission.approvePermission}
-				onClearError={handleClearError}
 			/>
 
 			<ChatInput

@@ -687,7 +687,7 @@ If your plugin does not need CSS, delete this file.
 .cchub-chat-error-container {
 	display: flex;
 	flex-direction: column;
-	gap: 12px;
+	gap: 14px;
 	padding: 20px;
 	background-color: var(--background-secondary);
 	border-radius: 8px;
@@ -696,9 +696,44 @@ If your plugin does not need CSS, delete this file.
 	overflow: hidden;
 }
 
+.cchub-chat-error-header {
+	display: flex;
+	gap: 12px;
+	align-items: flex-start;
+}
+
+.cchub-chat-error-icon {
+	font-size: 18px;
+	line-height: 1;
+}
+
+.cchub-chat-error-meta {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
 .cchub-chat-error-title {
-	margin: 0 0 8px 0 !important;
+	margin: 0 !important;
 	color: var(--color-red) !important;
+}
+
+.cchub-chat-error-source {
+	font-size: 12px;
+	color: var(--text-muted);
+}
+
+.cchub-chat-error-section {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+
+.cchub-chat-error-section-title {
+	font-size: 11px;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	color: var(--text-muted);
 }
 
 .cchub-chat-error-message {
@@ -709,17 +744,24 @@ If your plugin does not need CSS, delete this file.
 	word-wrap: break-word;
 	word-break: break-all;
 	overflow-wrap: anywhere;
+	white-space: pre-wrap;
 }
 
 .cchub-chat-error-suggestion {
-	margin: 8px 0 0 0 !important;
+	margin: 0 !important;
 	color: var(--text-muted);
 	font-size: 13px;
-	font-style: italic;
 	line-height: 1.4;
 	word-wrap: break-word;
 	word-break: break-all;
 	overflow-wrap: anywhere;
+	white-space: pre-wrap;
+}
+
+.cchub-chat-error-actions {
+	display: flex;
+	gap: 8px;
+	flex-wrap: wrap;
 }
 
 .cchub-chat-error-button {
@@ -727,9 +769,24 @@ If your plugin does not need CSS, delete this file.
 	border: 1px solid var(--background-modifier-border) !important;
 	border-radius: 6px !important;
 	background-color: transparent !important;
-	color: var(--text-muted) !important;
+	color: var(--text-normal) !important;
 	cursor: pointer;
 	font-size: 14px;
+}
+
+.cchub-chat-error-button--primary {
+	background-color: var(--interactive-accent) !important;
+	border-color: var(--interactive-accent) !important;
+	color: var(--text-on-accent) !important;
+}
+
+.cchub-chat-error-button--primary:hover {
+	background-color: var(--interactive-accent-hover) !important;
+	border-color: var(--interactive-accent-hover) !important;
+}
+
+.cchub-chat-error-button--secondary:hover {
+	background-color: var(--background-modifier-hover) !important;
 }
 
 /* Empty state */

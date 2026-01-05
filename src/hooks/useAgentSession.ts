@@ -31,6 +31,8 @@ export interface UseAgentSessionReturn {
 	isReady: boolean;
 	/** Error information if session operation failed */
 	errorInfo: SessionErrorInfo | null;
+	/** Clear the current session error */
+	clearError: () => void;
 
 	/** Create a new session (optionally overriding the agent) */
 	createSession: (agentIdOverride?: string) => Promise<void>;
@@ -135,6 +137,10 @@ export function useAgentSession(
 		setErrorInfo(error);
 	}, []);
 
+	const clearError = useCallback(() => {
+		setErrorInfo(null);
+	}, []);
+
 	// Use lifecycle hook
 	const {
 		createSession,
@@ -206,6 +212,7 @@ export function useAgentSession(
 		session,
 		isReady,
 		errorInfo,
+		clearError,
 		createSession,
 		restartSession,
 		closeSession,

@@ -3,9 +3,8 @@
 	"name": "Obsidian CCHub",
 	"version": "1.0.0",
 	"minAppVersion": "0.15.0",
-	"description": "Connect ACP agents inside Obsidian with a focused chat interface.",
-	"author": "ShiHao Wang",
-	"authorUrl": "https://obsidian.md",
-	"fundingUrl": "https://obsidian.md/pricing",
+	"description": "The Unified ACP Agent Interface for Obsidian.",
+	"author": "Obsidian CCHub Team",
+	"authorUrl": "https://github.com/obsidian-cchub",
 	"isDesktopOnly": true
 }

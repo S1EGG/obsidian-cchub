@@ -6,14 +6,23 @@ import type { IAcpClient } from "../../adapters/acp/acp.adapter";
 import type CCHubPlugin from "../../plugin";
 import type { ChatView } from "./ChatView";
 import { MessageRenderer } from "./MessageRenderer";
+import type { ErrorInfo as BaseErrorInfo } from "../../domain/models/agent-error";
 
 /**
- * Error information to display
+ * Error source types for display.
  */
-export interface ErrorInfo {
-	title: string;
-	message: string;
-	suggestion?: string;
+export type ErrorSource = "session" | "chat" | "permission";
+
+export interface ErrorAction {
+	label: string;
+	onClick: () => void;
+	variant?: "primary" | "secondary";
+}
+
+export interface ErrorDisplayInfo extends BaseErrorInfo {
+	source: ErrorSource;
+	sourceLabel: string;
+	actions: ErrorAction[];
 }
 
 /**
@@ -27,7 +36,7 @@ export interface ChatMessagesProps {
 	/** Whether we are waiting for the first agent response */
 	isAwaitingResponse: boolean;
 	/** Error information (if any) */
-	errorInfo: ErrorInfo | null;
+	errorInfo: ErrorDisplayInfo | null;
 	/** Plugin instance */
 	plugin: CCHubPlugin;
 	/** View instance for event registration */
@@ -39,8 +48,6 @@ export interface ChatMessagesProps {
 		requestId: string,
 		optionId: string,
 	) => Promise<void>;
-	/** Callback to clear the error */
-	onClearError: () => void;
 }
 
 /**
@@ -62,7 +69,6 @@ export function ChatMessages({
 	view,
 	acpClient,
 	onApprovePermission,
-	onClearError,
 }: ChatMessagesProps) {
 	const containerRef = useRef<HTMLDivElement>(null);
 	const [isAtBottom, setIsAtBottom] = useState(true);
@@ -126,24 +132,58 @@ export function ChatMessages({
 	return (
 		<div ref={containerRef} className="cchub-chat-view-messages">
 			{errorInfo ? (
-				<div className="cchub-chat-error-container">
-					<h4 className="cchub-chat-error-title">
-						{errorInfo.title}
-					</h4>
-					<p className="cchub-chat-error-message">
-						{errorInfo.message}
-					</p>
-					{errorInfo.suggestion && (
-						<p className="cchub-chat-error-suggestion">
-							💡 {errorInfo.suggestion}
+				<div className="cchub-chat-error-container" role="alert">
+					<div className="cchub-chat-error-header">
+						<span
+							className="cchub-chat-error-icon"
+							aria-hidden="true"
+						>
+							⚠️
+						</span>
+						<div className="cchub-chat-error-meta">
+							<h4 className="cchub-chat-error-title">
+								{errorInfo.title}
+							</h4>
+							<div className="cchub-chat-error-source">
+								{errorInfo.sourceLabel}
+							</div>
+						</div>
+					</div>
+
+					<div className="cchub-chat-error-section">
+						<div className="cchub-chat-error-section-title">
+							What happened
+						</div>
+						<p className="cchub-chat-error-message">
+							{errorInfo.message}
 						</p>
+					</div>
+
+					{errorInfo.suggestion && (
+						<div className="cchub-chat-error-section">
+							<div className="cchub-chat-error-section-title">
+								Suggested fix
+							</div>
+							<p className="cchub-chat-error-suggestion">
+								{errorInfo.suggestion}
+							</p>
+						</div>
 					)}
-					<button
-						onClick={onClearError}
-						className="cchub-chat-error-button"
-					>
-						OK
-					</button>
+
+					{errorInfo.actions.length > 0 && (
+						<div className="cchub-chat-error-actions">
+							{errorInfo.actions.map((action, index) => (
+								<button
+									type="button"
+									key={`${action.label}-${index}`}
+									onClick={action.onClick}
+									className={`cchub-chat-error-button ${action.variant === "primary" ? "cchub-chat-error-button--primary" : "cchub-chat-error-button--secondary"}`}
+								>
+									{action.label}
+								</button>
+							))}
+						</div>
+					)}
 				</div>
 			) : messages.length === 0 ? (
 				<div className="cchub-chat-empty-state" aria-hidden="true" />
