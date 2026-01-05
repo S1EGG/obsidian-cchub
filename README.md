@@ -1,90 +1,98 @@
-# Obsidian Sample Plugin
+# Obsidian CCHub
 
-This is a sample plugin for Obsidian (https://obsidian.md).
+CCHub 是一个将多个 ACP CLI 助手整合到 Obsidian 中的聊天插件，提供统一的对话界面、权限控制与导出能力，专注于本地、可控的工作流。
 
-This project uses TypeScript to provide type checking and documentation.
-The repo depends on the latest plugin API (obsidian.d.ts) in TypeScript Definition format, which contains TSDoc comments describing what it does.
+## 功能
 
-This sample plugin demonstrates some of the basic functionality the plugin API can do.
-- Adds a ribbon icon, which shows a Notice when clicked.
-- Adds a command "Open modal (simple)" which opens a Modal.
-- Adds a plugin setting tab to the settings page.
-- Registers a global click event and output 'click' to the console.
-- Registers a global interval which logs 'setInterval' to the console.
+- 集成 Claude Code、Codex、Gemini 等 ACP CLI 工具，并支持自定义 Agent
+- 统一聊天界面，支持计划/工具调用/终端输出渲染
+- 权限请求与一键批准/拒绝
+- @mention 笔记引用与 Slash 命令
+- 聊天记录导出为 Markdown（可含图片）
+- Windows WSL 模式支持
 
-## First time developing plugins?
+## 环境
 
-Quick starting guide for new plugin devs:
+- Obsidian 0.15+（仅桌面端）
+- Node.js 18+（开发与构建）
+- npm + esbuild（项目默认工具链）
 
-- Check if [someone already developed a plugin for what you want](https://obsidian.md/plugins)! There might be an existing plugin similar enough that you can partner up with.
-- Make a copy of this repo as a template with the "Use this template" button (login to GitHub if you don't see it).
-- Clone your repo to a local development folder. For convenience, you can place this folder in your `.obsidian/plugins/your-plugin-name` folder.
-- Install NodeJS, then run `npm i` in the command line under your repo folder.
-- Run `npm run dev` to compile your plugin from `main.ts` to `main.js`.
-- Make changes to `main.ts` (or create new `.ts` files). Those changes should be automatically compiled into `main.js`.
-- Reload Obsidian to load the new version of your plugin.
-- Enable plugin in settings window.
-- For updates to the Obsidian API run `npm update` in the command line under your repo folder.
+## 安装与开发
 
-## Releasing new releases
+安装依赖：
 
-- Update your `manifest.json` with your new version number, such as `1.0.1`, and the minimum Obsidian version required for your latest release.
-- Update your `versions.json` file with `"new-plugin-version": "minimum-obsidian-version"` so older versions of Obsidian can download an older version of your plugin that's compatible.
-- Create new GitHub release using your new version number as the "Tag version". Use the exact version number, don't include a prefix `v`. See here for an example: https://github.com/obsidianmd/obsidian-sample-plugin/releases
-- Upload the files `manifest.json`, `main.js`, `styles.css` as binary attachments. Note: The manifest.json file must be in two places, first the root path of your repository and also in the release.
-- Publish the release.
-
-> You can simplify the version bump process by running `npm version patch`, `npm version minor` or `npm version major` after updating `minAppVersion` manually in `manifest.json`.
-> The command will bump version in `manifest.json` and `package.json`, and add the entry for the new version to `versions.json`
-
-## Adding your plugin to the community plugin list
-
-- Check the [plugin guidelines](https://docs.obsidian.md/Plugins/Releasing/Plugin+guidelines).
-- Publish an initial version.
-- Make sure you have a `README.md` file in the root of your repo.
-- Make a pull request at https://github.com/obsidianmd/obsidian-releases to add your plugin.
-
-## How to use
-
-- Clone this repo.
-- Make sure your NodeJS is at least v16 (`node --version`).
-- `npm i` or `yarn` to install dependencies.
-- `npm run dev` to start compilation in watch mode.
-
-## Manually installing the plugin
-
-- Copy over `main.js`, `styles.css`, `manifest.json` to your vault `VaultFolder/.obsidian/plugins/your-plugin-id/`.
-
-## Improve code quality with eslint
-- [ESLint](https://eslint.org/) is a tool that analyzes your code to quickly find problems. You can run ESLint against your plugin to find common bugs and ways to improve your code. 
-- This project already has eslint preconfigured, you can invoke a check by running`npm run lint`
-- Together with a custom eslint [plugin](https://github.com/obsidianmd/eslint-plugin) for Obsidan specific code guidelines.
-- A GitHub action is preconfigured to automatically lint every commit on all branches.
-
-## Funding URL
-
-You can include funding URLs where people who use your plugin can financially support it.
-
-The simple way is to set the `fundingUrl` field to your link in your `manifest.json` file:
-
-```json
-{
-    "fundingUrl": "https://buymeacoffee.com"
-}
+```bash
+npm install
 ```
 
-If you have multiple URLs, you can also do:
+开发模式（自动构建）：
 
-```json
-{
-    "fundingUrl": {
-        "Buy Me a Coffee": "https://buymeacoffee.com",
-        "GitHub Sponsor": "https://github.com/sponsors",
-        "Patreon": "https://www.patreon.com/"
-    }
-}
+```bash
+npm run dev
 ```
 
-## API Documentation
+生产构建：
 
-See https://docs.obsidian.md
+```bash
+npm run build
+```
+
+## 在 Obsidian 中使用
+
+1. 将 `main.js`、`manifest.json`、`styles.css` 复制到：
+   `<Vault>/.obsidian/plugins/obsidian-cchub/`
+2. 重载 Obsidian
+3. 在 **Settings → Community plugins** 启用
+4. 点击侧边栏图标或运行命令 **Open CCHub**
+
+## 设置说明
+
+主要设置项如下（位置：**Settings → Community plugins → Obsidian CCHub**）：
+
+- **Active agent**：选择当前会话使用的 Agent
+- **Node.js path**：CLI 运行所需 Node.js 路径
+- **Working directory**：默认工作目录（留空使用库根目录）
+- **Permissions**：自动批准 read/list/execute
+- **Behavior**：自动引用当前笔记、发送快捷键
+- **Built-in agents**：配置 Claude/Codex/Gemini 的路径、参数与环境变量
+- **Custom agents**：添加自定义 ACP CLI
+- **Export**：导出目录、文件名模板、图片保存策略
+- **Windows WSL**：在 Windows 下通过 WSL 运行 CLI
+
+## 导出
+
+- 默认导出目录：`CCHub`
+- 默认文件名模板：`cchub_{date}_{time}`
+- 可选导出图片到 Obsidian 附件目录、自定义目录或 Base64
+- 导出的 Markdown 含前置信息与 `tags: [cchub]`
+
+## 隐私与安全
+
+- 插件不包含隐藏遥测
+- 网络访问仅由你配置的 CLI 工具决定
+- 仅在需要时读写库内文件，不访问库外路径
+
+## 项目结构
+
+```
+src/
+  main.ts                 # 插件入口
+  plugin.ts               # 生命周期与命令
+  adapters/               # ACP 与 Obsidian 适配层
+  components/             # UI 组件
+  domain/                 # 领域模型与端口
+  hooks/                  # React hooks
+  shared/                 # 通用工具与服务
+```
+
+## 发布流程
+
+1. 更新 `manifest.json` 的 `version`
+2. 更新 `versions.json` 对应版本
+3. 执行 `npm run build`
+4. 发布 GitHub Release（tag 与版本号一致且不含 `v`）
+5. 附加 `manifest.json`、`main.js`、`styles.css`
+
+## 许可证
+
+见 `LICENSE`
