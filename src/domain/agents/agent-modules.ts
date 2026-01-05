@@ -85,27 +85,6 @@ export const AGENT_MODULES: AgentModuleDefinition[] = [
 		setupHint: "Codex ACP typically uses the codex-acp binary.",
 	},
 	{
-		id: "mcp:codex",
-		protocol: "mcp",
-		label: "Codex (MCP)",
-		description: "Codex CLI MCP server.",
-		iconId: "openai",
-		commandCandidates: ["codex"],
-		auth: {
-			type: "apiKey",
-			envKey: "OPENAI_API_KEY",
-			label: "API key",
-			description:
-				"OpenAI API key. Required if not logging in with an OpenAI account.",
-			placeholder: "Enter your OpenAI API key",
-		},
-		timeouts: {
-			initializeMs: 60000,
-			newSessionMs: 120000,
-		},
-		setupHint: "Codex MCP uses the codex command.",
-	},
-	{
 		id: "acp:qwen",
 		protocol: "acp",
 		label: "Qwen Code",

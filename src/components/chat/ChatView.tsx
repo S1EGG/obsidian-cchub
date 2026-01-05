@@ -19,8 +19,6 @@ import { ChatExporter } from "../../shared/chat-exporter";
 
 // Adapter imports
 import { AcpAdapter, type IAcpClient } from "../../adapters/acp/acp.adapter";
-import { CodexAdapter } from "../../adapters/codex/codex.adapter";
-import { CCHubRouter } from "../../adapters/cchub-router";
 import { ObsidianVaultAdapter } from "../../adapters/obsidian/vault.adapter";
 
 // Hooks imports
@@ -91,11 +89,7 @@ function ChatComponent({
 	}, [noteMentionService]);
 
 	const acpAdapter = useMemo(() => new AcpAdapter(plugin), [plugin]);
-	const codexAdapter = useMemo(() => new CodexAdapter(plugin), [plugin]);
-	const cchubClient = useMemo(
-		() => new CCHubRouter(plugin, acpAdapter, codexAdapter),
-		[plugin, acpAdapter, codexAdapter],
-	);
+	const cchubClient = acpAdapter;
 	const acpClientRef = useRef<IAcpClient>(acpAdapter);
 
 	const vaultAccessAdapter = useMemo(() => {

@@ -32,7 +32,7 @@ export interface AgentEnvVar {
 /**
  * Agent protocol used by the runtime.
  */
-export type AgentProtocol = "acp" | "mcp";
+export type AgentProtocol = "acp";
 
 /**
  * Authentication configuration for an agent profile.
@@ -55,7 +55,7 @@ export interface AgentProfile {
 	/** Human-readable display name shown in UI */
 	displayName: string;
 
-	/** Module identifier (e.g., "acp:claude", "mcp:codex") */
+	/** Module identifier (e.g., "acp:claude", "acp:codex") */
 	moduleId: string;
 
 	/** Whether the agent is available for selection */

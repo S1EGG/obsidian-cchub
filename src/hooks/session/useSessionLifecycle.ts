@@ -196,15 +196,12 @@ export function useSessionLifecycle(
 
 				if (error instanceof TimeoutError) {
 					const isInit = error.step === "initialize";
-					const isMcp = resolvedRuntime?.module.protocol === "mcp";
 					onErrorUpdate({
 						title: isInit
 							? "Agent Initialization Timeout"
 							: "Session Creation Timeout",
 						message: isInit
-							? isMcp
-								? "The agent did not respond during MCP initialization in time."
-								: "The agent did not respond to the ACP handshake in time."
+							? "The agent did not respond to the ACP handshake in time."
 							: "The agent did not respond to session creation in time.",
 						suggestion:
 							resolvedRuntime?.module.setupHint ||

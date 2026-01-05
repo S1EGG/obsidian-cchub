@@ -65,7 +65,7 @@ const DEFAULT_SETTINGS: CCHubPluginSettings = {
 		{
 			id: "codex-acp",
 			displayName: "Codex",
-			moduleId: "mcp:codex",
+			moduleId: "acp:codex",
 			enabled: true,
 			command: "",
 			args: [],
@@ -434,20 +434,7 @@ export default class CCHubPlugin extends Plugin {
 			DEFAULT_SETTINGS.agents.map((agent) => [agent.id, agent]),
 		);
 
-		const resolveCodexModuleId = (
-			command: string,
-			args: string[],
-		): string => {
-			const normalizedCommand = command.trim().toLowerCase();
-			if (normalizedCommand.includes("codex-acp")) {
-				return "acp:codex";
-			}
-			const normalizedArgs = args.map((arg) => arg.toLowerCase());
-			if (normalizedArgs.some((arg) => arg.includes("acp"))) {
-				return "acp:codex";
-			}
-			return "mcp:codex";
-		};
+		const resolveCodexModuleId = (): string => "acp:codex";
 
 		const guessModuleId = (profile: AgentProfile): string => {
 			const idLower = profile.id.toLowerCase();
@@ -458,16 +445,27 @@ export default class CCHubPlugin extends Plugin {
 				return "acp:gemini";
 			}
 			if (idLower.includes("codex")) {
-				return resolveCodexModuleId(profile.command, profile.args);
+				return resolveCodexModuleId();
 			}
 			return "acp:custom";
 		};
 
 		const ensureValidModuleId = (profile: AgentProfile): AgentProfile => {
-			if (getAgentModuleById(profile.moduleId)) {
-				return profile;
+			const normalizedModuleId =
+				profile.moduleId === "mcp:codex"
+					? "acp:codex"
+					: profile.moduleId;
+			const normalizedProfile =
+				normalizedModuleId !== profile.moduleId
+					? { ...profile, moduleId: normalizedModuleId }
+					: profile;
+			if (getAgentModuleById(normalizedProfile.moduleId)) {
+				return normalizedProfile;
 			}
-			return { ...profile, moduleId: guessModuleId(profile) };
+			return {
+				...normalizedProfile,
+				moduleId: guessModuleId(normalizedProfile),
+			};
 		};
 
 		const resolvedAgents = (() => {
@@ -497,7 +495,7 @@ export default class CCHubPlugin extends Plugin {
 				(agent) => agent.moduleId === "acp:claude",
 			);
 			const defaultCodex = DEFAULT_SETTINGS.agents.find(
-				(agent) => agent.moduleId === "mcp:codex",
+				(agent) => agent.moduleId === "acp:codex",
 			);
 			const defaultGemini = DEFAULT_SETTINGS.agents.find(
 				(agent) => agent.moduleId === "acp:gemini",
@@ -553,7 +551,7 @@ export default class CCHubPlugin extends Plugin {
 					: legacyCodexArgs.length > 0
 						? legacyCodexArgs
 						: [];
-			const codexModuleId = resolveCodexModuleId(codexCommand, codexArgs);
+			const codexModuleId = resolveCodexModuleId();
 
 			const geminiDisplayName =
 				typeof geminiFromRaw.displayName === "string" &&
