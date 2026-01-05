@@ -2,11 +2,11 @@ import * as acp from "@agentclientprotocol/sdk";
 import { Platform } from "obsidian";
 
 import type {
-	IAgentClient,
+	ICCHubClient,
 	AgentConfig,
 	InitializeResult,
 	NewSessionResult,
-} from "../../domain/ports/agent-client.port";
+} from "../../domain/ports/cchub.port";
 import type { MessageContent } from "../../domain/models/chat-message";
 import type { SessionUpdate } from "../../domain/models/session-update";
 import type { PromptContent } from "../../domain/models/prompt-content";
@@ -25,7 +25,7 @@ import { TerminalManager } from "../../shared/terminal-manager";
 import { Logger } from "../../shared/logger";
 import { AcpPermissionHandler } from "./acp-permission-handler";
 import { AcpMessageHandler } from "./acp-message-handler";
-import type AgentClientPlugin from "../../plugin";
+import type CCHubPlugin from "../../plugin";
 import { convertWindowsPathToWsl } from "../../shared/wsl-utils";
 
 /**
@@ -33,7 +33,7 @@ import { convertWindowsPathToWsl } from "../../shared/wsl-utils";
  *
  * Provides ACP-specific operations needed by UI components
  * (terminal rendering, permission handling, etc.) that are not
- * part of the domain-level IAgentClient interface.
+ * part of the domain-level ICCHubClient interface.
  */
 export interface IAcpClient extends acp.Client {
 	handlePermissionResponse(requestId: string, optionId: string): void;
@@ -54,7 +54,7 @@ export interface IAcpClient extends acp.Client {
  * - Delegates message processing to AcpMessageHandler
  * - Provides callbacks for UI updates
  */
-export class AcpAdapter implements IAgentClient, IAcpClient {
+export class AcpAdapter implements ICCHubClient, IAcpClient {
 	private acpConnection: AcpConnection;
 	private logger: Logger;
 	private permissionHandler: AcpPermissionHandler;
@@ -72,7 +72,7 @@ export class AcpAdapter implements IAgentClient, IAcpClient {
 	// Current message tracking (for terminal operations)
 	private currentMessageId: string | null = null;
 
-	constructor(private plugin: AgentClientPlugin) {
+	constructor(private plugin: CCHubPlugin) {
 		this.logger = new Logger(plugin);
 
 		// Initialize handlers
@@ -105,7 +105,7 @@ export class AcpAdapter implements IAgentClient, IAcpClient {
 	}
 
 	// ========================================================================
-	// IAgentClient Implementation
+	// ICCHubClient Implementation
 	// ========================================================================
 
 	/**

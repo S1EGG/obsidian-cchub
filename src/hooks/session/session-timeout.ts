@@ -1,4 +1,4 @@
-import type { AgentClientPluginSettings } from "../../plugin";
+import type { CCHubPluginSettings } from "../../plugin";
 
 /**
  * Timeout error for session operations.
@@ -20,7 +20,7 @@ const NEW_SESSION_TIMEOUT_MS = 10000;
  * Get initialization timeout for a specific agent.
  */
 export function getInitializeTimeoutMs(
-	settings: AgentClientPluginSettings,
+	settings: CCHubPluginSettings,
 	agentId: string,
 ): number {
 	if (agentId === settings.codex.id) {
@@ -33,7 +33,7 @@ export function getInitializeTimeoutMs(
  * Get new session timeout for a specific agent.
  */
 export function getNewSessionTimeoutMs(
-	settings: AgentClientPluginSettings,
+	settings: CCHubPluginSettings,
 	agentId: string,
 ): number {
 	if (agentId === settings.codex.id) {

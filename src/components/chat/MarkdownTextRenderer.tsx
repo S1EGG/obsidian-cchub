@@ -31,7 +31,7 @@ export function MarkdownTextRenderer({ text, app }: MarkdownTextRendererProps) {
 	return (
 		<div
 			ref={containerRef}
-			className="agent-client-markdown-text-renderer"
+			className="cchub-markdown-text-renderer"
 		/>
 	);
 }

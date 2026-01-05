@@ -1,11 +1,11 @@
-import type { AgentClientPluginSettings } from "../../plugin";
+import type { CCHubPluginSettings } from "../../plugin";
 import type {
 	BaseAgentSettings,
 	ClaudeAgentSettings,
 	CodexAgentSettings,
 	GeminiAgentSettings,
 } from "../../domain/models/agent-config";
-import type { AgentConfig } from "../../domain/ports/agent-client.port";
+import type { AgentConfig } from "../../domain/ports/cchub.port";
 import { toAgentConfig } from "../../shared/settings-utils";
 import { resolveAcpAgentCommand } from "../../adapters/acp/acp-command-resolver";
 
@@ -20,7 +20,7 @@ export interface AgentInfo {
 /**
  * Get the currently active agent ID from settings.
  */
-export function getActiveAgentId(settings: AgentClientPluginSettings): string {
+export function getActiveAgentId(settings: CCHubPluginSettings): string {
 	return settings.activeAgentId || settings.claude.id;
 }
 
@@ -28,7 +28,7 @@ export function getActiveAgentId(settings: AgentClientPluginSettings): string {
  * Get list of all available agents from settings.
  */
 export function getAvailableAgentsFromSettings(
-	settings: AgentClientPluginSettings,
+	settings: CCHubPluginSettings,
 ): AgentInfo[] {
 	return [
 		{
@@ -54,7 +54,7 @@ export function getAvailableAgentsFromSettings(
  * Get the currently active agent information from settings.
  */
 export function getCurrentAgent(
-	settings: AgentClientPluginSettings,
+	settings: CCHubPluginSettings,
 ): AgentInfo {
 	const activeId = getActiveAgentId(settings);
 	const agents = getAvailableAgentsFromSettings(settings);
@@ -70,7 +70,7 @@ export function getCurrentAgent(
  * Find agent settings by ID from plugin settings.
  */
 export function findAgentSettings(
-	settings: AgentClientPluginSettings,
+	settings: CCHubPluginSettings,
 	agentId: string,
 ): BaseAgentSettings | null {
 	if (agentId === settings.claude.id) {
@@ -93,7 +93,7 @@ export function findAgentSettings(
  * Build AgentConfig with API key injection for known agents.
  */
 export function buildAgentConfigWithApiKey(
-	settings: AgentClientPluginSettings,
+	settings: CCHubPluginSettings,
 	agentSettings: BaseAgentSettings,
 	agentId: string,
 	workingDirectory: string,

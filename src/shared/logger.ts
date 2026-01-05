@@ -1,7 +1,7 @@
-import type AgentClientPlugin from "../plugin";
+import type CCHubPlugin from "../plugin";
 
 export class Logger {
-	constructor(private plugin: AgentClientPlugin) {}
+	constructor(private plugin: CCHubPlugin) {}
 
 	log(...args: unknown[]): void {
 		if (this.plugin.settings.debugMode) {

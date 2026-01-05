@@ -1,6 +1,6 @@
 import * as React from "react";
 const { useMemo } = React;
-import type AgentClientPlugin from "../../plugin";
+import type CCHubPlugin from "../../plugin";
 import { Logger } from "../../shared/logger";
 import * as acp from "@agentclientprotocol/sdk";
 
@@ -13,7 +13,7 @@ interface PermissionRequestSectionProps {
 		isActive?: boolean;
 	};
 	toolCallId: string;
-	plugin: AgentClientPlugin;
+	plugin: CCHubPlugin;
 	/** Callback to approve a permission request */
 	onApprovePermission?: (
 		requestId: string,
@@ -39,13 +39,13 @@ export function PermissionRequestSection({
 	);
 
 	return (
-		<div className="agent-client-message-permission-request">
+		<div className="cchub-message-permission-request">
 			{isActive && !isSelected && !isCancelled && (
-				<div className="agent-client-message-permission-request-options">
+				<div className="cchub-message-permission-request-options">
 					{permissionRequest.options.map((option) => (
 						<button
 							key={option.optionId}
-							className={`agent-client-permission-option ${option.kind ? `agent-client-permission-kind-${option.kind}` : ""}`}
+							className={`cchub-permission-option ${option.kind ? `cchub-permission-kind-${option.kind}` : ""}`}
 							onClick={() => {
 								// Update local UI state immediately for feedback
 								if (onOptionSelected) {
@@ -71,12 +71,12 @@ export function PermissionRequestSection({
 				</div>
 			)}
 			{isSelected && selectedOption && (
-				<div className="agent-client-message-permission-request-result agent-client-selected">
+				<div className="cchub-message-permission-request-result cchub-selected">
 					✓ Selected: {selectedOption.name}
 				</div>
 			)}
 			{isCancelled && (
-				<div className="agent-client-message-permission-request-result agent-client-cancelled">
+				<div className="cchub-message-permission-request-result cchub-cancelled">
 					⚠ Cancelled: Permission request was cancelled
 				</div>
 			)}

@@ -1,4 +1,4 @@
-import type { AgentClientPluginSettings } from "../../plugin";
+import type { CCHubPluginSettings } from "../../plugin";
 import type { BaseAgentSettings } from "../../domain/models/agent-config";
 import {
 	getAcpCliProfileByAgentId,
@@ -15,7 +15,7 @@ export interface ResolvedAcpCommand {
 const defaultDetector = new AcpCliDetector();
 
 export function resolveAcpAgentCommand(
-	settings: AgentClientPluginSettings,
+	settings: CCHubPluginSettings,
 	agentSettings: BaseAgentSettings,
 	agentId: string,
 	detector: AcpCliDetector = defaultDetector,

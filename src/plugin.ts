@@ -4,7 +4,7 @@ import {
 	createSettingsStore,
 	type SettingsStore,
 } from "./adapters/obsidian/settings-store.adapter";
-import { AgentClientSettingTab } from "./components/settings/AgentClientSettingTab";
+import { CCHubSettingTab } from "./components/settings/CCHubSettingTab";
 import {
 	sanitizeArgs,
 	normalizeEnvVars,
@@ -29,7 +29,7 @@ export type { AgentEnvVar, CustomAgentSettings };
  */
 export type SendMessageShortcut = "enter" | "cmd-enter";
 
-export interface AgentClientPluginSettings {
+export interface CCHubPluginSettings {
 	gemini: GeminiAgentSettings;
 	claude: ClaudeAgentSettings;
 	codex: CodexAgentSettings;
@@ -59,7 +59,7 @@ export interface AgentClientPluginSettings {
 	sendMessageShortcut: SendMessageShortcut;
 }
 
-const DEFAULT_SETTINGS: AgentClientPluginSettings = {
+const DEFAULT_SETTINGS: CCHubPluginSettings = {
 	claude: {
 		id: "claude-code-acp",
 		displayName: "Claude Code",
@@ -108,8 +108,8 @@ const DEFAULT_SETTINGS: AgentClientPluginSettings = {
 	sendMessageShortcut: "enter",
 };
 
-export default class AgentClientPlugin extends Plugin {
-	settings: AgentClientPluginSettings;
+export default class CCHubPlugin extends Plugin {
+	settings: CCHubPluginSettings;
 	settingsStore!: SettingsStore;
 
 	// Active ACP adapter instance (shared across use cases)
@@ -152,7 +152,7 @@ export default class AgentClientPlugin extends Plugin {
 		this.registerAgentCommands();
 		this.registerPermissionCommands();
 
-		this.addSettingTab(new AgentClientSettingTab(this.app, this));
+		this.addSettingTab(new CCHubSettingTab(this.app, this));
 	}
 
 	onunload() {}
@@ -185,7 +185,7 @@ export default class AgentClientPlugin extends Plugin {
 			if (viewContainerEl) {
 				window.setTimeout(() => {
 					const textarea = viewContainerEl.querySelector(
-						"textarea.agent-client-chat-input-textarea",
+						"textarea.cchub-chat-input-textarea",
 					);
 					if (textarea instanceof HTMLTextAreaElement) {
 						textarea.focus();
@@ -651,7 +651,7 @@ export default class AgentClientPlugin extends Plugin {
 		}
 	}
 
-	async saveSettingsAndNotify(nextSettings: AgentClientPluginSettings) {
+	async saveSettingsAndNotify(nextSettings: CCHubPluginSettings) {
 		this.settings = nextSettings;
 		await this.saveData(this.settings);
 		this.settingsStore.set(this.settings);

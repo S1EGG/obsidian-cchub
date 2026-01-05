@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import type { ChatSession, SlashCommand } from "../../domain/models/chat-session";
-import type { IAgentClient } from "../../domain/ports/agent-client.port";
+import type { ICCHubClient } from "../../domain/ports/cchub.port";
 import type { ISettingsAccess } from "../../domain/ports/settings-access.port";
 import { getAvailableAgentsFromSettings } from "./session-helpers";
 import type { AgentInfo } from "./session-helpers";
@@ -22,7 +22,7 @@ interface ModeCallbacks {
  * - Available commands updates
  */
 export function useSessionMode(
-	agentClient: IAgentClient,
+	cchubClient: ICCHubClient,
 	settingsAccess: ISettingsAccess,
 	callbacks: ModeCallbacks,
 ) {
@@ -53,7 +53,7 @@ export function useSessionMode(
 			});
 
 			try {
-				await agentClient.setSessionMode(sessionId, modeId);
+				await cchubClient.setSessionMode(sessionId, modeId);
 			} catch (error) {
 				console.error("Failed to set mode:", error);
 				// Rollback on error
@@ -71,7 +71,7 @@ export function useSessionMode(
 				}
 			}
 		},
-		[agentClient, onSessionUpdate],
+		[cchubClient, onSessionUpdate],
 	);
 
 	/**
@@ -99,7 +99,7 @@ export function useSessionMode(
 			});
 
 			try {
-				await agentClient.setSessionModel(sessionId, modelId);
+				await cchubClient.setSessionModel(sessionId, modelId);
 			} catch (error) {
 				console.error("Failed to set model:", error);
 				// Rollback on error
@@ -117,7 +117,7 @@ export function useSessionMode(
 				}
 			}
 		},
-		[agentClient, onSessionUpdate],
+		[cchubClient, onSessionUpdate],
 	);
 
 	/**

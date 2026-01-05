@@ -1,4 +1,4 @@
-import type { AgentClientPluginSettings } from "../../plugin";
+import type { CCHubPluginSettings } from "../../plugin";
 
 export interface AcpCliProfile {
 	agentId: string;
@@ -8,7 +8,7 @@ export interface AcpCliProfile {
 }
 
 export function getAcpCliProfiles(
-	settings: AgentClientPluginSettings,
+	settings: CCHubPluginSettings,
 ): AcpCliProfile[] {
 	return [
 		{
@@ -36,7 +36,7 @@ export function getAcpCliProfiles(
 }
 
 export function getAcpCliProfileByAgentId(
-	settings: AgentClientPluginSettings,
+	settings: CCHubPluginSettings,
 	agentId: string,
 ): AcpCliProfile | null {
 	return (

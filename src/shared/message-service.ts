@@ -8,11 +8,11 @@
  * - Process mentions (@[[note]] syntax)
  * - Add auto-mention for active note
  * - Convert mentions to file paths
- * - Send prompt to agent via IAgentClient
+ * - Send prompt to agent via ICCHubClient
  * - Handle authentication errors with retry logic
  */
 
-import type { IAgentClient } from "../domain/ports/agent-client.port";
+import type { ICCHubClient } from "../domain/ports/cchub.port";
 import type {
 	IVaultAccess,
 	NoteMetadata,
@@ -297,10 +297,10 @@ This is what the user is currently focusing on.
  */
 export async function sendPreparedPrompt(
 	input: SendPreparedPromptInput,
-	agentClient: IAgentClient,
+	cchubClient: ICCHubClient,
 ): Promise<SendPromptResult> {
 	try {
-		await agentClient.sendPrompt(input.sessionId, input.agentContent);
+		await cchubClient.sendPrompt(input.sessionId, input.agentContent);
 
 		return {
 			success: true,
@@ -314,7 +314,7 @@ export async function sendPreparedPrompt(
 			input.agentContent,
 			input.displayContent,
 			input.authMethods,
-			agentClient,
+			cchubClient,
 		);
 	}
 }
@@ -332,7 +332,7 @@ async function handleSendError(
 	agentContent: PromptContent[],
 	displayContent: PromptContent[],
 	authMethods: AuthenticationMethod[],
-	agentClient: IAgentClient,
+	cchubClient: ICCHubClient,
 ): Promise<SendPromptResult> {
 	// Check for "empty response text" error - ignore silently
 	if (isEmptyResponseError(error)) {
@@ -425,7 +425,7 @@ async function handleSendError(
 			agentContent,
 			displayContent,
 			method.id,
-			agentClient,
+			cchubClient,
 		);
 
 		if (retryResult) {
@@ -496,16 +496,16 @@ async function retryWithAuthentication(
 	agentContent: PromptContent[],
 	displayContent: PromptContent[],
 	authMethodId: string,
-	agentClient: IAgentClient,
+	cchubClient: ICCHubClient,
 ): Promise<SendPromptResult | null> {
 	try {
-		const authSuccess = await agentClient.authenticate(authMethodId);
+		const authSuccess = await cchubClient.authenticate(authMethodId);
 
 		if (!authSuccess) {
 			return null;
 		}
 
-		await agentClient.sendPrompt(sessionId, agentContent);
+		await cchubClient.sendPrompt(sessionId, agentContent);
 
 		return {
 			success: true,

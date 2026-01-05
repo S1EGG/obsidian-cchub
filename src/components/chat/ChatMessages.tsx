@@ -3,7 +3,7 @@ const { useRef, useState, useEffect, useCallback } = React;
 
 import type { ChatMessage } from "../../domain/models/chat-message";
 import type { IAcpClient } from "../../adapters/acp/acp.adapter";
-import type AgentClientPlugin from "../../plugin";
+import type CCHubPlugin from "../../plugin";
 import type { ChatView } from "./ChatView";
 import { MessageRenderer } from "./MessageRenderer";
 
@@ -27,7 +27,7 @@ export interface ChatMessagesProps {
 	/** Error information (if any) */
 	errorInfo: ErrorInfo | null;
 	/** Plugin instance */
-	plugin: AgentClientPlugin;
+	plugin: CCHubPlugin;
 	/** View instance for event registration */
 	view: ChatView;
 	/** ACP client for terminal operations */
@@ -115,30 +115,30 @@ export function ChatMessages({
 	}, [view, checkIfAtBottom]);
 
 	return (
-		<div ref={containerRef} className="agent-client-chat-view-messages">
+		<div ref={containerRef} className="cchub-chat-view-messages">
 			{errorInfo ? (
-				<div className="agent-client-chat-error-container">
-					<h4 className="agent-client-chat-error-title">
+				<div className="cchub-chat-error-container">
+					<h4 className="cchub-chat-error-title">
 						{errorInfo.title}
 					</h4>
-					<p className="agent-client-chat-error-message">
+					<p className="cchub-chat-error-message">
 						{errorInfo.message}
 					</p>
 					{errorInfo.suggestion && (
-						<p className="agent-client-chat-error-suggestion">
+						<p className="cchub-chat-error-suggestion">
 							💡 {errorInfo.suggestion}
 						</p>
 					)}
 					<button
 						onClick={onClearError}
-						className="agent-client-chat-error-button"
+						className="cchub-chat-error-button"
 					>
 						OK
 					</button>
 				</div>
 			) : messages.length === 0 ? (
 				<div
-					className="agent-client-chat-empty-state"
+					className="cchub-chat-empty-state"
 					aria-hidden="true"
 				/>
 			) : (
@@ -153,17 +153,17 @@ export function ChatMessages({
 						/>
 					))}
 					{isSending && (
-						<div className="agent-client-loading-indicator">
-							<div className="agent-client-loading-pill">
+						<div className="cchub-loading-indicator">
+							<div className="cchub-loading-pill">
 								<span
-									className="agent-client-loading-spark"
+									className="cchub-loading-spark"
 									aria-hidden="true"
 								/>
-								<span className="agent-client-loading-text">
+								<span className="cchub-loading-text">
 									Thinking
 								</span>
 								<span
-									className="agent-client-loading-ellipsis"
+									className="cchub-loading-ellipsis"
 									aria-hidden="true"
 								>
 									<span />

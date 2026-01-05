@@ -4,7 +4,7 @@ import type {
 	SessionState,
 	SlashCommand,
 } from "../domain/models/chat-session";
-import type { IAgentClient } from "../domain/ports/agent-client.port";
+import type { ICCHubClient } from "../domain/ports/cchub.port";
 import type { ISettingsAccess } from "../domain/ports/settings-access.port";
 import {
 	useSessionLifecycle,
@@ -94,12 +94,12 @@ function createInitialSession(
  * Handles session creation, restart, cancellation, and agent switching.
  * This hook owns the session state independently.
  *
- * @param agentClient - Agent client for communication
+ * @param cchubClient - Agent client for communication
  * @param settingsAccess - Settings access for agent configuration
  * @param workingDirectory - Working directory for the session
  */
 export function useAgentSession(
-	agentClient: IAgentClient,
+	cchubClient: ICCHubClient,
 	settingsAccess: ISettingsAccess,
 	workingDirectory: string,
 ): UseAgentSessionReturn {
@@ -141,7 +141,7 @@ export function useAgentSession(
 		restartSession,
 		closeSession: closeSessionBase,
 		cancelOperation: cancelOperationBase,
-	} = useSessionLifecycle(agentClient, settingsAccess, workingDirectory, {
+	} = useSessionLifecycle(cchubClient, settingsAccess, workingDirectory, {
 		onSessionUpdate,
 		onErrorUpdate,
 	});
@@ -154,7 +154,7 @@ export function useAgentSession(
 		getAvailableAgents,
 		updateAvailableCommands,
 		updateCurrentMode,
-	} = useSessionMode(agentClient, settingsAccess, {
+	} = useSessionMode(cchubClient, settingsAccess, {
 		onSessionUpdate,
 	});
 
@@ -192,7 +192,7 @@ export function useAgentSession(
 
 	// Register error callback for process-level errors
 	useEffect(() => {
-		agentClient.onError((error) => {
+		cchubClient.onError((error) => {
 			setSession((prev) => ({ ...prev, state: "error" }));
 			setErrorInfo({
 				title: error.title || "Agent Error",
@@ -200,7 +200,7 @@ export function useAgentSession(
 				suggestion: error.suggestion,
 			});
 		});
-	}, [agentClient]);
+	}, [cchubClient]);
 
 	return {
 		session,

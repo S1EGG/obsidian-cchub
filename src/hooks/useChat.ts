@@ -4,7 +4,7 @@ import type {
 	MessageContent,
 } from "../domain/models/chat-message";
 import type { SessionUpdate } from "../domain/models/session-update";
-import type { IAgentClient } from "../domain/ports/agent-client.port";
+import type { ICCHubClient } from "../domain/ports/cchub.port";
 import type { IVaultAccess } from "../domain/ports/vault-access.port";
 import type { NoteMetadata } from "../domain/ports/vault-access.port";
 import type { AuthenticationMethod } from "../domain/models/chat-session";
@@ -97,7 +97,7 @@ export interface UseChatReturn {
 	/**
 	 * Handle a session update from the agent.
 	 * This is the unified handler for all session update events.
-	 * Should be registered with agentClient.onSessionUpdate().
+	 * Should be registered with cchubClient.onSessionUpdate().
 	 */
 	handleSessionUpdate: (update: SessionUpdate) => void;
 }
@@ -179,14 +179,14 @@ function mergeToolCallContent(
  * should be passed to AcpAdapter.setMessageCallbacks() for receiving
  * agent responses.
  *
- * @param agentClient - Agent client for sending messages
+ * @param cchubClient - Agent client for sending messages
  * @param vaultAccess - Vault access for reading notes
  * @param mentionService - Mention service for parsing mentions
  * @param sessionContext - Session information (sessionId, authMethods)
  * @param settingsContext - Settings information (windowsWslMode)
  */
 export function useChat(
-	agentClient: IAgentClient,
+	cchubClient: ICCHubClient,
 	vaultAccess: IVaultAccess,
 	mentionService: IMentionService,
 	sessionContext: SessionContext,
@@ -499,7 +499,7 @@ export function useChat(
 						displayContent: prepared.displayContent,
 						authMethods: sessionContext.authMethods,
 					},
-					agentClient,
+					cchubClient,
 				);
 
 				if (result.success) {
@@ -532,7 +532,7 @@ export function useChat(
 			}
 		},
 		[
-			agentClient,
+			cchubClient,
 			vaultAccess,
 			mentionService,
 			sessionContext.sessionId,

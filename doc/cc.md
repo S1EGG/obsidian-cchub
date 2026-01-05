@@ -89,7 +89,7 @@ src/
 │   │   ├── vault.adapter.ts    # (359 行)
 │   │   ├── mention-service.ts  # (128 行)
 │   │   └── settings-store.adapter.ts
-│   └── agent-client-router.ts  # 路由器 (116 行)
+│   └── cchub-router.ts  # 路由器 (116 行)
 │
 ├── components/                 # React 组件 (3,453 行)
 │   ├── chat/                   # 聊天 UI 组件 (3,390 行)
@@ -108,7 +108,7 @@ src/
 │   │   ├── MarkdownTextRenderer.tsx
 │   │   └── HeaderButton.tsx
 │   └── settings/
-│       └── AgentClientSettingTab.ts
+│       └── CCHubSettingTab.ts
 │
 ├── domain/                     # 域模型与接口 (1,252 行)
 │   ├── models/                 # 数据模型 (767 行)
@@ -119,7 +119,7 @@ src/
 │   │   ├── agent-error.ts      # (99 行)
 │   │   └── prompt-content.ts
 │   └── ports/                  # 接口定义 (485 行)
-│       ├── agent-client.port.ts # (289 行)
+│       ├── cchub.port.ts # (289 行)
 │       ├── vault-access.port.ts # (94 行)
 │       └── settings-access.port.ts
 │
@@ -158,7 +158,7 @@ src/
 
 | 文件 | 行数 | 复杂度 | 主要责任 |
 |------|------|--------|---------|
-| `acp.adapter.ts` | 1,039 | ⚠️ 很高 | 核心 ACP 适配器，实现 IAgentClient 接口 |
+| `acp.adapter.ts` | 1,039 | ⚠️ 很高 | 核心 ACP 适配器，实现 ICCHubClient 接口 |
 | `acp.connection.ts` | 320 | 中等 | 进程生命周期管理、ACP 连接建立 |
 | `acp-type-converter.ts` | 70 | 低 | ACP 类型与域类型的转换 |
 | `acp-command-resolver.ts` | 62 | 低 | 命令路径解析 |
@@ -172,7 +172,7 @@ src/
 #### AcpAdapter (1,039 行) - **最复杂的适配器**
 
 **主要职责:**
-1. 实现 `IAgentClient` 接口 (9 个核心方法)
+1. 实现 `ICCHubClient` 接口 (9 个核心方法)
 2. 实现 `IAcpClient` 扩展接口 (4 个 UI 层特定方法)
 3. 管理会话状态
 4. 处理权限请求
@@ -266,7 +266,7 @@ private currentMessageId: string | null
 
 ### 5.3 消息路由和协议处理
 
-#### AgentClientRouter (116 行) - **路由器模式**
+#### CCHubRouter (116 行) - **路由器模式**
 
 ```typescript
 // 支持多个代理客户端:
@@ -275,7 +275,7 @@ private currentMessageId: string | null
 
 // 负责:
 - 动态选择活跃客户端
-- 路由所有 IAgentClient 调用
+- 路由所有 ICCHubClient 调用
 - 管理客户端生命周期
 - 统一事件回调
 ```
@@ -290,7 +290,7 @@ private currentMessageId: string | null
 ChatView (主入口)
     │
     ├──> useAgentSession (会话管理)
-    │       └──> AgentClientRouter
+    │       └──> CCHubRouter
     │           ├──> AcpAdapter
     │           │    ├──> AcpConnection
     │           │    └──> AcpTypeConverter
@@ -317,7 +317,7 @@ ChatView (主入口)
 
 **最长链 (会话初始化):**
 ```
-ChatView → useAgentSession → AgentClientRouter 
+ChatView → useAgentSession → CCHubRouter 
 → AcpAdapter.initialize() → AcpConnection.initialize() 
 → spawn() → ACP 进程
 ```
@@ -350,7 +350,7 @@ ChatInput.onSendMessage()
 
 | 接口 | 行数 | 方法数 | 用途 |
 |------|------|--------|------|
-| IAgentClient | 289 | 11 | 代理通信主接口 |
+| ICCHubClient | 289 | 11 | 代理通信主接口 |
 | IVaultAccess | 94 | 8 | Obsidian 文件系统 |
 | ISettingsAccess | 52 | 4 | 设置存储访问 |
 
@@ -518,7 +518,7 @@ useAgentSession.ts (主逻辑，300-400 行)
 
 #### 4. **AcpAdapter.ts 职责过多 (1,039 行)**
 
-**问题**: 同时实现两个接口 (`IAgentClient` + `IAcpClient`)，包含：
+**问题**: 同时实现两个接口 (`ICCHubClient` + `IAcpClient`)，包含：
 - 协议通信
 - 进程管理
 - 权限处理
@@ -769,7 +769,7 @@ src/adapters/codex/codex.connection.ts
 src/adapters/obsidian/mention-service.ts
 src/adapters/obsidian/settings-store.adapter.ts
 src/adapters/obsidian/vault.adapter.ts
-src/adapters/agent-client-router.ts
+src/adapters/cchub-router.ts
 ```
 
 **组件 (15 个)**
@@ -789,7 +789,7 @@ src/components/chat/ImagePreviewStrip.tsx
 src/components/chat/CollapsibleThought.tsx
 src/components/chat/MarkdownTextRenderer.tsx
 src/components/chat/HeaderButton.tsx
-src/components/settings/AgentClientSettingTab.ts
+src/components/settings/CCHubSettingTab.ts
 ```
 
 **域层 (9 个)**
@@ -800,7 +800,7 @@ src/domain/models/session-update.ts
 src/domain/models/agent-config.ts
 src/domain/models/agent-error.ts
 src/domain/models/prompt-content.ts
-src/domain/ports/agent-client.port.ts
+src/domain/ports/cchub.port.ts
 src/domain/ports/vault-access.port.ts
 src/domain/ports/settings-access.port.ts
 ```
@@ -961,7 +961,7 @@ Terminal:
 /Users/shihaowang/Documents/Tom's Notebook/PLUGIN DEVELOPMENT/.obsidian/plugins/obsidian-cchub/src/adapters/acp/acp-type-converter.ts
 /Users/shihaowang/Documents/Tom's Notebook/PLUGIN DEVELOPMENT/.obsidian/plugins/obsidian-cchub/src/adapters/acp/acp.adapter.ts
 /Users/shihaowang/Documents/Tom's Notebook/PLUGIN DEVELOPMENT/.obsidian/plugins/obsidian-cchub/src/adapters/acp/acp.connection.ts
-/Users/shihaowang/Documents/Tom's Notebook/PLUGIN DEVELOPMENT/.obsidian/plugins/obsidian-cchub/src/adapters/agent-client-router.ts
+/Users/shihaowang/Documents/Tom's Notebook/PLUGIN DEVELOPMENT/.obsidian/plugins/obsidian-cchub/src/adapters/cchub-router.ts
 /Users/shihaowang/Documents/Tom's Notebook/PLUGIN DEVELOPMENT/.obsidian/plugins/obsidian-cchub/src/adapters/codex/codex.adapter.ts
 /Users/shihaowang/Documents/Tom's Notebook/PLUGIN DEVELOPMENT/.obsidian/plugins/obsidian-cchub/src/adapters/codex/codex.connection.ts
 /Users/shihaowang/Documents/Tom's Notebook/PLUGIN DEVELOPMENT/.obsidian/plugins/obsidian-cchub/src/adapters/obsidian/mention-service.ts
@@ -982,14 +982,14 @@ Terminal:
 /Users/shihaowang/Documents/Tom's Notebook/PLUGIN DEVELOPMENT/.obsidian/plugins/obsidian-cchub/src/components/chat/TerminalRenderer.tsx
 /Users/shihaowang/Documents/Tom's Notebook/PLUGIN DEVELOPMENT/.obsidian/plugins/obsidian-cchub/src/components/chat/TextWithMentions.tsx
 /Users/shihaowang/Documents/Tom's Notebook/PLUGIN DEVELOPMENT/.obsidian/plugins/obsidian-cchub/src/components/chat/ToolCallRenderer.tsx
-/Users/shihaowang/Documents/Tom's Notebook/PLUGIN DEVELOPMENT/.obsidian/plugins/obsidian-cchub/src/components/settings/AgentClientSettingTab.ts
+/Users/shihaowang/Documents/Tom's Notebook/PLUGIN DEVELOPMENT/.obsidian/plugins/obsidian-cchub/src/components/settings/CCHubSettingTab.ts
 /Users/shihaowang/Documents/Tom's Notebook/PLUGIN DEVELOPMENT/.obsidian/plugins/obsidian-cchub/src/domain/models/agent-config.ts
 /Users/shihaowang/Documents/Tom's Notebook/PLUGIN DEVELOPMENT/.obsidian/plugins/obsidian-cchub/src/domain/models/agent-error.ts
 /Users/shihaowang/Documents/Tom's Notebook/PLUGIN DEVELOPMENT/.obsidian/plugins/obsidian-cchub/src/domain/models/chat-message.ts
 /Users/shihaowang/Documents/Tom's Notebook/PLUGIN DEVELOPMENT/.obsidian/plugins/obsidian-cchub/src/domain/models/chat-session.ts
 /Users/shihaowang/Documents/Tom's Notebook/PLUGIN DEVELOPMENT/.obsidian/plugins/obsidian-cchub/src/domain/models/prompt-content.ts
 /Users/shihaowang/Documents/Tom's Notebook/PLUGIN DEVELOPMENT/.obsidian/plugins/obsidian-cchub/src/domain/models/session-update.ts
-/Users/shihaowang/Documents/Tom's Notebook/PLUGIN DEVELOPMENT/.obsidian/plugins/obsidian-cchub/src/domain/ports/agent-client.port.ts
+/Users/shihaowang/Documents/Tom's Notebook/PLUGIN DEVELOPMENT/.obsidian/plugins/obsidian-cchub/src/domain/ports/cchub.port.ts
 /Users/shihaowang/Documents/Tom's Notebook/PLUGIN DEVELOPMENT/.obsidian/plugins/obsidian-cchub/src/domain/ports/settings-access.port.ts
 /Users/shihaowang/Documents/Tom's Notebook/PLUGIN DEVELOPMENT/.obsidian/plugins/obsidian-cchub/src/domain/ports/vault-access.port.ts
 /Users/shihaowang/Documents/Tom's Notebook/PLUGIN DEVELOPMENT/.obsidian/plugins/obsidian-cchub/src/hooks/useAgentSession.ts
@@ -1085,7 +1085,7 @@ import {
 	createSettingsStore,
 	type SettingsStore,
 } from "./adapters/obsidian/settings-store.adapter";
-import { AgentClientSettingTab } from "./components/settings/AgentClientSettingTab";
+import { CCHubSettingTab } from "./components/settings/CCHubSettingTab";
 import {
 	sanitizeArgs,
 	normalizeEnvVars,
@@ -1110,7 +1110,7 @@ export type { AgentEnvVar, CustomAgentSettings };
  */
 export type SendMessageShortcut = "enter" | "cmd-enter";
 
-export interface AgentClientPluginSettings {
+export interface CCHubPluginSettings {
 	gemini: GeminiAgentSettings;
 	claude: ClaudeAgentSettings;
 	codex: CodexAgentSettings;
@@ -1140,7 +1140,7 @@ export interface AgentClientPluginSettings {
 	sendMessageShortcut: SendMessageShortcut;
 }
 
-const DEFAULT_SETTINGS: AgentClientPluginSettings = {
+const DEFAULT_SETTINGS: CCHubPluginSettings = {
 	claude: {
 		id: "claude-code-acp",
 		displayName: "Claude Code",
@@ -1189,8 +1189,8 @@ const DEFAULT_SETTINGS: AgentClientPluginSettings = {
 	sendMessageShortcut: "enter",
 };
 
-export default class AgentClientPlugin extends Plugin {
-	settings: AgentClientPluginSettings;
+export default class CCHubPlugin extends Plugin {
+	settings: CCHubPluginSettings;
 	settingsStore!: SettingsStore;
 
 	// Active ACP adapter instance (shared across use cases)
@@ -1231,7 +1231,7 @@ export default class AgentClientPlugin extends Plugin {
 		this.registerAgentCommands();
 		this.registerPermissionCommands();
 
-		this.addSettingTab(new AgentClientSettingTab(this.app, this));
+		this.addSettingTab(new CCHubSettingTab(this.app, this));
 	}
 
 	onunload() {}
@@ -1264,7 +1264,7 @@ export default class AgentClientPlugin extends Plugin {
 			if (viewContainerEl) {
 				window.setTimeout(() => {
 					const textarea = viewContainerEl.querySelector(
-						"textarea.agent-client-chat-input-textarea",
+						"textarea.cchub-chat-input-textarea",
 					);
 					if (textarea instanceof HTMLTextAreaElement) {
 						textarea.focus();
@@ -1730,7 +1730,7 @@ export default class AgentClientPlugin extends Plugin {
 		}
 	}
 
-	async saveSettingsAndNotify(nextSettings: AgentClientPluginSettings) {
+	async saveSettingsAndNotify(nextSettings: CCHubPluginSettings) {
 		this.settings = nextSettings;
 		await this.saveData(this.settings);
 		this.settingsStore.set(this.settings);
@@ -1786,7 +1786,7 @@ Status: Completed
  */
 
 export { default } from "./plugin";
-export type { AgentClientPluginSettings } from "./plugin";
+export type { CCHubPluginSettings } from "./plugin";
 ```
 
 **Tool Call: Read /Users/shihaowang/Documents/Tom's Notebook/PLUGIN DEVELOPMENT/.obsidian/plugins/obsidian-cchub/src/adapters/acp/acp.adapter.ts (1 - 100)**
@@ -1797,11 +1797,11 @@ import * as acp from "@agentclientprotocol/sdk";
 import { Platform } from "obsidian";
 
 import type {
-	IAgentClient,
+	ICCHubClient,
 	AgentConfig,
 	InitializeResult,
 	NewSessionResult,
-} from "../../domain/ports/agent-client.port";
+} from "../../domain/ports/cchub.port";
 import type {
 	MessageContent,
 	PermissionOption,
@@ -1817,7 +1817,7 @@ import {
 } from "./acp.connection";
 import { TerminalManager } from "../../shared/terminal-manager";
 import { Logger } from "../../shared/logger";
-import type AgentClientPlugin from "../../plugin";
+import type CCHubPlugin from "../../plugin";
 import type {
 	SlashCommand,
 	SessionModeState,
@@ -1830,7 +1830,7 @@ import { convertWindowsPathToWsl } from "../../shared/wsl-utils";
  *
  * Provides ACP-specific operations needed by UI components
  * (terminal rendering, permission handling, etc.) that are not
- * part of the domain-level IAgentClient interface.
+ * part of the domain-level ICCHubClient interface.
  *
  * This interface extends the base ACP Client from the protocol library
  * with plugin-specific methods for:
@@ -1857,7 +1857,7 @@ export interface IAcpClient extends acp.Client {
  * - Handles message updates and terminal operations
  * - Provides callbacks for UI updates
  */
-export class AcpAdapter implements IAgentClient, IAcpClient {
+export class AcpAdapter implements ICCHubClient, IAcpClient {
 	private acpConnection: AcpConnection;
 	private logger: Logger;
 
@@ -1903,8 +1903,8 @@ import { spawn, type ChildProcess } from "child_process";
 import * as acp from "@agentclientprotocol/sdk";
 import { Platform } from "obsidian";
 
-import type AgentClientPlugin from "../../plugin";
-import type { AgentConfig } from "../../domain/ports/agent-client.port";
+import type CCHubPlugin from "../../plugin";
+import type { AgentConfig } from "../../domain/ports/cchub.port";
 import type { Logger } from "../../shared/logger";
 import { wrapCommandForWsl } from "../../shared/wsl-utils";
 import { resolveCommandDirectory } from "../../shared/path-utils";
@@ -1932,7 +1932,7 @@ export class AcpConnection {
 	private agentProcess: ChildProcess | null = null;
 
 	constructor(
-		private plugin: AgentClientPlugin,
+		private plugin: CCHubPlugin,
 		private logger: Logger,
 		private client: acp.Client,
 		private events: AcpConnectionEvents = {},
@@ -2001,7 +2001,7 @@ export class AcpConnection {
 		this.logger.log(
 ```
 
-**Tool Call: Read /Users/shihaowang/Documents/Tom's Notebook/PLUGIN DEVELOPMENT/.obsidian/plugins/obsidian-cchub/src/domain/ports/agent-client.port.ts**
+**Tool Call: Read /Users/shihaowang/Documents/Tom's Notebook/PLUGIN DEVELOPMENT/.obsidian/plugins/obsidian-cchub/src/domain/ports/cchub.port.ts**
 Status: Completed
 
 ```
@@ -2152,7 +2152,7 @@ export interface NewSessionResult {
  * This port will be implemented by adapters that handle the actual
  * ACP protocol communication and process management.
  */
-export interface IAgentClient {
+export interface ICCHubClient {
 	/**
 	 * Initialize connection to an agent.
 	 *
@@ -2305,7 +2305,7 @@ import * as React from "react";
 const { useState, useRef, useEffect, useMemo, useCallback } = React;
 import { createRoot, Root } from "react-dom/client";
 
-import type AgentClientPlugin from "../../plugin";
+import type CCHubPlugin from "../../plugin";
 
 // Component imports
 import { ChatHeader } from "./ChatHeader";
@@ -2322,7 +2322,7 @@ import { ChatExporter } from "../../shared/chat-exporter";
 // Adapter imports
 import { AcpAdapter, type IAcpClient } from "../../adapters/acp/acp.adapter";
 import { CodexAdapter } from "../../adapters/codex/codex.adapter";
-import { AgentClientRouter } from "../../adapters/agent-client-router";
+import { CCHubRouter } from "../../adapters/cchub-router";
 import { ObsidianVaultAdapter } from "../../adapters/obsidian/vault.adapter";
 
 // Hooks imports
@@ -2353,7 +2353,7 @@ function ChatComponent({
 	plugin,
 	view,
 }: {
-	plugin: AgentClientPlugin;
+	plugin: CCHubPlugin;
 	view: ChatView;
 }) {
 	// ============================================================
@@ -2399,7 +2399,7 @@ import type {
 	MessageContent,
 } from "../domain/models/chat-message";
 import type { SessionUpdate } from "../domain/models/session-update";
-import type { IAgentClient } from "../domain/ports/agent-client.port";
+import type { ICCHubClient } from "../domain/ports/cchub.port";
 import type { IVaultAccess } from "../domain/ports/vault-access.port";
 import type { NoteMetadata } from "../domain/ports/vault-access.port";
 import type { AuthenticationMethod } from "../domain/models/chat-session";
@@ -2492,7 +2492,7 @@ export interface UseChatReturn {
 	/**
 	 * Handle a session update from the agent.
 	 * This is the unified handler for all session update events.
-	 * Should be registered with agentClient.onSessionUpdate().
+	 * Should be registered with cchubClient.onSessionUpdate().
 ```
 
 **Tool Call: Read /Users/shihaowang/Documents/Tom's Notebook/PLUGIN DEVELOPMENT/.obsidian/plugins/obsidian-cchub/src/hooks/useAgentSession.ts (1 - 80)**
@@ -2506,9 +2506,9 @@ import type {
 	SlashCommand,
 	AuthenticationMethod,
 } from "../domain/models/chat-session";
-import type { IAgentClient } from "../domain/ports/agent-client.port";
+import type { ICCHubClient } from "../domain/ports/cchub.port";
 import type { ISettingsAccess } from "../domain/ports/settings-access.port";
-import type { AgentClientPluginSettings } from "../plugin";
+import type { CCHubPluginSettings } from "../plugin";
 import type {
 	BaseAgentSettings,
 	ClaudeAgentSettings,
@@ -2581,28 +2581,28 @@ export interface UseAgentSessionReturn {
 	 * Switch to a different agent.
 ```
 
-**Tool Call: Read /Users/shihaowang/Documents/Tom's Notebook/PLUGIN DEVELOPMENT/.obsidian/plugins/obsidian-cchub/src/adapters/agent-client-router.ts**
+**Tool Call: Read /Users/shihaowang/Documents/Tom's Notebook/PLUGIN DEVELOPMENT/.obsidian/plugins/obsidian-cchub/src/adapters/cchub-router.ts**
 Status: Completed
 
 ```
 import type {
 	AgentConfig,
-	IAgentClient,
+	ICCHubClient,
 	InitializeResult,
 	NewSessionResult,
-} from "../domain/ports/agent-client.port";
+} from "../domain/ports/cchub.port";
 import type { SessionUpdate } from "../domain/models/session-update";
 import type { AgentError } from "../domain/models/agent-error";
 import type { PromptContent } from "../domain/models/prompt-content";
-import type AgentClientPlugin from "../plugin";
+import type CCHubPlugin from "../plugin";
 import { AcpAdapter } from "./acp/acp.adapter";
 import { CodexAdapter } from "./codex/codex.adapter";
 
-export class AgentClientRouter implements IAgentClient {
-	private activeClient: IAgentClient | null = null;
+export class CCHubRouter implements ICCHubClient {
+	private activeClient: ICCHubClient | null = null;
 
 	constructor(
-		private plugin: AgentClientPlugin,
+		private plugin: CCHubPlugin,
 		private acpAdapter: AcpAdapter,
 		private codexAdapter: CodexAdapter,
 	) {}
@@ -2679,14 +2679,14 @@ export class AgentClientRouter implements IAgentClient {
 		return await this.getActiveClient().setSessionModel(sessionId, modelId);
 	}
 
-	private getActiveClient(): IAgentClient {
+	private getActiveClient(): ICCHubClient {
 		if (!this.activeClient) {
 			throw new Error("No active agent client initialized");
 		}
 		return this.activeClient;
 	}
 
-	private selectClient(config: AgentConfig): IAgentClient {
+	private selectClient(config: AgentConfig): ICCHubClient {
 		if (config.id === this.plugin.settings.codex.id) {
 			if (this.isCodexAcpCommand(config.command)) {
 				return this.acpAdapter;
@@ -2772,7 +2772,7 @@ Terminal:
      320 src/adapters/acp/acp.connection.ts
      128 src/adapters/obsidian/mention-service.ts
      123 src/adapters/obsidian/settings-store.adapter.ts
-     116 src/adapters/agent-client-router.ts
+     116 src/adapters/cchub-router.ts
      105 src/adapters/acp/acp-cli-detector.ts
       70 src/adapters/acp/acp-type-converter.ts
       62 src/adapters/acp/acp-command-resolver.ts
@@ -2830,7 +2830,7 @@ Status: Completed
 Terminal:
 ```
     1252 total
-     289 src/domain/ports/agent-client.port.ts
+     289 src/domain/ports/cchub.port.ts
      231 src/domain/models/chat-session.ts
      204 src/domain/models/chat-message.ts
      157 src/domain/models/session-update.ts
@@ -2851,11 +2851,11 @@ import * as acp from "@agentclientprotocol/sdk";
 import { Platform } from "obsidian";
 
 import type {
-	IAgentClient,
+	ICCHubClient,
 	AgentConfig,
 	InitializeResult,
 	NewSessionResult,
-} from "../../domain/ports/agent-client.port";
+} from "../../domain/ports/cchub.port";
 import type {
 	MessageContent,
 	PermissionOption,
@@ -2871,7 +2871,7 @@ import {
 } from "./acp.connection";
 import { TerminalManager } from "../../shared/terminal-manager";
 import { Logger } from "../../shared/logger";
-import type AgentClientPlugin from "../../plugin";
+import type CCHubPlugin from "../../plugin";
 import type {
 	SlashCommand,
 	SessionModeState,
@@ -2884,7 +2884,7 @@ import { convertWindowsPathToWsl } from "../../shared/wsl-utils";
  *
  * Provides ACP-specific operations needed by UI components
  * (terminal rendering, permission handling, etc.) that are not
- * part of the domain-level IAgentClient interface.
+ * part of the domain-level ICCHubClient interface.
  *
  * This interface extends the base ACP Client from the protocol library
  * with plugin-specific methods for:
@@ -2911,7 +2911,7 @@ export interface IAcpClient extends acp.Client {
  * - Handles message updates and terminal operations
  * - Provides callbacks for UI updates
  */
-export class AcpAdapter implements IAgentClient, IAcpClient {
+export class AcpAdapter implements ICCHubClient, IAcpClient {
 	private acpConnection: AcpConnection;
 	private logger: Logger;
 
@@ -2950,7 +2950,7 @@ export class AcpAdapter implements IAgentClient, IAcpClient {
 		options: PermissionOption[];
 	}> = [];
 
-	constructor(private plugin: AgentClientPlugin) {
+	constructor(private plugin: CCHubPlugin) {
 		this.logger = new Logger(plugin);
 		// Initialize with no-op callback
 		this.updateMessage = () => {};
@@ -3007,7 +3007,7 @@ import * as React from "react";
 const { useRef, useState, useEffect, useCallback, useMemo } = React;
 import { setIcon, DropdownComponent, Notice } from "obsidian";
 
-import type AgentClientPlugin from "../../plugin";
+import type CCHubPlugin from "../../plugin";
 import type { ChatView } from "./ChatView";
 import type { NoteMetadata } from "../../domain/ports/vault-access.port";
 import type {
@@ -3065,7 +3065,7 @@ export interface ChatInputProps {
 	/** Slash commands hook state and methods */
 	slashCommands: UseSlashCommandsReturn;
 	/** Plugin instance */
-	plugin: AgentClientPlugin;
+	plugin: CCHubPlugin;
 	/** View instance for event registration */
 	view: ChatView;
 	/** Callback to send a message with optional images */
@@ -3176,7 +3176,7 @@ const INITIALIZE_TIMEOUT_MS = 20000;
 const NEW_SESSION_TIMEOUT_MS = 10000;
 
 function getInitializeTimeoutMs(
-	settings: AgentClientPluginSettings,
+	settings: CCHubPluginSettings,
 	agentId: string,
 ): number {
 	if (agentId === settings.codex.id) {
@@ -3186,7 +3186,7 @@ function getInitializeTimeoutMs(
 }
 
 function getNewSessionTimeoutMs(
-	settings: AgentClientPluginSettings,
+	settings: CCHubPluginSettings,
 	agentId: string,
 ): number {
 	if (agentId === settings.codex.id) {
@@ -3229,7 +3229,7 @@ async function withTimeout<T>(
 /**
  * Get the currently active agent ID from settings.
  */
-function getActiveAgentId(settings: AgentClientPluginSettings): string {
+function getActiveAgentId(settings: CCHubPluginSettings): string {
 	return settings.activeAgentId || settings.claude.id;
 }
 
@@ -3237,7 +3237,7 @@ function getActiveAgentId(settings: AgentClientPluginSettings): string {
  * Get list of all available agents from settings.
  */
 function getAvailableAgentsFromSettings(
-	settings: AgentClientPluginSettings,
+	settings: CCHubPluginSettings,
 ): AgentInfo[] {
 
 
@@ -3250,7 +3250,7 @@ Status: Completed
 ```
 import type { AgentEnvVar, CustomAgentSettings } from "../plugin";
 import type { BaseAgentSettings } from "../domain/models/agent-config";
-import type { AgentConfig } from "../domain/ports/agent-client.port";
+import type { AgentConfig } from "../domain/ports/cchub.port";
 
 export const sanitizeArgs = (value: unknown): string[] => {
 	if (Array.isArray(value)) {
@@ -3371,7 +3371,7 @@ export const ensureUniqueCustomAgentIds = (
  * Convert BaseAgentSettings to AgentConfig for process execution.
  *
  * Transforms the storage format (BaseAgentSettings) to the runtime format (AgentConfig)
- * needed by IAgentClient.initialize().
+ * needed by ICCHubClient.initialize().
  *
  * @param settings - Agent settings from plugin configuration
  * @param workingDirectory - Working directory for the agent session
@@ -3620,7 +3620,7 @@ Status: Completed
 
 Terminal:
 ```
-     116 src/adapters/agent-client-router.ts
+     116 src/adapters/cchub-router.ts
      774 src/hooks/useAgentSession.ts
      164 src/hooks/useAutoExport.ts
       62 src/hooks/useAutoMention.ts
@@ -3650,7 +3650,7 @@ import * as React from "react";
 const { useState, useMemo } = React;
 import type { MessageContent } from "../../domain/models/chat-message";
 import type { IAcpClient } from "../../adapters/acp/acp.adapter";
-import type AgentClientPlugin from "../../plugin";
+import type CCHubPlugin from "../../plugin";
 import { TerminalRenderer } from "./TerminalRenderer";
 import { PermissionRequestSection } from "./PermissionRequestSection";
 import { toRelativePath } from "../../shared/path-utils";
@@ -3659,7 +3659,7 @@ import * as Diff from "diff";
 
 interface ToolCallRendererProps {
 	content: Extract<MessageContent, { type: "tool_call" }>;
-	plugin: AgentClientPlugin;
+	plugin: CCHubPlugin;
 	acpClient?: IAcpClient;
 	/** Callback to approve a permission request */
 	onApprovePermission?: (
@@ -3742,11 +3742,11 @@ Status: Completed
  * - Process mentions (@[[note]] syntax)
  * - Add auto-mention for active note
  * - Convert mentions to file paths
- * - Send prompt to agent via IAgentClient
+ * - Send prompt to agent via ICCHubClient
  * - Handle authentication errors with retry logic
  */
 
-import type { IAgentClient } from "../domain/ports/agent-client.port";
+import type { ICCHubClient } from "../domain/ports/cchub.port";
 import type {
 	IVaultAccess,
 	NoteMetadata,
@@ -4042,11 +4042,11 @@ import * as acp from "@agentclientprotocol/sdk";
 import { Platform } from "obsidian";
 
 import type {
-	IAgentClient,
+	ICCHubClient,
 	AgentConfig,
 	InitializeResult,
 	NewSessionResult,
-} from "../../domain/ports/agent-client.port";
+} from "../../domain/ports/cchub.port";
 import type {
 	MessageContent,
 	PermissionOption,
@@ -4062,7 +4062,7 @@ import {
 } from "./acp.connection";
 import { TerminalManager } from "../../shared/terminal-manager";
 import { Logger } from "../../shared/logger";
-import type AgentClientPlugin from "../../plugin";
+import type CCHubPlugin from "../../plugin";
 import type {
 	SlashCommand,
 	SessionModeState,
@@ -4075,7 +4075,7 @@ import { convertWindowsPathToWsl } from "../../shared/wsl-utils";
  *
  * Provides ACP-specific operations needed by UI components
  * (terminal rendering, permission handling, etc.) that are not
- * part of the domain-level IAgentClient interface.
+ * part of the domain-level ICCHubClient interface.
  *
  * This interface extends the base ACP Client from the protocol library
  * with plugin-specific methods for:
@@ -4102,7 +4102,7 @@ export interface IAcpClient extends acp.Client {
  * - Handles message updates and terminal operations
  * - Provides callbacks for UI updates
  */
-export class AcpAdapter implements IAgentClient, IAcpClient {
+export class AcpAdapter implements ICCHubClient, IAcpClient {
 	private acpConnection: AcpConnection;
 	private logger: Logger;
 
@@ -4141,7 +4141,7 @@ export class AcpAdapter implements IAgentClient, IAcpClient {
 		options: PermissionOption[];
 	}> = [];
 
-	constructor(private plugin: AgentClientPlugin) {
+	constructor(private plugin: CCHubPlugin) {
 		this.logger = new Logger(plugin);
 		// Initialize with no-op callback
 		this.updateMessage = () => {};
@@ -4467,7 +4467,7 @@ export class AcpAdapter implements IAgentClient, IAcpClient {
 	/**
 	 * Check if the agent connection is initialized and ready.
 	 *
-	 * Implementation of IAgentClient.isInitialized()
+	 * Implementation of ICCHubClient.isInitialized()
 	 */
 	isInitialized(): boolean {
 		return this.isInitializedFlag && this.acpConnection.isConnected();
@@ -4476,7 +4476,7 @@ export class AcpAdapter implements IAgentClient, IAcpClient {
 	/**
 	 * Get the ID of the currently connected agent.
 	 *
-	 * Implementation of IAgentClient.getCurrentAgentId()
+	 * Implementation of ICCHubClient.getCurrentAgentId()
 	 */
 	getCurrentAgentId(): string | null {
 		return this.currentAgentId;
@@ -4488,7 +4488,7 @@ export class AcpAdapter implements IAgentClient, IAcpClient {
 	 * Changes the agent's operating mode for the current session.
 	 * The agent will confirm the mode change via a current_mode_update notification.
 	 *
-	 * Implementation of IAgentClient.setSessionMode()
+	 * Implementation of ICCHubClient.setSessionMode()
 	 */
 	async setSessionMode(sessionId: string, modeId: string): Promise<void> {
 		const connection = this.getConnectionOrThrow();
@@ -4513,7 +4513,7 @@ export class AcpAdapter implements IAgentClient, IAcpClient {
 	}
 
 	/**
-	 * Implementation of IAgentClient.setSessionModel()
+	 * Implementation of ICCHubClient.setSessionModel()
 	 */
 	async setSessionModel(sessionId: string, modelId: string): Promise<void> {
 		const connection = this.getConnectionOrThrow();
@@ -5087,8 +5087,8 @@ import { spawn, type ChildProcess } from "child_process";
 import * as acp from "@agentclientprotocol/sdk";
 import { Platform } from "obsidian";
 
-import type AgentClientPlugin from "../../plugin";
-import type { AgentConfig } from "../../domain/ports/agent-client.port";
+import type CCHubPlugin from "../../plugin";
+import type { AgentConfig } from "../../domain/ports/cchub.port";
 import type { Logger } from "../../shared/logger";
 import { wrapCommandForWsl } from "../../shared/wsl-utils";
 import { resolveCommandDirectory } from "../../shared/path-utils";
@@ -5116,7 +5116,7 @@ export class AcpConnection {
 	private agentProcess: ChildProcess | null = null;
 
 	constructor(
-		private plugin: AgentClientPlugin,
+		private plugin: CCHubPlugin,
 		private logger: Logger,
 		private client: acp.Client,
 		private events: AcpConnectionEvents = {},
@@ -5405,28 +5405,28 @@ export class AcpConnection {
 }
 ```
 
-**Tool Call: Read /Users/shihaowang/Documents/Tom's Notebook/PLUGIN DEVELOPMENT/.obsidian/plugins/obsidian-cchub/src/adapters/agent-client-router.ts**
+**Tool Call: Read /Users/shihaowang/Documents/Tom's Notebook/PLUGIN DEVELOPMENT/.obsidian/plugins/obsidian-cchub/src/adapters/cchub-router.ts**
 Status: Completed
 
 ```
 import type {
 	AgentConfig,
-	IAgentClient,
+	ICCHubClient,
 	InitializeResult,
 	NewSessionResult,
-} from "../domain/ports/agent-client.port";
+} from "../domain/ports/cchub.port";
 import type { SessionUpdate } from "../domain/models/session-update";
 import type { AgentError } from "../domain/models/agent-error";
 import type { PromptContent } from "../domain/models/prompt-content";
-import type AgentClientPlugin from "../plugin";
+import type CCHubPlugin from "../plugin";
 import { AcpAdapter } from "./acp/acp.adapter";
 import { CodexAdapter } from "./codex/codex.adapter";
 
-export class AgentClientRouter implements IAgentClient {
-	private activeClient: IAgentClient | null = null;
+export class CCHubRouter implements ICCHubClient {
+	private activeClient: ICCHubClient | null = null;
 
 	constructor(
-		private plugin: AgentClientPlugin,
+		private plugin: CCHubPlugin,
 		private acpAdapter: AcpAdapter,
 		private codexAdapter: CodexAdapter,
 	) {}
@@ -5503,14 +5503,14 @@ export class AgentClientRouter implements IAgentClient {
 		return await this.getActiveClient().setSessionModel(sessionId, modelId);
 	}
 
-	private getActiveClient(): IAgentClient {
+	private getActiveClient(): ICCHubClient {
 		if (!this.activeClient) {
 			throw new Error("No active agent client initialized");
 		}
 		return this.activeClient;
 	}
 
-	private selectClient(config: AgentConfig): IAgentClient {
+	private selectClient(config: AgentConfig): ICCHubClient {
 		if (config.id === this.plugin.settings.codex.id) {
 			if (this.isCodexAcpCommand(config.command)) {
 				return this.acpAdapter;
@@ -5542,9 +5542,9 @@ import type {
 	SlashCommand,
 	AuthenticationMethod,
 } from "../domain/models/chat-session";
-import type { IAgentClient } from "../domain/ports/agent-client.port";
+import type { ICCHubClient } from "../domain/ports/cchub.port";
 import type { ISettingsAccess } from "../domain/ports/settings-access.port";
-import type { AgentClientPluginSettings } from "../plugin";
+import type { CCHubPluginSettings } from "../plugin";
 import type {
 	BaseAgentSettings,
 	ClaudeAgentSettings,
@@ -5671,7 +5671,7 @@ const INITIALIZE_TIMEOUT_MS = 20000;
 const NEW_SESSION_TIMEOUT_MS = 10000;
 
 function getInitializeTimeoutMs(
-	settings: AgentClientPluginSettings,
+	settings: CCHubPluginSettings,
 	agentId: string,
 ): number {
 	if (agentId === settings.codex.id) {
@@ -5681,7 +5681,7 @@ function getInitializeTimeoutMs(
 }
 
 function getNewSessionTimeoutMs(
-	settings: AgentClientPluginSettings,
+	settings: CCHubPluginSettings,
 	agentId: string,
 ): number {
 	if (agentId === settings.codex.id) {
@@ -5724,7 +5724,7 @@ async function withTimeout<T>(
 /**
  * Get the currently active agent ID from settings.
  */
-function getActiveAgentId(settings: AgentClientPluginSettings): string {
+function getActiveAgentId(settings: CCHubPluginSettings): string {
 	return settings.activeAgentId || settings.claude.id;
 }
 
@@ -5732,7 +5732,7 @@ function getActiveAgentId(settings: AgentClientPluginSettings): string {
  * Get list of all available agents from settings.
  */
 function getAvailableAgentsFromSettings(
-	settings: AgentClientPluginSettings,
+	settings: CCHubPluginSettings,
 ): AgentInfo[] {
 	return [
 		{
@@ -5757,7 +5757,7 @@ function getAvailableAgentsFromSettings(
 /**
  * Get the currently active agent information from settings.
  */
-function getCurrentAgent(settings: AgentClientPluginSettings): AgentInfo {
+function getCurrentAgent(settings: CCHubPluginSettings): AgentInfo {
 	const activeId = getActiveAgentId(settings);
 	const agents = getAvailableAgentsFromSettings(settings);
 	return (
@@ -5776,7 +5776,7 @@ function getCurrentAgent(settings: AgentClientPluginSettings): AgentInfo {
  * Find agent settings by ID from plugin settings.
  */
 function findAgentSettings(
-	settings: AgentClientPluginSettings,
+	settings: CCHubPluginSettings,
 	agentId: string,
 ): BaseAgentSettings | null {
 	if (agentId === settings.claude.id) {
@@ -5799,7 +5799,7 @@ function findAgentSettings(
  * Build AgentConfig with API key injection for known agents.
  */
 function buildAgentConfigWithApiKey(
-	settings: AgentClientPluginSettings,
+	settings: CCHubPluginSettings,
 	agentSettings: BaseAgentSettings,
 	agentId: string,
 	workingDirectory: string,
@@ -5843,7 +5843,7 @@ Status: Completed
 ```
 import { spawn, ChildProcess, SpawnOptions } from "child_process";
 import * as acp from "@agentclientprotocol/sdk";
-import type AgentClientPlugin from "../plugin";
+import type CCHubPlugin from "../plugin";
 import { Logger } from "./logger";
 import { Platform } from "obsidian";
 import { wrapCommandForWsl } from "./wsl-utils";
@@ -5864,9 +5864,9 @@ interface TerminalProcess {
 export class TerminalManager {
 	private terminals = new Map<string, TerminalProcess>();
 	private logger: Logger;
-	private plugin: AgentClientPlugin;
+	private plugin: CCHubPlugin;
 
-	constructor(plugin: AgentClientPlugin) {
+	constructor(plugin: CCHubPlugin) {
 		this.logger = new Logger(plugin);
 		this.plugin = plugin;
 	}
@@ -6131,7 +6131,7 @@ Status: Completed
 /Users/shihaowang/Documents/Tom's Notebook/PLUGIN DEVELOPMENT/.obsidian/plugins/obsidian-cchub/src/adapters/acp/acp-cli-profiles.ts
 /Users/shihaowang/Documents/Tom's Notebook/PLUGIN DEVELOPMENT/.obsidian/plugins/obsidian-cchub/src/adapters/acp/acp-cli-detector.ts
 /Users/shihaowang/Documents/Tom's Notebook/PLUGIN DEVELOPMENT/.obsidian/plugins/obsidian-cchub/src/adapters/acp/acp-command-resolver.ts
-/Users/shihaowang/Documents/Tom's Notebook/PLUGIN DEVELOPMENT/.obsidian/plugins/obsidian-cchub/src/adapters/agent-client-router.ts
+/Users/shihaowang/Documents/Tom's Notebook/PLUGIN DEVELOPMENT/.obsidian/plugins/obsidian-cchub/src/adapters/cchub-router.ts
 /Users/shihaowang/Documents/Tom's Notebook/PLUGIN DEVELOPMENT/.obsidian/plugins/obsidian-cchub/src/adapters/obsidian/vault.adapter.ts
 /Users/shihaowang/Documents/Tom's Notebook/PLUGIN DEVELOPMENT/.obsidian/plugins/obsidian-cchub/src/adapters/acp/acp.adapter.ts
 /Users/shihaowang/Documents/Tom's Notebook/PLUGIN DEVELOPMENT/.obsidian/plugins/obsidian-cchub/src/adapters/codex/codex.adapter.ts
@@ -6259,7 +6259,7 @@ Diff: /Users/shihaowang/Documents/Tom's Notebook/PLUGIN DEVELOPMENT/.obsidian/pl
 import * as acp from "@agentclientprotocol/sdk";
 import type { PermissionOption } from "../../domain/models/chat-message";
 import type { Logger } from "../../shared/logger";
-import type AgentClientPlugin from "../../plugin";
+import type CCHubPlugin from "../../plugin";
 
 /**
  * Pending permission request entry in the queue.
@@ -6316,7 +6316,7 @@ export class AcpPermissionHandler {
 	private updateMessageCallback: UpdateMessageCallback;
 
 	constructor(
-		private plugin: AgentClientPlugin,
+		private plugin: CCHubPlugin,
 		private logger: Logger,
 	) {
 		// Initialize with no-op callback
@@ -6819,11 +6819,11 @@ import * as acp from "@agentclientprotocol/sdk";
 import { Platform } from "obsidian";
 
 import type {
-	IAgentClient,
+	ICCHubClient,
 	AgentConfig,
 	InitializeResult,
 	NewSessionResult,
-} from "../../domain/ports/agent-client.port";
+} from "../../domain/ports/cchub.port";
 import type { MessageContent } from "../../domain/models/chat-message";
 import type { SessionUpdate } from "../../domain/models/session-update";
 import type { PromptContent } from "../../domain/models/prompt-content";
@@ -6839,7 +6839,7 @@ import { TerminalManager } from "../../shared/terminal-manager";
 import { Logger } from "../../shared/logger";
 import { AcpPermissionHandler } from "./acp-permission-handler";
 import { AcpMessageHandler } from "./acp-message-handler";
-import type AgentClientPlugin from "../../plugin";
+import type CCHubPlugin from "../../plugin";
 import { convertWindowsPathToWsl } from "../../shared/wsl-utils";
 
 /**
@@ -6847,7 +6847,7 @@ import { convertWindowsPathToWsl } from "../../shared/wsl-utils";
  *
  * Provides ACP-specific operations needed by UI components
  * (terminal rendering, permission handling, etc.) that are not
- * part of the domain-level IAgentClient interface.
+ * part of the domain-level ICCHubClient interface.
  */
 export interface IAcpClient extends acp.Client {
 	handlePermissionResponse(requestId: string, optionId: string): void;
@@ -6868,7 +6868,7 @@ export interface IAcpClient extends acp.Client {
  * - Delegates message processing to AcpMessageHandler
  * - Provides callbacks for UI updates
  */
-export class AcpAdapter implements IAgentClient, IAcpClient {
+export class AcpAdapter implements ICCHubClient, IAcpClient {
 	private acpConnection: AcpConnection;
 	private logger: Logger;
 	private permissionHandler: AcpPermissionHandler;
@@ -6886,7 +6886,7 @@ export class AcpAdapter implements IAgentClient, IAcpClient {
 	// Current message tracking (for terminal operations)
 	private currentMessageId: string | null = null;
 
-	constructor(private plugin: AgentClientPlugin) {
+	constructor(private plugin: CCHubPlugin) {
 		this.logger = new Logger(plugin);
 		
 		// Initialize handlers
@@ -6917,7 +6917,7 @@ export class AcpAdapter implements IAgentClient, IAcpClient {
 	}
 
 	// ========================================================================
-	// IAgentClient Implementation
+	// ICCHubClient Implementation
 	// ========================================================================
 
 	/**
@@ -7666,8 +7666,8 @@ import { spawn, type ChildProcess } from "child_process";
 import * as acp from "@agentclientprotocol/sdk";
 import { Platform } from "obsidian";
 
-import type AgentClientPlugin from "../../plugin";
-import type { AgentConfig } from "../../domain/ports/agent-client.port";
+import type CCHubPlugin from "../../plugin";
+import type { AgentConfig } from "../../domain/ports/cchub.port";
 import type { Logger } from "../../shared/logger";
 import { resolveCommandDirectory } from "../../shared/path-utils";
 import { wrapCommandForPlatform } from "../../shared/platform/platform-command-wrapper";
@@ -7705,7 +7705,7 @@ export class AcpConnection {
 	private agentProcess: ChildProcess | null = null;
 
 	constructor(
-		private plugin: AgentClientPlugin,
+		private plugin: CCHubPlugin,
 		private logger: Logger,
 		private client: acp.Client,
 		private events: AcpConnectionEvents = {},
@@ -8047,7 +8047,7 @@ import { spawn, ChildProcess, SpawnOptions } from "child_process";
 import * as acp from "@agentclientprotocol/sdk";
 import { Platform } from "obsidian";
 
-import type AgentClientPlugin from "../plugin";
+import type CCHubPlugin from "../plugin";
 import { Logger } from "./logger";
 import {
 	wrapCommandForPlatform,
@@ -8083,9 +8083,9 @@ interface TerminalProcess {
 export class TerminalManager {
 	private terminals = new Map<string, TerminalProcess>();
 	private logger: Logger;
-	private plugin: AgentClientPlugin;
+	private plugin: CCHubPlugin;
 
-	constructor(plugin: AgentClientPlugin) {
+	constructor(plugin: CCHubPlugin) {
 		this.logger = new Logger(plugin);
 		this.plugin = plugin;
 	}

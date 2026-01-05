@@ -1,16 +1,16 @@
 import { TFile, prepareFuzzySearch } from "obsidian";
-import type AgentClientPlugin from "../../plugin";
+import type CCHubPlugin from "../../plugin";
 import { Logger } from "../../shared/logger";
 
 // Note mention service for @-mention functionality
 export class NoteMentionService {
 	private files: TFile[] = [];
 	private lastBuild = 0;
-	private plugin: AgentClientPlugin;
+	private plugin: CCHubPlugin;
 	private logger: Logger;
 	private eventRefs: ReturnType<typeof this.plugin.app.vault.on>[] = [];
 
-	constructor(plugin: AgentClientPlugin) {
+	constructor(plugin: CCHubPlugin) {
 		this.plugin = plugin;
 		this.logger = new Logger(plugin);
 		this.rebuildIndex();

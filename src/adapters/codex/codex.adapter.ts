@@ -1,9 +1,9 @@
 import type {
 	AgentConfig,
-	IAgentClient,
+	ICCHubClient,
 	InitializeResult,
 	NewSessionResult,
-} from "../../domain/ports/agent-client.port";
+} from "../../domain/ports/cchub.port";
 import type { AgentError } from "../../domain/models/agent-error";
 import type { PromptContent } from "../../domain/models/prompt-content";
 import type { SessionUpdate } from "../../domain/models/session-update";
@@ -11,7 +11,7 @@ import type { PermissionOption } from "../../domain/models/chat-message";
 import { Platform } from "obsidian";
 import { Logger } from "../../shared/logger";
 import { resolveCommandDirectory } from "../../shared/path-utils";
-import type AgentClientPlugin from "../../plugin";
+import type CCHubPlugin from "../../plugin";
 import { CodexConnection, type CodexEventEnvelope } from "./codex.connection";
 
 interface PermissionRequestEntry {
@@ -24,7 +24,7 @@ interface PermissionRequestEntry {
 	changes?: Record<string, unknown>;
 }
 
-export class CodexAdapter implements IAgentClient {
+export class CodexAdapter implements ICCHubClient {
 	private connection: CodexConnection | null = null;
 	private logger: Logger;
 	private sessionUpdateCallback: ((update: SessionUpdate) => void) | null =
@@ -42,7 +42,7 @@ export class CodexAdapter implements IAgentClient {
 	>();
 	private pendingPermissionQueue: string[] = [];
 
-	constructor(private plugin: AgentClientPlugin) {
+	constructor(private plugin: CCHubPlugin) {
 		this.logger = new Logger(plugin);
 	}
 

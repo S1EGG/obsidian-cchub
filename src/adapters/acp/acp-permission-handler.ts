@@ -1,7 +1,7 @@
 import * as acp from "@agentclientprotocol/sdk";
 import type { PermissionOption } from "../../domain/models/chat-message";
 import type { Logger } from "../../shared/logger";
-import type AgentClientPlugin from "../../plugin";
+import type CCHubPlugin from "../../plugin";
 
 /**
  * Pending permission request entry in the queue.
@@ -58,7 +58,7 @@ export class AcpPermissionHandler {
 	private updateMessageCallback: UpdateMessageCallback;
 
 	constructor(
-		private plugin: AgentClientPlugin,
+		private plugin: CCHubPlugin,
 		private logger: Logger,
 	) {
 		// Initialize with no-op callback

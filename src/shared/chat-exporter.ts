@@ -1,4 +1,4 @@
-import type AgentClientPlugin from "../plugin";
+import type CCHubPlugin from "../plugin";
 import type {
 	ChatMessage,
 	MessageContent,
@@ -25,7 +25,7 @@ interface ConvertContext {
 export class ChatExporter {
 	private logger: Logger;
 
-	constructor(private plugin: AgentClientPlugin) {
+	constructor(private plugin: CCHubPlugin) {
 		this.logger = new Logger(plugin);
 	}
 
@@ -143,7 +143,7 @@ created: ${localTimestamp}
 agentDisplayName: ${agentLabel}
 agentId: ${agentId}
 session_id: ${sessionId}
-tags: [agent-client]
+tags: [cchub]
 ---`;
 	}
 

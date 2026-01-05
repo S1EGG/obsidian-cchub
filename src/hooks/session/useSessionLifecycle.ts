@@ -3,7 +3,7 @@ import type {
 	ChatSession,
 	AuthenticationMethod,
 } from "../../domain/models/chat-session";
-import type { IAgentClient } from "../../domain/ports/agent-client.port";
+import type { ICCHubClient } from "../../domain/ports/cchub.port";
 import type { ISettingsAccess } from "../../domain/ports/settings-access.port";
 import {
 	getActiveAgentId,
@@ -45,7 +45,7 @@ interface LifecycleCallbacks {
  * - Operation cancellation
  */
 export function useSessionLifecycle(
-	agentClient: IAgentClient,
+	cchubClient: ICCHubClient,
 	settingsAccess: ISettingsAccess,
 	workingDirectory: string,
 	callbacks: LifecycleCallbacks,
@@ -106,8 +106,8 @@ export function useSessionLifecycle(
 			console.debug("[useSessionLifecycle] agentConfig:", agentConfig);
 
 			// Check if initialization is needed
-			const isInit = agentClient.isInitialized();
-			const currentAgentId = agentClient.getCurrentAgentId();
+			const isInit = cchubClient.isInitialized();
+			const currentAgentId = cchubClient.getCurrentAgentId();
 			const needsInitialize = !isInit || currentAgentId !== activeAgentId;
 			console.debug("[useSessionLifecycle] needsInitialize check:", {
 				isInit,
@@ -129,11 +129,11 @@ export function useSessionLifecycle(
 			if (needsInitialize) {
 				console.debug("[useSessionLifecycle] Calling initialize...");
 				const initResult = await withTimeout(
-					agentClient.initialize(agentConfig),
+					cchubClient.initialize(agentConfig),
 					getInitializeTimeoutMs(settings, activeAgentId),
 					"initialize",
 					() => {
-						void agentClient.disconnect();
+						void cchubClient.disconnect();
 					},
 				);
 				console.debug("[useSessionLifecycle] Initialize completed");
@@ -143,11 +143,11 @@ export function useSessionLifecycle(
 
 			// Create new session
 			const sessionResult = await withTimeout(
-				agentClient.newSession(workingDirectory),
+				cchubClient.newSession(workingDirectory),
 				getNewSessionTimeoutMs(settings, activeAgentId),
 				"newSession",
 				() => {
-					void agentClient.disconnect();
+					void cchubClient.disconnect();
 				},
 			);
 
@@ -195,7 +195,7 @@ export function useSessionLifecycle(
 			});
 		}
 	}, [
-		agentClient,
+		cchubClient,
 		settingsAccess,
 		workingDirectory,
 		onSessionUpdate,
@@ -217,7 +217,7 @@ export function useSessionLifecycle(
 			// Cancel current session if active
 			if (sessionId) {
 				try {
-					await agentClient.cancel(sessionId);
+					await cchubClient.cancel(sessionId);
 				} catch (error) {
 					console.warn("Failed to cancel session:", error);
 				}
@@ -225,7 +225,7 @@ export function useSessionLifecycle(
 
 			// Disconnect from agent
 			try {
-				await agentClient.disconnect();
+				await cchubClient.disconnect();
 			} catch (error) {
 				console.warn("Failed to disconnect:", error);
 			}
@@ -237,7 +237,7 @@ export function useSessionLifecycle(
 				state: "disconnected",
 			}));
 		},
-		[agentClient, onSessionUpdate],
+		[cchubClient, onSessionUpdate],
 	);
 
 	/**
@@ -250,7 +250,7 @@ export function useSessionLifecycle(
 			}
 
 			try {
-				await agentClient.cancel(sessionId);
+				await cchubClient.cancel(sessionId);
 				onSessionUpdate((prev) => ({
 					...prev,
 					state: "ready",
@@ -264,7 +264,7 @@ export function useSessionLifecycle(
 				}));
 			}
 		},
-		[agentClient, onSessionUpdate],
+		[cchubClient, onSessionUpdate],
 	);
 
 	return {

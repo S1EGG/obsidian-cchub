@@ -2,8 +2,8 @@ import { spawn, type ChildProcess } from "child_process";
 import * as acp from "@agentclientprotocol/sdk";
 import { Platform } from "obsidian";
 
-import type AgentClientPlugin from "../../plugin";
-import type { AgentConfig } from "../../domain/ports/agent-client.port";
+import type CCHubPlugin from "../../plugin";
+import type { AgentConfig } from "../../domain/ports/cchub.port";
 import type { Logger } from "../../shared/logger";
 import { resolveCommandDirectory } from "../../shared/path-utils";
 import { wrapCommandForPlatform } from "../../shared/platform/platform-command-wrapper";
@@ -41,7 +41,7 @@ export class AcpConnection {
 	private agentProcess: ChildProcess | null = null;
 
 	constructor(
-		private plugin: AgentClientPlugin,
+		private plugin: CCHubPlugin,
 		private logger: Logger,
 		private client: acp.Client,
 		private events: AcpConnectionEvents = {},

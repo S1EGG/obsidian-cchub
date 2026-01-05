@@ -1,7 +1,7 @@
 import * as React from "react";
 const { useRef, useEffect, useMemo } = React;
 import { Logger } from "../../shared/logger";
-import type AgentClientPlugin from "../../plugin";
+import type CCHubPlugin from "../../plugin";
 import type { ChatView } from "./ChatView";
 import type { NoteMetadata } from "../../domain/ports/vault-access.port";
 import type { SlashCommand } from "../../domain/models/chat-session";
@@ -34,7 +34,7 @@ interface SuggestionDropdownProps {
 	onClose: () => void;
 
 	/** Plugin instance for logging */
-	plugin: AgentClientPlugin;
+	plugin: CCHubPlugin;
 
 	/** View instance for event registration */
 	view: ChatView;
@@ -105,16 +105,16 @@ export function SuggestionDropdown({
 			return (
 				<div
 					key={note.path}
-					className={`agent-client-mention-dropdown-item ${isSelected ? "agent-client-selected" : ""} ${hasBorder ? "agent-client-has-border" : ""}`}
+					className={`cchub-mention-dropdown-item ${isSelected ? "cchub-selected" : ""} ${hasBorder ? "cchub-has-border" : ""}`}
 					onClick={() => onSelect(note)}
 					onMouseEnter={() => {
 						// Could update selected index on hover
 					}}
 				>
-					<div className="agent-client-mention-dropdown-item-name">
+					<div className="cchub-mention-dropdown-item-name">
 						{note.name}
 					</div>
-					<div className="agent-client-mention-dropdown-item-path">
+					<div className="cchub-mention-dropdown-item-path">
 						{note.path}
 					</div>
 				</div>
@@ -125,16 +125,16 @@ export function SuggestionDropdown({
 			return (
 				<div
 					key={command.name}
-					className={`agent-client-mention-dropdown-item ${isSelected ? "agent-client-selected" : ""} ${hasBorder ? "agent-client-has-border" : ""}`}
+					className={`cchub-mention-dropdown-item ${isSelected ? "cchub-selected" : ""} ${hasBorder ? "cchub-has-border" : ""}`}
 					onClick={() => onSelect(command)}
 					onMouseEnter={() => {
 						// Could update selected index on hover
 					}}
 				>
-					<div className="agent-client-mention-dropdown-item-name">
+					<div className="cchub-mention-dropdown-item-name">
 						/{command.name}
 					</div>
-					<div className="agent-client-mention-dropdown-item-path">
+					<div className="cchub-mention-dropdown-item-path">
 						{command.description}
 						{command.hint && ` (${command.hint})`}
 					</div>
@@ -144,7 +144,7 @@ export function SuggestionDropdown({
 	};
 
 	return (
-		<div ref={dropdownRef} className="agent-client-mention-dropdown">
+		<div ref={dropdownRef} className="cchub-mention-dropdown">
 			{items.map((item, index) => renderItem(item, index))}
 		</div>
 	);

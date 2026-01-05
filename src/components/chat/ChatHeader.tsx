@@ -43,14 +43,14 @@ export function ChatHeader({
 	const statusLabel = isSessionReady
 		? conversationTitle?.trim() || "Untitled conversation"
 		: "Loading...";
-	const statusClass = `agent-client-chat-view-header-status${!isSessionReady ? " agent-client-chat-view-header-status--loading" : ""}`;
+	const statusClass = `cchub-chat-view-header-status${!isSessionReady ? " cchub-chat-view-header-status--loading" : ""}`;
 	return (
-		<div className="agent-client-chat-view-header">
-			<div className="agent-client-chat-view-header-title">
+		<div className="cchub-chat-view-header">
+			<div className="cchub-chat-view-header-title">
 				{badge}
 				<span className={statusClass}>{statusLabel}</span>
 			</div>
-			<div className="agent-client-chat-view-header-actions">
+			<div className="cchub-chat-view-header-actions">
 				<HeaderButton
 					iconName="plus"
 					tooltip="New chat"
@@ -82,9 +82,9 @@ function buildAgentBadge(
 	const monogram =
 		trimmed.length > 0 ? trimmed.slice(0, 1).toUpperCase() : "?";
 	const badgeClass = icon
-		? "agent-client-agent-badge agent-client-agent-badge--icon"
-		: "agent-client-agent-badge";
-	const loadingClass = isLoading ? " agent-client-agent-badge--loading" : "";
+		? "cchub-agent-badge cchub-agent-badge--icon"
+		: "cchub-agent-badge";
+	const loadingClass = isLoading ? " cchub-agent-badge--loading" : "";
 
 	return (
 		<div
@@ -93,16 +93,16 @@ function buildAgentBadge(
 			data-agent-id={agentId}
 		>
 			{icon ? (
-				<span className="agent-client-agent-logo" aria-hidden="true">
+				<span className="cchub-agent-logo" aria-hidden="true">
 					{icon}
 				</span>
 			) : (
-				<span className="agent-client-agent-monogram">{monogram}</span>
+				<span className="cchub-agent-monogram">{monogram}</span>
 			)}
 			{isBuiltin ? (
 				<span className="sr-only">{trimmed}</span>
 			) : (
-				<span className="agent-client-agent-label">
+				<span className="cchub-agent-label">
 					{trimmed || agentId}
 				</span>
 			)}

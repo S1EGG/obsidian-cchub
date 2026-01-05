@@ -2,7 +2,7 @@ import { spawn, ChildProcess, SpawnOptions } from "child_process";
 import * as acp from "@agentclientprotocol/sdk";
 import { Platform } from "obsidian";
 
-import type AgentClientPlugin from "../plugin";
+import type CCHubPlugin from "../plugin";
 import { Logger } from "./logger";
 import {
 	wrapCommandForPlatform,
@@ -41,9 +41,9 @@ interface TerminalProcess {
 export class TerminalManager {
 	private terminals = new Map<string, TerminalProcess>();
 	private logger: Logger;
-	private plugin: AgentClientPlugin;
+	private plugin: CCHubPlugin;
 
-	constructor(plugin: AgentClientPlugin) {
+	constructor(plugin: CCHubPlugin) {
 		this.logger = new Logger(plugin);
 		this.plugin = plugin;
 	}

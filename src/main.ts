@@ -6,4 +6,4 @@
  */
 
 export { default } from "./plugin";
-export type { AgentClientPluginSettings } from "./plugin";
+export type { CCHubPluginSettings } from "./plugin";

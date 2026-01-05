@@ -23,7 +23,7 @@
 
 | 项目 | 参考内容 |
 |------|----------|
-| [obsidian-agent-client](https://github.com/RAIT-09/obsidian-agent-client) | CLI 工具集成方式、ACP 协议实现、消息类型定义、权限处理机制 |
+| [obsidian-cchub](https://github.com/RAIT-09/obsidian-cchub) | CLI 工具集成方式、ACP 协议实现、消息类型定义、权限处理机制 |
 | [obsidian-copilot](https://github.com/logancyang/obsidian-copilot) | 交互体验设计、视觉设计、消息渲染、上下文管理 |
 
 ---
@@ -58,7 +58,7 @@ interface AgentConfig {
 
 #### 2.2.1 消息类型
 
-基于 obsidian-agent-client 的域模型定义：
+基于 obsidian-cchub 的域模型定义：
 
 ```typescript
 type MessageContent =
@@ -144,13 +144,13 @@ type SessionState =
 
 ### 3.1 整体架构
 
-采用 **React Hooks 架构**，参考 obsidian-agent-client 的设计：
+采用 **React Hooks 架构**，参考 obsidian-cchub 的设计：
 
 ```
 src/
 ├── domain/                   # 纯域模型 + 端口接口
 │   ├── models/               # agent-config, chat-message, chat-session 等
-│   └── ports/                # IAgentClient, ISettingsAccess, IVaultAccess
+│   └── ports/                # ICCHubClient, ISettingsAccess, IVaultAccess
 ├── adapters/                 # 接口实现
 │   ├── acp/                  # ACP 协议适配器
 │   └── obsidian/             # Obsidian 平台适配器
@@ -174,10 +174,10 @@ src/
 
 ### 3.2 核心接口
 
-#### 3.2.1 IAgentClient (Agent 通信接口)
+#### 3.2.1 ICCHubClient (Agent 通信接口)
 
 ```typescript
-interface IAgentClient {
+interface ICCHubClient {
   // 生命周期
   initialize(config: AgentConfig): Promise<InitializeResult>;
   newSession(workingDirectory: string): Promise<NewSessionResult>;
@@ -440,7 +440,7 @@ interface CustomAgentConfig {
 
 - [ ] 项目初始化 (esbuild, TypeScript, React)
 - [ ] 域模型定义 (ChatMessage, ChatSession, AgentConfig)
-- [ ] 端口接口定义 (IAgentClient, IVaultAccess, ISettingsAccess)
+- [ ] 端口接口定义 (ICCHubClient, IVaultAccess, ISettingsAccess)
 - [ ] 插件入口和设置页面骨架
 
 #### 6.1.2 ACP 适配器
@@ -594,9 +594,9 @@ interface CustomAgentConfig {
 
 ### 9.1 参考资料
 
-- [Agent Client Protocol (ACP) 规范](https://github.com/zed-industries/agent-client-protocol)
+- [Agent Client Protocol (ACP) 规范](https://github.com/zed-industries/cchub-protocol)
 - [Obsidian 插件开发文档](https://docs.obsidian.md/Plugins)
-- [obsidian-agent-client 源码](https://github.com/RAIT-09/obsidian-agent-client)
+- [obsidian-cchub 源码](https://github.com/RAIT-09/obsidian-cchub)
 - [obsidian-copilot 源码](https://github.com/logancyang/obsidian-copilot)
 
 ### 9.2 术语表

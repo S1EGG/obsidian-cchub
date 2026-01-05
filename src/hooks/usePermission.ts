@@ -3,7 +3,7 @@ import type {
 	ChatMessage,
 	PermissionOption,
 } from "../domain/models/chat-message";
-import type { IAgentClient } from "../domain/ports/agent-client.port";
+import type { ICCHubClient } from "../domain/ports/cchub.port";
 import type { ErrorInfo } from "../domain/models/agent-error";
 
 // ============================================================================
@@ -127,11 +127,11 @@ function selectOption(
  * - Provides methods to approve/reject permissions
  * - Handles hotkey-triggered approve/reject actions
  *
- * @param agentClient - Agent client for permission responses
+ * @param cchubClient - Agent client for permission responses
  * @param messages - Chat messages (from useChat) to scan for active permissions
  */
 export function usePermission(
-	agentClient: IAgentClient,
+	cchubClient: ICCHubClient,
 	messages: ChatMessage[],
 ): UsePermissionReturn {
 	// Error state
@@ -145,12 +145,12 @@ export function usePermission(
 
 	/**
 	 * Approve a specific permission request.
-	 * Calls agentClient.respondToPermission directly.
+	 * Calls cchubClient.respondToPermission directly.
 	 */
 	const approvePermission = useCallback(
 		async (requestId: string, optionId: string): Promise<void> => {
 			try {
-				await agentClient.respondToPermission(requestId, optionId);
+				await cchubClient.respondToPermission(requestId, optionId);
 			} catch (error) {
 				setErrorInfo({
 					title: "Permission Error",
@@ -158,7 +158,7 @@ export function usePermission(
 				});
 			}
 		},
-		[agentClient],
+		[cchubClient],
 	);
 
 	/**

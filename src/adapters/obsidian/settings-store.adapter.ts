@@ -7,8 +7,8 @@
  */
 
 import type { ISettingsAccess } from "../../domain/ports/settings-access.port";
-import type { AgentClientPluginSettings } from "../../plugin";
-import type AgentClientPlugin from "../../plugin";
+import type { CCHubPluginSettings } from "../../plugin";
+import type CCHubPlugin from "../../plugin";
 
 /** Listener callback invoked when settings change */
 type Listener = () => void;
@@ -24,13 +24,13 @@ type Listener = () => void;
  */
 export class SettingsStore implements ISettingsAccess {
 	/** Current settings state */
-	private state: AgentClientPluginSettings;
+	private state: CCHubPluginSettings;
 
 	/** Set of registered listeners */
 	private listeners = new Set<Listener>();
 
 	/** Plugin instance for persistence */
-	private plugin: AgentClientPlugin;
+	private plugin: CCHubPlugin;
 
 	/**
 	 * Create a new settings store.
@@ -38,7 +38,7 @@ export class SettingsStore implements ISettingsAccess {
 	 * @param initial - Initial settings state
 	 * @param plugin - Plugin instance for saving settings
 	 */
-	constructor(initial: AgentClientPluginSettings, plugin: AgentClientPlugin) {
+	constructor(initial: CCHubPluginSettings, plugin: CCHubPlugin) {
 		this.state = initial;
 		this.plugin = plugin;
 	}
@@ -50,7 +50,7 @@ export class SettingsStore implements ISettingsAccess {
 	 *
 	 * @returns Current plugin settings
 	 */
-	getSnapshot = (): AgentClientPluginSettings => this.state;
+	getSnapshot = (): CCHubPluginSettings => this.state;
 
 	/**
 	 * Update plugin settings.
@@ -62,7 +62,7 @@ export class SettingsStore implements ISettingsAccess {
 	 * @returns Promise that resolves when settings are saved
 	 */
 	async updateSettings(
-		updates: Partial<AgentClientPluginSettings>,
+		updates: Partial<CCHubPluginSettings>,
 	): Promise<void> {
 		const next = { ...this.state, ...updates };
 		this.state = next;
@@ -99,7 +99,7 @@ export class SettingsStore implements ISettingsAccess {
 	 *
 	 * @param next - New settings object
 	 */
-	set(next: AgentClientPluginSettings): void {
+	set(next: CCHubPluginSettings): void {
 		this.state = next;
 		this.plugin.settings = next;
 		for (const listener of this.listeners) {
@@ -118,6 +118,6 @@ export class SettingsStore implements ISettingsAccess {
  * @returns New SettingsStore instance
  */
 export const createSettingsStore = (
-	initial: AgentClientPluginSettings,
-	plugin: AgentClientPlugin,
+	initial: CCHubPluginSettings,
+	plugin: CCHubPlugin,
 ) => new SettingsStore(initial, plugin);

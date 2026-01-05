@@ -1,21 +1,21 @@
 import type {
 	AgentConfig,
-	IAgentClient,
+	ICCHubClient,
 	InitializeResult,
 	NewSessionResult,
-} from "../domain/ports/agent-client.port";
+} from "../domain/ports/cchub.port";
 import type { SessionUpdate } from "../domain/models/session-update";
 import type { AgentError } from "../domain/models/agent-error";
 import type { PromptContent } from "../domain/models/prompt-content";
-import type AgentClientPlugin from "../plugin";
+import type CCHubPlugin from "../plugin";
 import { AcpAdapter } from "./acp/acp.adapter";
 import { CodexAdapter } from "./codex/codex.adapter";
 
-export class AgentClientRouter implements IAgentClient {
-	private activeClient: IAgentClient | null = null;
+export class CCHubRouter implements ICCHubClient {
+	private activeClient: ICCHubClient | null = null;
 
 	constructor(
-		private plugin: AgentClientPlugin,
+		private plugin: CCHubPlugin,
 		private acpAdapter: AcpAdapter,
 		private codexAdapter: CodexAdapter,
 	) {}
@@ -92,15 +92,15 @@ export class AgentClientRouter implements IAgentClient {
 		return await this.getActiveClient().setSessionModel(sessionId, modelId);
 	}
 
-	private getActiveClient(): IAgentClient {
+	private getActiveClient(): ICCHubClient {
 		if (!this.activeClient) {
 			throw new Error("No active agent client initialized");
 		}
 		return this.activeClient;
 	}
 
-	private selectClient(config: AgentConfig): IAgentClient {
-		console.debug("[AgentClientRouter] selectClient:", {
+	private selectClient(config: AgentConfig): ICCHubClient {
+		console.debug("[CCHubRouter] selectClient:", {
 			configId: config.id,
 			codexId: this.plugin.settings.codex.id,
 			command: config.command,
@@ -109,14 +109,14 @@ export class AgentClientRouter implements IAgentClient {
 		if (config.id === this.plugin.settings.codex.id) {
 			if (this.isCodexAcpCommand(config.command)) {
 				console.debug(
-					"[AgentClientRouter] Using AcpAdapter for Codex (codex-acp command)",
+					"[CCHubRouter] Using AcpAdapter for Codex (codex-acp command)",
 				);
 				return this.acpAdapter;
 			}
-			console.debug("[AgentClientRouter] Using CodexAdapter");
+			console.debug("[CCHubRouter] Using CodexAdapter");
 			return this.codexAdapter;
 		}
-		console.debug("[AgentClientRouter] Using AcpAdapter (default)");
+		console.debug("[CCHubRouter] Using AcpAdapter (default)");
 		return this.acpAdapter;
 	}
 

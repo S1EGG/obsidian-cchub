@@ -5,17 +5,17 @@ import {
 	DropdownComponent,
 	Platform,
 } from "obsidian";
-import type AgentClientPlugin from "../../plugin";
+import type CCHubPlugin from "../../plugin";
 import type { CustomAgentSettings, AgentEnvVar } from "../../plugin";
 import { normalizeEnvVars } from "../../shared/settings-utils";
 
 /* eslint-disable obsidianmd/ui/sentence-case */
-export class AgentClientSettingTab extends PluginSettingTab {
-	plugin: AgentClientPlugin;
+export class CCHubSettingTab extends PluginSettingTab {
+	plugin: CCHubPlugin;
 	private agentSelector: DropdownComponent | null = null;
 	private unsubscribe: (() => void) | null = null;
 
-	constructor(app: App, plugin: AgentClientPlugin) {
+	constructor(app: App, plugin: CCHubPlugin) {
 		super(app, plugin);
 		this.plugin = plugin;
 	}
@@ -718,7 +718,7 @@ export class AgentClientSettingTab extends PluginSettingTab {
 		const getAgentAtIndex = () => this.plugin.settings.customAgents[index];
 
 		const blockEl = containerEl.createDiv({
-			cls: "agent-client-custom-agent",
+			cls: "cchub-custom-agent",
 		});
 
 		const idSetting = new Setting(blockEl)

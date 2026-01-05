@@ -2,12 +2,12 @@ import * as React from "react";
 const { useState, useRef, useEffect, useMemo } = React;
 import type { IAcpClient } from "../../adapters/acp/acp.adapter";
 import { Logger } from "../../shared/logger";
-import type AgentClientPlugin from "../../plugin";
+import type CCHubPlugin from "../../plugin";
 
 interface TerminalRendererProps {
 	terminalId: string;
 	acpClient: IAcpClient | null;
-	plugin: AgentClientPlugin;
+	plugin: CCHubPlugin;
 }
 
 export function TerminalRenderer({
@@ -103,31 +103,31 @@ export function TerminalRenderer({
 	}, [isRunning]);
 
 	return (
-		<div className="agent-client-terminal-renderer">
-			<div className="agent-client-terminal-renderer-header">
+		<div className="cchub-terminal-renderer">
+			<div className="cchub-terminal-renderer-header">
 				🖥️ Terminal {terminalId.slice(0, 8)}
 				{isRunning ? (
-					<span className="agent-client-terminal-status agent-client-running">
+					<span className="cchub-terminal-status cchub-running">
 						● RUNNING
 					</span>
 				) : isCancelled ? (
-					<span className="agent-client-terminal-status agent-client-cancelled">
+					<span className="cchub-terminal-status cchub-cancelled">
 						● CANCELLED
 					</span>
 				) : (
-					<span className="agent-client-terminal-status agent-client-finished">
+					<span className="cchub-terminal-status cchub-finished">
 						● FINISHED
 					</span>
 				)}
 			</div>
 
-			<div className="agent-client-terminal-renderer-output">
+			<div className="cchub-terminal-renderer-output">
 				{output || (isRunning ? "Waiting for output..." : "No output")}
 			</div>
 
 			{exitStatus && (
 				<div
-					className={`agent-client-terminal-renderer-exit ${exitStatus.exitCode === 0 ? "agent-client-success" : "agent-client-error"}`}
+					className={`cchub-terminal-renderer-exit ${exitStatus.exitCode === 0 ? "cchub-success" : "cchub-error"}`}
 				>
 					Exit Code: {exitStatus.exitCode}
 					{exitStatus.signal && ` | Signal: ${exitStatus.signal}`}

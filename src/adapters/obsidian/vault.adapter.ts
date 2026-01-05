@@ -12,7 +12,7 @@ import type {
 	EditorPosition,
 } from "../../domain/ports/vault-access.port";
 import { NoteMentionService } from "./mention-service";
-import type AgentClientPlugin from "../../plugin";
+import type CCHubPlugin from "../../plugin";
 import {
 	TFile,
 	MarkdownView,
@@ -42,7 +42,7 @@ export class ObsidianVaultAdapter implements IVaultAccess {
 	private lastSelectionKey = "";
 
 	constructor(
-		private plugin: AgentClientPlugin,
+		private plugin: CCHubPlugin,
 		mentionService: NoteMentionService,
 	) {
 		this.mentionService = mentionService;

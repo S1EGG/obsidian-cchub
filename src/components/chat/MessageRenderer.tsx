@@ -4,12 +4,12 @@ import type {
 	MessageContent,
 } from "../../domain/models/chat-message";
 import type { IAcpClient } from "../../adapters/acp/acp.adapter";
-import type AgentClientPlugin from "../../plugin";
+import type CCHubPlugin from "../../plugin";
 import { MessageContentRenderer } from "./MessageContentRenderer";
 
 interface MessageRendererProps {
 	message: ChatMessage;
-	plugin: AgentClientPlugin;
+	plugin: CCHubPlugin;
 	acpClient?: IAcpClient;
 	/** Callback to approve a permission request */
 	onApprovePermission?: (
@@ -66,7 +66,7 @@ export function MessageRenderer({
 
 	return (
 		<div
-			className={`agent-client-message-renderer ${message.role === "user" ? "agent-client-message-user" : "agent-client-message-assistant"}`}
+			className={`cchub-message-renderer ${message.role === "user" ? "cchub-message-user" : "cchub-message-assistant"}`}
 		>
 			{groups.map((group, idx) => {
 				if (group.type === "images") {
@@ -74,7 +74,7 @@ export function MessageRenderer({
 					return (
 						<div
 							key={idx}
-							className="agent-client-message-images-strip"
+							className="cchub-message-images-strip"
 						>
 							{group.items.map((content, imgIdx) => (
 								<MessageContentRenderer

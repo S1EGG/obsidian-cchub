@@ -1,11 +1,11 @@
 import * as React from "react";
 const { useState } = React;
-import type AgentClientPlugin from "../../plugin";
+import type CCHubPlugin from "../../plugin";
 import { MarkdownTextRenderer } from "./MarkdownTextRenderer";
 
 interface CollapsibleThoughtProps {
 	text: string;
-	plugin: AgentClientPlugin;
+	plugin: CCHubPlugin;
 }
 
 export function CollapsibleThought({ text, plugin }: CollapsibleThoughtProps) {
@@ -13,23 +13,23 @@ export function CollapsibleThought({ text, plugin }: CollapsibleThoughtProps) {
 
 	return (
 		<div
-			className="agent-client-collapsible-thought"
+			className="cchub-collapsible-thought"
 			onClick={() => setIsExpanded(!isExpanded)}
 		>
-			<div className="agent-client-collapsible-thought-header">
+			<div className="cchub-collapsible-thought-header">
 				<span
-					className="agent-client-collapsible-thought-indicator"
+					className="cchub-collapsible-thought-indicator"
 					aria-hidden="true"
 				/>
-				<span className="agent-client-collapsible-thought-label">
+				<span className="cchub-collapsible-thought-label">
 					Thinking
 				</span>
-				<span className="agent-client-collapsible-thought-icon">
+				<span className="cchub-collapsible-thought-icon">
 					{isExpanded ? "v" : ">"}
 				</span>
 			</div>
 			{isExpanded && (
-				<div className="agent-client-collapsible-thought-content">
+				<div className="cchub-collapsible-thought-content">
 					<MarkdownTextRenderer text={text} app={plugin.app} />
 				</div>
 			)}

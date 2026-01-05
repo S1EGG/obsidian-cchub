@@ -3,7 +3,7 @@ import * as React from "react";
 const { useState, useRef, useEffect, useMemo, useCallback } = React;
 import { createRoot, Root } from "react-dom/client";
 
-import type AgentClientPlugin from "../../plugin";
+import type CCHubPlugin from "../../plugin";
 
 // Component imports
 import { ChatHeader } from "./ChatHeader";
@@ -20,7 +20,7 @@ import { ChatExporter } from "../../shared/chat-exporter";
 // Adapter imports
 import { AcpAdapter, type IAcpClient } from "../../adapters/acp/acp.adapter";
 import { CodexAdapter } from "../../adapters/codex/codex.adapter";
-import { AgentClientRouter } from "../../adapters/agent-client-router";
+import { CCHubRouter } from "../../adapters/cchub-router";
 import { ObsidianVaultAdapter } from "../../adapters/obsidian/vault.adapter";
 
 // Hooks imports
@@ -51,7 +51,7 @@ function ChatComponent({
 	plugin,
 	view,
 }: {
-	plugin: AgentClientPlugin;
+	plugin: CCHubPlugin;
 	view: ChatView;
 }) {
 	// ============================================================
@@ -87,8 +87,8 @@ function ChatComponent({
 
 	const acpAdapter = useMemo(() => new AcpAdapter(plugin), [plugin]);
 	const codexAdapter = useMemo(() => new CodexAdapter(plugin), [plugin]);
-	const agentClient = useMemo(
-		() => new AgentClientRouter(plugin, acpAdapter, codexAdapter),
+	const cchubClient = useMemo(
+		() => new CCHubRouter(plugin, acpAdapter, codexAdapter),
 		[plugin, acpAdapter, codexAdapter],
 	);
 	const acpClientRef = useRef<IAcpClient>(acpAdapter);
@@ -108,7 +108,7 @@ function ChatComponent({
 	}, [settings.workingDirectory, vaultPath]);
 
 	const agentSession = useAgentSession(
-		agentClient,
+		cchubClient,
 		plugin.settingsStore,
 		workingDirectory,
 	);
@@ -120,7 +120,7 @@ function ChatComponent({
 	} = agentSession;
 
 	const chat = useChat(
-		agentClient,
+		cchubClient,
 		vaultAccessAdapter,
 		noteMentionService,
 		{
@@ -134,7 +134,7 @@ function ChatComponent({
 
 	const { messages, isSending } = chat;
 
-	const permission = usePermission(agentClient, messages);
+	const permission = usePermission(cchubClient, messages);
 
 	const mentions = useMentions(vaultAccessAdapter, plugin);
 	const autoMention = useAutoMention(vaultAccessAdapter);
@@ -359,7 +359,7 @@ function ChatComponent({
 	// ============================================================
 	// Register unified session update callback
 	useEffect(() => {
-		agentClient.onSessionUpdate((update) => {
+		cchubClient.onSessionUpdate((update) => {
 			// Filter by sessionId - ignore updates from old sessions
 			if (session.sessionId && update.sessionId !== session.sessionId) {
 				logger.log(
@@ -379,7 +379,7 @@ function ChatComponent({
 			}
 		});
 	}, [
-		agentClient,
+		cchubClient,
 		session.sessionId,
 		logger,
 		chat.handleSessionUpdate,
@@ -503,7 +503,7 @@ function ChatComponent({
 	// Render
 	// ============================================================
 	return (
-		<div className="agent-client-chat-view-container">
+		<div className="cchub-chat-view-container">
 			<ChatHeader
 				agentId={session.agentId}
 				agentLabel={activeAgentLabel}
@@ -550,10 +550,10 @@ function ChatComponent({
 
 export class ChatView extends ItemView {
 	private root: Root | null = null;
-	private plugin: AgentClientPlugin;
+	private plugin: CCHubPlugin;
 	private logger: Logger;
 
-	constructor(leaf: WorkspaceLeaf, plugin: AgentClientPlugin) {
+	constructor(leaf: WorkspaceLeaf, plugin: CCHubPlugin) {
 		super(leaf);
 		this.plugin = plugin;
 		this.logger = new Logger(plugin);

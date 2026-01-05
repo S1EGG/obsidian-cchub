@@ -8,7 +8,7 @@ If your plugin does not need CSS, delete this file.
 */
 
 /* ===== Settings Tab Documentation Link ===== */
-.agent-client-doc-link {
+.cchub-doc-link {
 	padding: 12px 16px;
 	margin-bottom: 16px;
 	background-color: var(--background-secondary);
@@ -18,17 +18,17 @@ If your plugin does not need CSS, delete this file.
 	color: var(--text-muted);
 }
 
-.agent-client-doc-link a {
+.cchub-doc-link a {
 	color: var(--text-accent);
 	text-decoration: none;
 }
 
-.agent-client-doc-link a:hover {
+.cchub-doc-link a:hover {
 	text-decoration: underline;
 }
 
 /* ===== Settings Tab Custom Agent Block ===== */
-.agent-client-custom-agent {
+.cchub-custom-agent {
 	padding: 16px;
 	margin-bottom: 24px;
 	background-color: var(--background-secondary);
@@ -37,13 +37,13 @@ If your plugin does not need CSS, delete this file.
 }
 
 /* ===== Loading Indicator ===== */
-.agent-client-loading-indicator {
+.cchub-loading-indicator {
 	display: flex;
 	align-items: center;
 	padding: 6px 16px 10px;
 }
 
-.agent-client-loading-pill {
+.cchub-loading-pill {
 	display: inline-flex;
 	align-items: center;
 	gap: 6px;
@@ -56,7 +56,7 @@ If your plugin does not need CSS, delete this file.
 	letter-spacing: 0.02em;
 }
 
-.agent-client-loading-spark {
+.cchub-loading-spark {
 	width: 6px;
 	height: 6px;
 	border-radius: 50%;
@@ -67,17 +67,17 @@ If your plugin does not need CSS, delete this file.
 	animation: cchubPulse 1.4s ease-in-out infinite;
 }
 
-.agent-client-loading-text {
+.cchub-loading-text {
 	font-weight: 500;
 }
 
-.agent-client-loading-ellipsis {
+.cchub-loading-ellipsis {
 	display: inline-flex;
 	gap: 4px;
 	align-items: center;
 }
 
-.agent-client-loading-ellipsis span {
+.cchub-loading-ellipsis span {
 	width: 3px;
 	height: 3px;
 	border-radius: 50%;
@@ -85,11 +85,11 @@ If your plugin does not need CSS, delete this file.
 	animation: cchubDots 1.2s ease-in-out infinite;
 }
 
-.agent-client-loading-ellipsis span:nth-child(2) {
+.cchub-loading-ellipsis span:nth-child(2) {
 	animation-delay: 0.15s;
 }
 
-.agent-client-loading-ellipsis span:nth-child(3) {
+.cchub-loading-ellipsis span:nth-child(3) {
 	animation-delay: 0.3s;
 }
 
@@ -132,16 +132,16 @@ If your plugin does not need CSS, delete this file.
 }
 
 @media (prefers-reduced-motion: reduce) {
-	.agent-client-agent-badge.agent-client-agent-badge--loading
-		.agent-client-agent-logo,
-	.agent-client-agent-badge.agent-client-agent-badge--loading
-		.agent-client-agent-monogram {
+	.cchub-agent-badge.cchub-agent-badge--loading
+		.cchub-agent-logo,
+	.cchub-agent-badge.cchub-agent-badge--loading
+		.cchub-agent-monogram {
 		animation: none;
 	}
 }
 
 /* ===== Header Button Component ===== */
-.agent-client-header-button {
+.cchub-header-button {
 	width: 24px;
 	height: 24px;
 	padding: 0 !important;
@@ -165,26 +165,26 @@ If your plugin does not need CSS, delete this file.
 	min-height: unset !important;
 }
 
-.agent-client-header-button svg {
+.cchub-header-button svg {
 	color: var(--text-muted);
 	transition: color 0.2s ease;
 	width: 16px;
 	height: 16px;
 }
 
-.agent-client-header-button:hover {
+.cchub-header-button:hover {
 	background-color: var(--background-modifier-hover) !important;
 	transform: scale(1.08);
 }
 
-.agent-client-header-button:hover svg {
+.cchub-header-button:hover svg {
 	color: var(--interactive-accent);
 }
 
 /* ===== Message Content Components ===== */
 
 /* Tool Call */
-.agent-client-message-tool-call {
+.cchub-message-tool-call {
 	padding: 8px;
 	margin-top: 4px;
 	background-color: transparent;
@@ -198,7 +198,7 @@ If your plugin does not need CSS, delete this file.
 	max-width: 100%;
 }
 
-.agent-client-message-tool-call-title {
+.cchub-message-tool-call-title {
 	font-weight: bold;
 	margin-bottom: 4px;
 	user-select: text;
@@ -207,7 +207,7 @@ If your plugin does not need CSS, delete this file.
 	word-break: break-word;
 }
 
-.agent-client-message-tool-call-locations {
+.cchub-message-tool-call-locations {
 	color: var(--text-muted);
 	user-select: text;
 	overflow-wrap: break-word;
@@ -215,13 +215,13 @@ If your plugin does not need CSS, delete this file.
 	word-break: break-word;
 }
 
-.agent-client-message-tool-call-location {
+.cchub-message-tool-call-location {
 	display: block;
 	font-family: var(--font-monospace);
 	font-size: 0.9em;
 }
 
-.agent-client-message-tool-call-status {
+.cchub-message-tool-call-status {
 	color: var(--text-muted);
 	user-select: text;
 	overflow-wrap: break-word;
@@ -230,7 +230,7 @@ If your plugin does not need CSS, delete this file.
 }
 
 /* Plan */
-.agent-client-message-plan {
+.cchub-message-plan {
 	padding: 8px;
 	margin-top: 4px;
 	border: 1px solid var(--background-modifier-border);
@@ -243,7 +243,7 @@ If your plugin does not need CSS, delete this file.
 	max-width: 100%;
 }
 
-.agent-client-message-plan-title {
+.cchub-message-plan-title {
 	font-weight: bold;
 	margin-bottom: 4px;
 	user-select: text;
@@ -252,7 +252,7 @@ If your plugin does not need CSS, delete this file.
 	word-break: break-word;
 }
 
-.agent-client-message-plan-entry {
+.cchub-message-plan-entry {
 	margin: 2px 0;
 	padding: 2px 4px;
 	border-left: 2px solid var(--text-muted);
@@ -262,23 +262,23 @@ If your plugin does not need CSS, delete this file.
 	word-break: break-word;
 }
 
-.agent-client-message-plan-entry-icon.agent-client-status-completed {
+.cchub-message-plan-entry-icon.cchub-status-completed {
 	color: var(--color-green);
 	user-select: text;
 }
 
-.agent-client-message-plan-entry-icon.agent-client-status-in_progress {
+.cchub-message-plan-entry-icon.cchub-status-in_progress {
 	color: var(--color-orange);
 	user-select: text;
 }
 
-.agent-client-message-plan-entry-icon.agent-client-status-pending {
+.cchub-message-plan-entry-icon.cchub-status-pending {
 	color: var(--text-muted);
 	user-select: text;
 }
 
 /* Permission Request */
-.agent-client-message-permission-request {
+.cchub-message-permission-request {
 	padding: 6px 0px;
 	margin-top: 4px;
 	background-color: var(--background-secondary);
@@ -290,7 +290,7 @@ If your plugin does not need CSS, delete this file.
 	max-width: 100%;
 }
 
-.agent-client-message-permission-request-title {
+.cchub-message-permission-request-title {
 	font-weight: bold;
 	margin-bottom: 8px;
 	display: flex;
@@ -302,7 +302,7 @@ If your plugin does not need CSS, delete this file.
 	word-break: break-word;
 }
 
-.agent-client-message-permission-request-description {
+.cchub-message-permission-request-description {
 	margin-bottom: 12px;
 	color: var(--text-normal);
 	user-select: text;
@@ -311,14 +311,14 @@ If your plugin does not need CSS, delete this file.
 	word-break: break-word;
 }
 
-.agent-client-message-permission-request-options {
+.cchub-message-permission-request-options {
 	display: flex;
 	flex-wrap: wrap;
 	gap: 8px;
 	justify-content: flex-end;
 }
 
-.agent-client-message-permission-request-result {
+.cchub-message-permission-request-result {
 	padding: 8px;
 	background-color: var(--background-primary);
 	border-radius: 4px;
@@ -326,16 +326,16 @@ If your plugin does not need CSS, delete this file.
 	user-select: text;
 }
 
-.agent-client-message-permission-request-result.agent-client-selected {
+.cchub-message-permission-request-result.cchub-selected {
 	color: var(--text-accent);
 }
 
-.agent-client-message-permission-request-result.agent-client-cancelled {
+.cchub-message-permission-request-result.cchub-cancelled {
 	color: var(--color-orange);
 }
 
 /* ===== Permission Request Buttons ===== */
-.agent-client-permission-option {
+.cchub-permission-option {
 	padding: 8px 16px !important;
 	border: 1px solid var(--background-modifier-border) !important;
 	border-radius: 6px !important;
@@ -350,62 +350,62 @@ If your plugin does not need CSS, delete this file.
 	opacity: 1;
 }
 
-.agent-client-permission-option.agent-client-selected {
+.cchub-permission-option.cchub-selected {
 	background-color: var(--interactive-accent) !important;
 	color: white !important;
 	font-weight: 600;
 }
 
-.agent-client-permission-option.agent-client-disabled {
+.cchub-permission-option.cchub-disabled {
 	background-color: var(--background-modifier-border) !important;
 	color: var(--text-muted) !important;
 	cursor: not-allowed !important;
 }
 
-.agent-client-permission-option.agent-client-disabled:not(
-		.agent-client-selected
+.cchub-permission-option.cchub-disabled:not(
+		.cchub-selected
 	) {
 	opacity: 0.5;
 }
 
 /* Special kinds */
-.agent-client-permission-option.agent-client-permission-kind-allow_always:not(
-		.agent-client-selected
-	):not(.agent-client-disabled) {
+.cchub-permission-option.cchub-permission-kind-allow_always:not(
+		.cchub-selected
+	):not(.cchub-disabled) {
 	background-color: var(--color-green) !important;
 	color: white !important;
 	border-color: var(--color-green) !important;
 }
 
-.agent-client-permission-option.agent-client-permission-kind-reject_once:not(
-		.agent-client-selected
-	):not(.agent-client-disabled) {
+.cchub-permission-option.cchub-permission-kind-reject_once:not(
+		.cchub-selected
+	):not(.cchub-disabled) {
 	background-color: var(--color-red) !important;
 	color: white !important;
 	border-color: var(--color-red) !important;
 }
 
-.agent-client-permission-option.agent-client-permission-kind-allow_once:not(
-		.agent-client-selected
-	):not(.agent-client-disabled) {
+.cchub-permission-option.cchub-permission-kind-allow_once:not(
+		.cchub-selected
+	):not(.cchub-disabled) {
 	background-color: var(--color-orange) !important;
 	color: white !important;
 	border-color: var(--color-orange) !important;
 }
 
 /* Normal option button hover (no kind specified) */
-.agent-client-permission-option:not(
-		.agent-client-permission-kind-allow_always
-	):not(.agent-client-permission-kind-reject_once):not(
-		.agent-client-permission-kind-allow_once
-	):not(.agent-client-disabled):not(.agent-client-selected):hover {
+.cchub-permission-option:not(
+		.cchub-permission-kind-allow_always
+	):not(.cchub-permission-kind-reject_once):not(
+		.cchub-permission-kind-allow_once
+	):not(.cchub-disabled):not(.cchub-selected):hover {
 	background-color: var(--background-modifier-hover) !important;
 }
 
 /* ===== Chat View Components ===== */
 
 /* Main container */
-.agent-client-chat-view-container {
+.cchub-chat-view-container {
 	height: 100%;
 	display: flex;
 	flex-direction: column;
@@ -413,7 +413,7 @@ If your plugin does not need CSS, delete this file.
 }
 
 /* Header */
-.agent-client-chat-view-header {
+.cchub-chat-view-header {
 	padding: 4px 12px;
 	border-bottom: 1px solid var(--background-modifier-border);
 	flex-shrink: 0;
@@ -424,14 +424,14 @@ If your plugin does not need CSS, delete this file.
 	min-height: 32px;
 }
 
-.agent-client-chat-view-header-title {
+.cchub-chat-view-header-title {
 	margin: 0 !important;
 	display: flex;
 	align-items: center;
 	gap: 8px;
 }
 
-.agent-client-chat-view-header-update {
+.cchub-chat-view-header-update {
 	margin: 0 10px 0 auto !important;
 	padding: 2px 8px;
 	font-size: 11px;
@@ -441,24 +441,24 @@ If your plugin does not need CSS, delete this file.
 	font-weight: 500;
 }
 
-.agent-client-chat-view-header-actions {
+.cchub-chat-view-header-actions {
 	display: flex;
 	gap: 8px;
 }
 
-.agent-client-chat-view-header-status {
+.cchub-chat-view-header-status {
 	font-size: 13px;
 	font-weight: 600;
 	letter-spacing: 0.01em;
 	color: var(--text-normal);
 }
 
-.agent-client-chat-view-header-status.agent-client-chat-view-header-status--loading {
+.cchub-chat-view-header-status.cchub-chat-view-header-status--loading {
 	color: var(--text-muted);
 	font-weight: 500;
 }
 
-.agent-client-agent-badge {
+.cchub-agent-badge {
 	display: inline-flex;
 	align-items: center;
 	gap: 6px;
@@ -468,27 +468,27 @@ If your plugin does not need CSS, delete this file.
 	background-color: var(--background-secondary);
 }
 
-.agent-client-agent-badge.agent-client-agent-badge--icon {
+.cchub-agent-badge.cchub-agent-badge--icon {
 	padding: 0;
 	border: none;
 	background: none;
 }
 
-.agent-client-agent-badge.agent-client-agent-badge--loading
-	.agent-client-agent-logo,
-.agent-client-agent-badge.agent-client-agent-badge--loading
-	.agent-client-agent-monogram {
+.cchub-agent-badge.cchub-agent-badge--loading
+	.cchub-agent-logo,
+.cchub-agent-badge.cchub-agent-badge--loading
+	.cchub-agent-monogram {
 	animation: cchubBreath 1.8s ease-in-out infinite;
 	transform-origin: center;
 }
 
-.agent-client-agent-icon {
+.cchub-agent-icon {
 	width: 18px;
 	height: 18px;
 	color: var(--text-normal);
 }
 
-.agent-client-agent-logo {
+.cchub-agent-logo {
 	--icon-size: 16px;
 	width: var(--icon-size);
 	height: var(--icon-size);
@@ -501,14 +501,14 @@ If your plugin does not need CSS, delete this file.
 	line-height: 0;
 }
 
-.agent-client-agent-logo svg,
-.agent-client-agent-logo .svg-icon {
+.cchub-agent-logo svg,
+.cchub-agent-logo .svg-icon {
 	width: var(--icon-size) !important;
 	height: var(--icon-size) !important;
 	display: block;
 }
 
-.agent-client-agent-monogram {
+.cchub-agent-monogram {
 	width: 18px;
 	height: 18px;
 	border-radius: 50%;
@@ -521,7 +521,7 @@ If your plugin does not need CSS, delete this file.
 	font-weight: 600;
 }
 
-.agent-client-agent-label {
+.cchub-agent-label {
 	font-size: 13px;
 	font-weight: 600;
 	letter-spacing: 0.01em;
@@ -529,7 +529,7 @@ If your plugin does not need CSS, delete this file.
 }
 
 /* Messages container */
-.agent-client-chat-view-messages {
+.cchub-chat-view-messages {
 	flex: 1;
 	padding: 16px;
 	overflow-y: auto;
@@ -541,7 +541,7 @@ If your plugin does not need CSS, delete this file.
 }
 
 /* Error display */
-.agent-client-chat-error-container {
+.cchub-chat-error-container {
 	display: flex;
 	flex-direction: column;
 	gap: 12px;
@@ -553,12 +553,12 @@ If your plugin does not need CSS, delete this file.
 	overflow: hidden;
 }
 
-.agent-client-chat-error-title {
+.cchub-chat-error-title {
 	margin: 0 0 8px 0 !important;
 	color: var(--color-red) !important;
 }
 
-.agent-client-chat-error-message {
+.cchub-chat-error-message {
 	margin: 0 !important;
 	color: var(--text-normal);
 	font-size: 14px;
@@ -568,7 +568,7 @@ If your plugin does not need CSS, delete this file.
 	overflow-wrap: anywhere;
 }
 
-.agent-client-chat-error-suggestion {
+.cchub-chat-error-suggestion {
 	margin: 8px 0 0 0 !important;
 	color: var(--text-muted);
 	font-size: 13px;
@@ -579,7 +579,7 @@ If your plugin does not need CSS, delete this file.
 	overflow-wrap: anywhere;
 }
 
-.agent-client-chat-error-button {
+.cchub-chat-error-button {
 	padding: 8px 16px !important;
 	border: 1px solid var(--background-modifier-border) !important;
 	border-radius: 6px !important;
@@ -590,20 +590,20 @@ If your plugin does not need CSS, delete this file.
 }
 
 /* Empty state */
-.agent-client-chat-empty-state {
+.cchub-chat-empty-state {
 	color: var(--text-muted);
 	text-align: center;
 	margin-top: 20px;
 }
 
 /* Input area */
-.agent-client-chat-input-container {
+.cchub-chat-input-container {
 	flex-shrink: 0;
 	position: relative;
 }
 
-.agent-client-chat-input-container.agent-client-chat-input-container--loading
-	.agent-client-chat-input-box {
+.cchub-chat-input-container.cchub-chat-input-container--loading
+	.cchub-chat-input-box {
 	background-color: var(--background-secondary);
 	border-color: var(--background-modifier-border);
 	opacity: 0.55;
@@ -613,7 +613,7 @@ If your plugin does not need CSS, delete this file.
 }
 
 /* Input box - outer container with border and background */
-.agent-client-chat-input-box {
+.cchub-chat-input-box {
 	display: flex;
 	flex-direction: column;
 	border: 1px solid var(--background-modifier-border);
@@ -623,16 +623,16 @@ If your plugin does not need CSS, delete this file.
 	transition: box-shadow 0.15s ease;
 }
 
-.agent-client-chat-input-box:focus-within {
+.cchub-chat-input-box:focus-within {
 	box-shadow: 0 0 0 1.5px var(--background-modifier-border);
 }
 
-.agent-client-chat-input-box.agent-client-dragging-over {
+.cchub-chat-input-box.cchub-dragging-over {
 	background-color: var(--background-secondary);
 }
 
 /* Auto-mention inline display */
-.agent-client-auto-mention-inline {
+.cchub-auto-mention-inline {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
@@ -642,7 +642,7 @@ If your plugin does not need CSS, delete this file.
 	background-color: var(--background-primary);
 }
 
-.agent-client-mention-badge {
+.cchub-mention-badge {
 	background-color: var(--background-modifier-hover);
 	color: var(--text-muted);
 	border-radius: 6px;
@@ -658,12 +658,12 @@ If your plugin does not need CSS, delete this file.
 	max-width: calc(100% - 24px);
 }
 
-.agent-client-mention-badge.agent-client-disabled {
+.cchub-mention-badge.cchub-disabled {
 	color: var(--text-faint);
 	text-decoration: line-through;
 }
 
-.agent-client-auto-mention-toggle-btn {
+.cchub-auto-mention-toggle-btn {
 	background: none;
 	background-color: transparent !important;
 	border: none !important;
@@ -688,13 +688,13 @@ If your plugin does not need CSS, delete this file.
 	border-radius: 6px;
 }
 
-.agent-client-auto-mention-toggle-btn svg {
+.cchub-auto-mention-toggle-btn svg {
 	width: 14px;
 	height: 14px;
 	color: inherit;
 }
 
-.agent-client-auto-mention-toggle-btn:hover {
+.cchub-auto-mention-toggle-btn:hover {
 	background: none;
 	box-shadow: none;
 	color: var(--text-normal);
@@ -702,14 +702,14 @@ If your plugin does not need CSS, delete this file.
 	transform: scale(1.04);
 }
 
-.agent-client-auto-mention-toggle-btn:active,
-.agent-client-auto-mention-toggle-btn:focus {
+.cchub-auto-mention-toggle-btn:active,
+.cchub-auto-mention-toggle-btn:focus {
 	background: none;
 	box-shadow: none;
 	outline: none;
 }
 
-.agent-client-chat-input-textarea {
+.cchub-chat-input-textarea {
 	width: 100%;
 	padding: 12px;
 	border: none;
@@ -728,39 +728,39 @@ If your plugin does not need CSS, delete this file.
 	-ms-overflow-style: none;
 }
 
-.agent-client-chat-input-textarea::-webkit-scrollbar {
+.cchub-chat-input-textarea::-webkit-scrollbar {
 	display: none;
 }
 
-.agent-client-chat-input-textarea:hover {
+.cchub-chat-input-textarea:hover {
 	border: none !important;
 	background-color: transparent !important;
 }
 
-.agent-client-chat-input-textarea:focus {
+.cchub-chat-input-textarea:focus {
 	border: none !important;
 	outline: none !important;
 	box-shadow: none !important;
 }
 
 /* Dynamic textarea height management */
-.agent-client-chat-input-textarea.agent-client-textarea-auto-height {
+.cchub-chat-input-textarea.cchub-textarea-auto-height {
 	height: auto;
 }
 
-.agent-client-chat-input-textarea.agent-client-textarea-expanded {
+.cchub-chat-input-textarea.cchub-textarea-expanded {
 	height: var(--textarea-height, auto);
 }
 
 /* Textarea wrapper for hint overlay */
-.agent-client-textarea-wrapper {
+.cchub-textarea-wrapper {
 	position: relative;
 	flex: 1;
 	min-height: 78px;
 }
 
 /* Hint overlay for slash commands */
-.agent-client-hint-overlay {
+.cchub-hint-overlay {
 	/* Positioning - exact overlay on textarea */
 	position: absolute;
 	top: 0;
@@ -780,16 +780,16 @@ If your plugin does not need CSS, delete this file.
 	overflow: hidden;
 }
 
-.agent-client-hint-overlay .agent-client-invisible {
+.cchub-hint-overlay .cchub-invisible {
 	visibility: hidden;
 }
 
-.agent-client-hint-overlay .agent-client-hint-text {
+.cchub-hint-overlay .cchub-hint-text {
 	color: var(--text-faint);
 }
 
 /* Input Actions Container */
-.agent-client-chat-input-actions {
+.cchub-chat-input-actions {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
@@ -797,19 +797,19 @@ If your plugin does not need CSS, delete this file.
 	padding: 6px 12px 10px 12px;
 }
 
-.agent-client-chat-input-actions-left,
-.agent-client-chat-input-actions-right {
+.cchub-chat-input-actions-left,
+.cchub-chat-input-actions-right {
 	display: flex;
 	align-items: center;
 	gap: 8px;
 }
 
-.agent-client-chat-input-actions-right {
+.cchub-chat-input-actions-right {
 	margin-left: auto;
 	justify-content: flex-end;
 }
 
-.agent-client-mention-trigger-btn {
+.cchub-mention-trigger-btn {
 	width: 20px;
 	height: 20px;
 	border: none !important;
@@ -831,15 +831,15 @@ If your plugin does not need CSS, delete this file.
 	transition: all 0.2s ease;
 }
 
-.agent-client-mention-trigger-btn svg,
-.agent-client-mention-trigger-btn .svg-icon {
+.cchub-mention-trigger-btn svg,
+.cchub-mention-trigger-btn .svg-icon {
 	width: 16px;
 	height: 16px;
 	color: var(--text-faint);
 }
 
 /* Mode Selector */
-.agent-client-mode-selector {
+.cchub-mode-selector {
 	display: inline-flex;
 	align-items: center;
 	padding: 0 4px;
@@ -852,11 +852,11 @@ If your plugin does not need CSS, delete this file.
 	flex: 0 0 auto;
 }
 
-.agent-client-mode-selector:hover {
+.cchub-mode-selector:hover {
 	background-color: var(--background-modifier-hover);
 }
 
-.agent-client-mode-selector-icon {
+.cchub-mode-selector-icon {
 	display: flex;
 	align-items: center;
 	pointer-events: none;
@@ -865,12 +865,12 @@ If your plugin does not need CSS, delete this file.
 	order: 2;
 }
 
-.agent-client-mode-selector-icon svg {
+.cchub-mode-selector-icon svg {
 	width: 12px;
 	height: 12px;
 }
 
-.agent-client-mode-selector select.dropdown {
+.cchub-mode-selector select.dropdown {
 	padding: 0 !important;
 	margin: 0 !important;
 	border: none !important;
@@ -892,15 +892,15 @@ If your plugin does not need CSS, delete this file.
 	white-space: nowrap;
 }
 
-.agent-client-mode-selector select.dropdown:hover,
-.agent-client-mode-selector select.dropdown:focus {
+.cchub-mode-selector select.dropdown:hover,
+.cchub-mode-selector select.dropdown:focus {
 	color: var(--text-faint) !important;
 	background-color: transparent !important;
 	box-shadow: none !important;
 }
 
 /* Model Selector (experimental) */
-.agent-client-model-selector {
+.cchub-model-selector {
 	display: inline-flex;
 	align-items: center;
 	padding: 0 4px;
@@ -913,11 +913,11 @@ If your plugin does not need CSS, delete this file.
 	flex: 0 0 auto;
 }
 
-.agent-client-model-selector:hover {
+.cchub-model-selector:hover {
 	background-color: var(--background-modifier-hover);
 }
 
-.agent-client-model-selector-icon {
+.cchub-model-selector-icon {
 	display: flex;
 	align-items: center;
 	pointer-events: none;
@@ -926,12 +926,12 @@ If your plugin does not need CSS, delete this file.
 	order: 2;
 }
 
-.agent-client-model-selector-icon svg {
+.cchub-model-selector-icon svg {
 	width: 12px;
 	height: 12px;
 }
 
-.agent-client-model-selector select.dropdown {
+.cchub-model-selector select.dropdown {
 	padding: 0 !important;
 	margin: 0 !important;
 	border: none !important;
@@ -953,15 +953,15 @@ If your plugin does not need CSS, delete this file.
 	white-space: nowrap;
 }
 
-.agent-client-model-selector select.dropdown:hover,
-.agent-client-model-selector select.dropdown:focus {
+.cchub-model-selector select.dropdown:hover,
+.cchub-model-selector select.dropdown:focus {
 	color: var(--text-faint) !important;
 	background-color: transparent !important;
 	box-shadow: none !important;
 }
 
 /* Send button */
-.agent-client-chat-send-button {
+.cchub-chat-send-button {
 	width: 20px;
 	height: 20px;
 	padding: 0 !important;
@@ -980,31 +980,31 @@ If your plugin does not need CSS, delete this file.
 	transition: all 0.2s ease;
 }
 
-.agent-client-chat-send-button.agent-client-disabled {
+.cchub-chat-send-button.cchub-disabled {
 	cursor: not-allowed !important;
 }
 
 /* Send button icon states */
-.agent-client-chat-send-button svg {
+.cchub-chat-send-button svg {
 	transition: color 0.2s ease;
 }
 
-.agent-client-chat-send-button svg.agent-client-icon-sending {
+.cchub-chat-send-button svg.cchub-icon-sending {
 	color: var(--color-red);
 }
 
-.agent-client-chat-send-button svg.agent-client-icon-active {
+.cchub-chat-send-button svg.cchub-icon-active {
 	color: var(--interactive-accent);
 }
 
-.agent-client-chat-send-button svg.agent-client-icon-inactive {
+.cchub-chat-send-button svg.cchub-icon-inactive {
 	color: var(--text-muted);
 }
 
 /* ===== Other Chat Components ===== */
 
 /* Collapsible Thought */
-.agent-client-collapsible-thought {
+.cchub-collapsible-thought {
 	color: var(--text-muted);
 	background-color: var(--background-secondary);
 	font-size: 12px;
@@ -1019,13 +1019,13 @@ If your plugin does not need CSS, delete this file.
 	border-radius: 6px;
 }
 
-.agent-client-collapsible-thought-header {
+.cchub-collapsible-thought-header {
 	display: flex;
 	align-items: center;
 	gap: 6px;
 }
 
-.agent-client-collapsible-thought-indicator {
+.cchub-collapsible-thought-indicator {
 	width: 6px;
 	height: 6px;
 	border-radius: 50%;
@@ -1034,18 +1034,18 @@ If your plugin does not need CSS, delete this file.
 	animation: cchubPulse 1.6s ease-in-out infinite;
 }
 
-.agent-client-collapsible-thought-label {
+.cchub-collapsible-thought-label {
 	font-weight: 600;
 	letter-spacing: 0.02em;
 }
 
-.agent-client-collapsible-thought-icon {
+.cchub-collapsible-thought-icon {
 	font-size: 11px;
 	opacity: 0.6;
 	margin-left: auto;
 }
 
-.agent-client-collapsible-thought-content {
+.cchub-collapsible-thought-content {
 	margin-top: 6px;
 	padding-left: 12px;
 	user-select: text;
@@ -1055,7 +1055,7 @@ If your plugin does not need CSS, delete this file.
 }
 
 /* Mention Dropdown */
-.agent-client-mention-dropdown {
+.cchub-mention-dropdown {
 	position: absolute;
 	bottom: 100%;
 	left: 0;
@@ -1071,7 +1071,7 @@ If your plugin does not need CSS, delete this file.
 	z-index: 1000;
 }
 
-.agent-client-mention-dropdown-item {
+.cchub-mention-dropdown-item {
 	padding: 4px 16px;
 	cursor: pointer;
 	background-color: transparent;
@@ -1079,28 +1079,28 @@ If your plugin does not need CSS, delete this file.
 	transition: background-color 0.1s ease;
 }
 
-.agent-client-mention-dropdown-item.agent-client-selected {
+.cchub-mention-dropdown-item.cchub-selected {
 	background-color: var(--background-primary);
 }
 
-.agent-client-mention-dropdown-item.agent-client-has-border {
+.cchub-mention-dropdown-item.cchub-has-border {
 	border-bottom: 1px solid var(--background-modifier-border);
 }
 
-.agent-client-mention-dropdown-item-name {
+.cchub-mention-dropdown-item-name {
 	font-weight: 500;
 	color: var(--text-normal);
 	margin-bottom: 2px;
 }
 
-.agent-client-mention-dropdown-item-path {
+.cchub-mention-dropdown-item-path {
 	font-size: 12px;
 	color: var(--text-muted);
 	opacity: 0.8;
 }
 
 /* Terminal Renderer */
-.agent-client-terminal-renderer {
+.cchub-terminal-renderer {
 	padding: 12px;
 	margin-top: 4px;
 	background-color: var(--background-secondary);
@@ -1111,7 +1111,7 @@ If your plugin does not need CSS, delete this file.
 	user-select: text;
 }
 
-.agent-client-terminal-renderer-header {
+.cchub-terminal-renderer-header {
 	font-weight: bold;
 	margin-bottom: 8px;
 	display: flex;
@@ -1121,24 +1121,24 @@ If your plugin does not need CSS, delete this file.
 	user-select: text;
 }
 
-.agent-client-terminal-status {
+.cchub-terminal-status {
 	font-size: 10px;
 	user-select: text;
 }
 
-.agent-client-terminal-status.agent-client-running {
+.cchub-terminal-status.cchub-running {
 	color: var(--color-green);
 }
 
-.agent-client-terminal-status.agent-client-cancelled {
+.cchub-terminal-status.cchub-cancelled {
 	color: var(--color-orange);
 }
 
-.agent-client-terminal-status.agent-client-finished {
+.cchub-terminal-status.cchub-finished {
 	color: var(--text-muted);
 }
 
-.agent-client-terminal-renderer-output {
+.cchub-terminal-renderer-output {
 	background-color: var(--background-primary);
 	padding: 8px;
 	border-radius: 4px;
@@ -1151,7 +1151,7 @@ If your plugin does not need CSS, delete this file.
 	user-select: text;
 }
 
-.agent-client-terminal-renderer-exit {
+.cchub-terminal-renderer-exit {
 	margin-top: 8px;
 	padding: 4px 8px;
 	color: white;
@@ -1161,16 +1161,16 @@ If your plugin does not need CSS, delete this file.
 	user-select: text;
 }
 
-.agent-client-terminal-renderer-exit.agent-client-success {
+.cchub-terminal-renderer-exit.cchub-success {
 	background-color: var(--color-green);
 }
 
-.agent-client-terminal-renderer-exit.agent-client-error {
+.cchub-terminal-renderer-exit.cchub-error {
 	background-color: var(--color-red);
 }
 
 /* Message Renderer */
-.agent-client-message-renderer {
+.cchub-message-renderer {
 	padding: 0px 16px;
 	width: 100%;
 	margin: 4px 0;
@@ -1182,20 +1182,20 @@ If your plugin does not need CSS, delete this file.
 	box-sizing: border-box;
 }
 
-.agent-client-message-renderer.agent-client-message-user {
+.cchub-message-renderer.cchub-message-user {
 	background-color: var(--background-primary);
 	border: 1px solid var(--background-modifier-border);
 	border-radius: 8px;
 }
 
-.agent-client-message-renderer.agent-client-message-assistant {
+.cchub-message-renderer.cchub-message-assistant {
 	background-color: transparent;
 	border: none;
 	border-radius: 0;
 }
 
 /* Text with Mentions */
-.agent-client-text-with-mentions {
+.cchub-text-with-mentions {
 	user-select: text;
 	white-space: pre-wrap;
 	word-wrap: break-word;
@@ -1206,7 +1206,7 @@ If your plugin does not need CSS, delete this file.
 	max-width: 100%;
 }
 
-.agent-client-text-mention {
+.cchub-text-mention {
 	background-color: transparent;
 	color: var(--interactive-accent-hover);
 	border-radius: 3px;
@@ -1216,7 +1216,7 @@ If your plugin does not need CSS, delete this file.
 }
 
 /* Markdown Text Renderer */
-.agent-client-markdown-text-renderer {
+.cchub-markdown-text-renderer {
 	user-select: text;
 	font-size: 14px;
 	line-height: 1.55;
@@ -1226,7 +1226,7 @@ If your plugin does not need CSS, delete this file.
 	max-width: 100%;
 }
 
-.agent-client-markdown-text-renderer .markdown-rendered {
+.cchub-markdown-text-renderer .markdown-rendered {
 	font-size: inherit;
 	overflow-wrap: break-word;
 	word-wrap: break-word;
@@ -1246,7 +1246,7 @@ If your plugin does not need CSS, delete this file.
 }
 
 /* Tool Call Diff Renderer */
-.agent-client-tool-call-diff {
+.cchub-tool-call-diff {
 	margin-top: 8px;
 	border: 1px solid var(--background-modifier-border);
 	border-radius: 4px;
@@ -1255,12 +1255,12 @@ If your plugin does not need CSS, delete this file.
 	font-size: 12px;
 }
 
-.agent-client-tool-call-diff-content {
+.cchub-tool-call-diff-content {
 	background-color: var(--background-primary);
 	overflow: auto;
 }
 
-.agent-client-diff-line-info {
+.cchub-diff-line-info {
 	padding: 4px 12px;
 	background-color: var(--background-secondary);
 	color: var(--text-muted);
@@ -1268,14 +1268,14 @@ If your plugin does not need CSS, delete this file.
 	font-style: italic;
 }
 
-.agent-client-diff-line {
+.cchub-diff-line {
 	display: flex;
 	align-items: flex-start;
 	line-height: 1.5;
 	user-select: text;
 }
 
-.agent-client-diff-line-number {
+.cchub-diff-line-number {
 	display: inline-block;
 	width: 40px;
 	padding: 2px 8px;
@@ -1286,15 +1286,15 @@ If your plugin does not need CSS, delete this file.
 	font-size: 11px;
 }
 
-.agent-client-diff-line-number-old {
+.cchub-diff-line-number-old {
 	border-right: 1px solid var(--background-modifier-border);
 }
 
-.agent-client-diff-line-number-new {
+.cchub-diff-line-number-new {
 	border-right: 1px solid var(--background-modifier-border);
 }
 
-.agent-client-diff-line-marker {
+.cchub-diff-line-marker {
 	display: inline-block;
 	width: 20px;
 	padding: 2px 4px;
@@ -1304,39 +1304,39 @@ If your plugin does not need CSS, delete this file.
 	text-align: center;
 }
 
-.agent-client-diff-line-content {
+.cchub-diff-line-content {
 	flex: 1;
 	padding: 2px 12px;
 	white-space: pre-wrap;
 	word-break: break-all;
 }
 
-.agent-client-diff-line-added {
+.cchub-diff-line-added {
 	background-color: rgba(46, 160, 67, 0.15);
 }
 
-.agent-client-diff-line-added .agent-client-diff-line-marker {
+.cchub-diff-line-added .cchub-diff-line-marker {
 	color: var(--color-green);
 }
 
-.agent-client-diff-line-removed {
+.cchub-diff-line-removed {
 	background-color: rgba(248, 81, 73, 0.15);
 }
 
-.agent-client-diff-line-removed .agent-client-diff-line-marker {
+.cchub-diff-line-removed .cchub-diff-line-marker {
 	color: var(--color-red);
 }
 
-.agent-client-diff-line-context {
+.cchub-diff-line-context {
 	background-color: transparent;
 }
 
-.agent-client-diff-line-context .agent-client-diff-line-marker {
+.cchub-diff-line-context .cchub-diff-line-marker {
 	color: var(--text-faint);
 }
 
 /* Hunk header styling */
-.agent-client-diff-hunk-header {
+.cchub-diff-hunk-header {
 	padding: 4px 12px;
 	background-color: var(--background-secondary-alt);
 	color: var(--text-muted);
@@ -1347,25 +1347,25 @@ If your plugin does not need CSS, delete this file.
 }
 
 /* Word-level diff highlighting */
-.agent-client-diff-word-added {
+.cchub-diff-word-added {
 	background-color: rgba(46, 160, 67, 0.4);
 	font-weight: 600;
 }
 
-.agent-client-diff-word-removed {
+.cchub-diff-word-removed {
 	background-color: rgba(248, 81, 73, 0.4);
 	font-weight: 600;
 	text-decoration: line-through;
 }
 
 /* Tool Call Details */
-.agent-client-tool-call-read-details,
-.agent-client-tool-call-edit-details,
-.agent-client-tool-call-delete-details,
-.agent-client-tool-call-move-details,
-.agent-client-tool-call-search-details,
-.agent-client-tool-call-execute-details,
-.agent-client-tool-call-fetch-details {
+.cchub-tool-call-read-details,
+.cchub-tool-call-edit-details,
+.cchub-tool-call-delete-details,
+.cchub-tool-call-move-details,
+.cchub-tool-call-search-details,
+.cchub-tool-call-execute-details,
+.cchub-tool-call-fetch-details {
 	padding: 4px 0;
 	font-size: 12px;
 	color: var(--text-muted);
@@ -1375,14 +1375,14 @@ If your plugin does not need CSS, delete this file.
 	max-width: 100%;
 }
 
-.agent-client-tool-call-location {
+.cchub-tool-call-location {
 	padding: 2px 0;
 	overflow-wrap: break-word;
 	word-wrap: break-word;
 	word-break: break-word;
 }
 
-.agent-client-tool-call-line {
+.cchub-tool-call-line {
 	color: var(--text-accent);
 	font-weight: 500;
 	overflow-wrap: break-word;
@@ -1390,7 +1390,7 @@ If your plugin does not need CSS, delete this file.
 	word-break: break-word;
 }
 
-.agent-client-tool-call-content {
+.cchub-tool-call-content {
 	padding: 8px 0;
 	overflow-wrap: break-word;
 	word-wrap: break-word;
@@ -1398,7 +1398,7 @@ If your plugin does not need CSS, delete this file.
 }
 
 /* ===== Image Preview Strip ===== */
-.agent-client-image-preview-strip {
+.cchub-image-preview-strip {
 	display: flex;
 	gap: 8px;
 	padding: 8px 12px;
@@ -1408,27 +1408,27 @@ If your plugin does not need CSS, delete this file.
 	-ms-overflow-style: none;
 }
 
-.agent-client-image-preview-strip::-webkit-scrollbar {
+.cchub-image-preview-strip::-webkit-scrollbar {
 	height: 4px;
 }
 
-.agent-client-image-preview-strip::-webkit-scrollbar-track {
+.cchub-image-preview-strip::-webkit-scrollbar-track {
 	background: transparent;
 }
 
-.agent-client-image-preview-strip::-webkit-scrollbar-thumb {
+.cchub-image-preview-strip::-webkit-scrollbar-thumb {
 	background-color: var(--background-modifier-border);
 	border-radius: 2px;
 }
 
-.agent-client-image-preview-item {
+.cchub-image-preview-item {
 	position: relative;
 	flex-shrink: 0;
 	width: 64px;
 	height: 64px;
 }
 
-.agent-client-image-preview-thumbnail {
+.cchub-image-preview-thumbnail {
 	width: 100%;
 	height: 100%;
 	object-fit: cover;
@@ -1437,7 +1437,7 @@ If your plugin does not need CSS, delete this file.
 	border: 1px solid var(--background-modifier-border);
 }
 
-.agent-client-image-preview-remove {
+.cchub-image-preview-remove {
 	position: absolute;
 	top: -6px;
 	right: -6px;
@@ -1457,22 +1457,22 @@ If your plugin does not need CSS, delete this file.
 	box-shadow: none !important;
 }
 
-.agent-client-image-preview-remove svg {
+.cchub-image-preview-remove svg {
 	width: 12px;
 	height: 12px;
 }
 
-.agent-client-image-preview-item:hover .agent-client-image-preview-remove {
+.cchub-image-preview-item:hover .cchub-image-preview-remove {
 	opacity: 1;
 }
 
 /* ===== Message Image (in chat history) ===== */
-.agent-client-message-image {
+.cchub-message-image {
 	display: inline-block;
 	margin: 4px 4px 4px 0;
 }
 
-.agent-client-message-image-thumbnail {
+.cchub-message-image-thumbnail {
 	width: 120px;
 	height: 120px;
 	object-fit: cover;
@@ -1482,7 +1482,7 @@ If your plugin does not need CSS, delete this file.
 }
 
 /* ===== Message Images Strip (horizontal scroll in chat history) ===== */
-.agent-client-message-images-strip {
+.cchub-message-images-strip {
 	display: flex;
 	gap: 8px;
 	padding: 8px 0;
@@ -1491,20 +1491,20 @@ If your plugin does not need CSS, delete this file.
 	-ms-overflow-style: none;
 }
 
-.agent-client-message-images-strip::-webkit-scrollbar {
+.cchub-message-images-strip::-webkit-scrollbar {
 	height: 4px;
 }
 
-.agent-client-message-images-strip::-webkit-scrollbar-track {
+.cchub-message-images-strip::-webkit-scrollbar-track {
 	background: transparent;
 }
 
-.agent-client-message-images-strip::-webkit-scrollbar-thumb {
+.cchub-message-images-strip::-webkit-scrollbar-thumb {
 	background-color: var(--background-modifier-border);
 	border-radius: 2px;
 }
 
-.agent-client-message-images-strip .agent-client-message-image {
+.cchub-message-images-strip .cchub-message-image {
 	flex-shrink: 0;
 	margin: 0;
 }

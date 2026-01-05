@@ -4,7 +4,7 @@ import type { ChatSession } from "../domain/models/chat-session";
 import { ChatExporter } from "../shared/chat-exporter";
 import { Logger } from "../shared/logger";
 import { Notice } from "obsidian";
-import type AgentClientPlugin from "../plugin";
+import type CCHubPlugin from "../plugin";
 
 // ============================================================================
 // Types
@@ -60,7 +60,7 @@ export interface UseAutoExportReturn {
  *
  * @param plugin - Plugin instance for settings and exporter
  */
-export function useAutoExport(plugin: AgentClientPlugin): UseAutoExportReturn {
+export function useAutoExport(plugin: CCHubPlugin): UseAutoExportReturn {
 	const loggerRef = useRef(new Logger(plugin));
 
 	/**

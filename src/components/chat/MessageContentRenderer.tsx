@@ -1,7 +1,7 @@
 import * as React from "react";
 import type { MessageContent } from "../../domain/models/chat-message";
 import type { IAcpClient } from "../../adapters/acp/acp.adapter";
-import type AgentClientPlugin from "../../plugin";
+import type CCHubPlugin from "../../plugin";
 import { MarkdownTextRenderer } from "./MarkdownTextRenderer";
 import { CollapsibleThought } from "./CollapsibleThought";
 import { TerminalRenderer } from "./TerminalRenderer";
@@ -10,7 +10,7 @@ import { ToolCallRenderer } from "./ToolCallRenderer";
 
 interface MessageContentRendererProps {
 	content: MessageContent;
-	plugin: AgentClientPlugin;
+	plugin: CCHubPlugin;
 	messageId?: string;
 	messageRole?: "user" | "assistant";
 	acpClient?: IAcpClient;
@@ -65,17 +65,17 @@ export function MessageContentRenderer({
 
 		case "plan":
 			return (
-				<div className="agent-client-message-plan">
-					<div className="agent-client-message-plan-title">
+				<div className="cchub-message-plan">
+					<div className="cchub-message-plan-title">
 						📋 Plan
 					</div>
 					{content.entries.map((entry, idx) => (
 						<div
 							key={idx}
-							className="agent-client-message-plan-entry"
+							className="cchub-message-plan-entry"
 						>
 							<span
-								className={`agent-client-message-plan-entry-icon agent-client-status-${entry.status}`}
+								className={`cchub-message-plan-entry-icon cchub-status-${entry.status}`}
 							>
 								{entry.status === "completed"
 									? "✓"
@@ -100,11 +100,11 @@ export function MessageContentRenderer({
 
 		case "image":
 			return (
-				<div className="agent-client-message-image">
+				<div className="cchub-message-image">
 					<img
 						src={`data:${content.mimeType};base64,${content.data}`}
 						alt="Attached image"
-						className="agent-client-message-image-thumbnail"
+						className="cchub-message-image-thumbnail"
 					/>
 				</div>
 			);

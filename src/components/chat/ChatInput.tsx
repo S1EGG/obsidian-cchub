@@ -2,7 +2,7 @@ import * as React from "react";
 const { useRef, useState, useEffect, useCallback, useMemo } = React;
 import { setIcon, DropdownComponent, Notice } from "obsidian";
 
-import type AgentClientPlugin from "../../plugin";
+import type CCHubPlugin from "../../plugin";
 import type { ChatView } from "./ChatView";
 import type { NoteMetadata } from "../../domain/ports/vault-access.port";
 import type {
@@ -60,7 +60,7 @@ export interface ChatInputProps {
 	/** Slash commands hook state and methods */
 	slashCommands: UseSlashCommandsReturn;
 	/** Plugin instance */
-	plugin: AgentClientPlugin;
+	plugin: CCHubPlugin;
 	/** View instance for event registration */
 	view: ChatView;
 	/** Callback to send a message with optional images */
@@ -399,12 +399,12 @@ export function ChatInput({
 		if (textarea) {
 			// Remove previous dynamic height classes
 			textarea.classList.remove(
-				"agent-client-textarea-auto-height",
-				"agent-client-textarea-expanded",
+				"cchub-textarea-auto-height",
+				"cchub-textarea-expanded",
 			);
 
 			// Temporarily use auto to measure
-			textarea.classList.add("agent-client-textarea-auto-height");
+			textarea.classList.add("cchub-textarea-auto-height");
 			const scrollHeight = textarea.scrollHeight;
 			const minHeight = 80;
 			const maxHeight = 300;
@@ -417,7 +417,7 @@ export function ChatInput({
 
 			// Apply expanded class if needed
 			if (calculatedHeight > minHeight) {
-				textarea.classList.add("agent-client-textarea-expanded");
+				textarea.classList.add("cchub-textarea-expanded");
 				// Set CSS variable for dynamic height
 				textarea.style.setProperty(
 					"--textarea-height",
@@ -427,7 +427,7 @@ export function ChatInput({
 				textarea.style.removeProperty("--textarea-height");
 			}
 
-			textarea.classList.remove("agent-client-textarea-auto-height");
+			textarea.classList.remove("cchub-textarea-auto-height");
 		}
 	}, []);
 
@@ -438,22 +438,22 @@ export function ChatInput({
 		(svg: SVGElement) => {
 			// Remove all state classes
 			svg.classList.remove(
-				"agent-client-icon-sending",
-				"agent-client-icon-active",
-				"agent-client-icon-inactive",
+				"cchub-icon-sending",
+				"cchub-icon-active",
+				"cchub-icon-inactive",
 			);
 
 			if (isSending) {
 				// Stop button - always active when sending
-				svg.classList.add("agent-client-icon-sending");
+				svg.classList.add("cchub-icon-sending");
 			} else {
 				// Send button - active when has input (text or images)
 				const hasContent =
 					inputValue.trim() !== "" || attachedImages.length > 0;
 				svg.classList.add(
 					hasContent
-						? "agent-client-icon-active"
-						: "agent-client-icon-inactive",
+						? "cchub-icon-active"
+						: "cchub-icon-inactive",
 				);
 			}
 		},
@@ -920,7 +920,7 @@ export function ChatInput({
 	const placeholder = isSessionReady
 		? `Message ${agentLabel} - @ to mention notes${availableCommands.length > 0 ? ", / for commands" : ""}`
 		: "";
-	const containerClass = `agent-client-chat-input-container${!isSessionReady ? " agent-client-chat-input-container--loading" : ""}`;
+	const containerClass = `cchub-chat-input-container${!isSessionReady ? " cchub-chat-input-container--loading" : ""}`;
 
 	return (
 		<div className={containerClass}>
@@ -952,14 +952,14 @@ export function ChatInput({
 
 			{/* Input Box - flexbox container with border */}
 			<div
-				className={`agent-client-chat-input-box ${isDraggingOver ? "agent-client-dragging-over" : ""}`}
+				className={`cchub-chat-input-box ${isDraggingOver ? "cchub-dragging-over" : ""}`}
 				onDragOver={handleDragOver}
 				onDragEnter={handleDragEnter}
 				onDragLeave={handleDragLeave}
 				onDrop={(e) => void handleDrop(e)}
 			>
 				{/* Textarea with Hint Overlay */}
-				<div className="agent-client-textarea-wrapper">
+				<div className="cchub-textarea-wrapper">
 					<textarea
 						ref={textareaRef}
 						value={inputValue}
@@ -967,18 +967,18 @@ export function ChatInput({
 						onKeyDown={handleKeyDown}
 						onPaste={(e) => void handlePaste(e)}
 						placeholder={placeholder}
-						className="agent-client-chat-input-textarea"
+						className="cchub-chat-input-textarea"
 						rows={1}
 					/>
 					{hintText && (
 						<div
-							className="agent-client-hint-overlay"
+							className="cchub-hint-overlay"
 							aria-hidden="true"
 						>
-							<span className="agent-client-invisible">
+							<span className="cchub-invisible">
 								{commandText}
 							</span>
-							<span className="agent-client-hint-text">
+							<span className="cchub-hint-text">
 								{hintText}
 							</span>
 						</div>
@@ -994,11 +994,11 @@ export function ChatInput({
 				)}
 
 				{/* Input Actions (Mode Selector + Model Selector + Send Button) */}
-				<div className="agent-client-chat-input-actions">
-					<div className="agent-client-chat-input-actions-left">
+				<div className="cchub-chat-input-actions">
+					<div className="cchub-chat-input-actions-left">
 						<button
 							type="button"
-							className="agent-client-mention-trigger-btn"
+							className="cchub-mention-trigger-btn"
 							title="Insert @ mention"
 							aria-label="Insert @ mention"
 							ref={setMentionButton}
@@ -1006,12 +1006,12 @@ export function ChatInput({
 							onClick={handleInsertMentionTrigger}
 						/>
 					</div>
-					<div className="agent-client-chat-input-actions-right">
+					<div className="cchub-chat-input-actions-right">
 						{/* Mode Selector */}
 						{modes && modes.availableModes.length > 1 && (
 							<div
 								ref={modeDropdownRef}
-								className="agent-client-mode-selector"
+								className="cchub-mode-selector"
 								title={
 									modes.availableModes.find(
 										(m) => m.id === modes.currentModeId,
@@ -1019,7 +1019,7 @@ export function ChatInput({
 								}
 							>
 								<span
-									className="agent-client-mode-selector-icon"
+									className="cchub-mode-selector-icon"
 									ref={(el) => {
 										if (el) setIcon(el, "chevron-down");
 									}}
@@ -1031,7 +1031,7 @@ export function ChatInput({
 						{models && models.availableModels.length > 1 && (
 							<div
 								ref={modelDropdownRef}
-								className="agent-client-model-selector"
+								className="cchub-model-selector"
 								title={
 									models.availableModels.find(
 										(m) =>
@@ -1040,7 +1040,7 @@ export function ChatInput({
 								}
 							>
 								<span
-									className="agent-client-model-selector-icon"
+									className="cchub-model-selector-icon"
 									ref={(el) => {
 										if (el) setIcon(el, "chevron-down");
 									}}
@@ -1053,7 +1053,7 @@ export function ChatInput({
 							ref={sendButtonRef}
 							onClick={() => void handleSendOrStop()}
 							disabled={isButtonDisabled}
-							className={`agent-client-chat-send-button ${isSending ? "sending" : ""} ${isButtonDisabled ? "agent-client-disabled" : ""}`}
+							className={`cchub-chat-send-button ${isSending ? "sending" : ""} ${isButtonDisabled ? "cchub-disabled" : ""}`}
 							title={
 								!isSessionReady
 									? "Connecting..."

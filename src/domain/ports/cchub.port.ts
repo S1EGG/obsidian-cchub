@@ -145,7 +145,7 @@ export interface NewSessionResult {
  * This port will be implemented by adapters that handle the actual
  * ACP protocol communication and process management.
  */
-export interface IAgentClient {
+export interface ICCHubClient {
 	/**
 	 * Initialize connection to an agent.
 	 *
