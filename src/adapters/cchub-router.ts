@@ -102,26 +102,13 @@ export class CCHubRouter implements ICCHubClient {
 	private selectClient(config: AgentConfig): ICCHubClient {
 		console.debug("[CCHubRouter] selectClient:", {
 			configId: config.id,
-			codexId: this.plugin.settings.codex.id,
-			command: config.command,
-			isCodexAcp: this.isCodexAcpCommand(config.command),
+			protocol: config.protocol,
 		});
-		if (config.id === this.plugin.settings.codex.id) {
-			if (this.isCodexAcpCommand(config.command)) {
-				console.debug(
-					"[CCHubRouter] Using AcpAdapter for Codex (codex-acp command)",
-				);
-				return this.acpAdapter;
-			}
-			console.debug("[CCHubRouter] Using CodexAdapter");
+		if (config.protocol === "mcp") {
+			console.debug("[CCHubRouter] Using CodexAdapter (MCP)");
 			return this.codexAdapter;
 		}
-		console.debug("[CCHubRouter] Using AcpAdapter (default)");
+		console.debug("[CCHubRouter] Using AcpAdapter");
 		return this.acpAdapter;
-	}
-
-	private isCodexAcpCommand(command: string): boolean {
-		const normalized = command.trim().toLowerCase();
-		return normalized.includes("codex-acp");
 	}
 }

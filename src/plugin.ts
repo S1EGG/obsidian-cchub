@@ -8,19 +8,14 @@ import { CCHubSettingTab } from "./components/settings/CCHubSettingTab";
 import {
 	sanitizeArgs,
 	normalizeEnvVars,
-	normalizeCustomAgent,
-	ensureUniqueCustomAgentIds,
+	normalizeAgentProfile,
+	ensureUniqueAgentIds,
 } from "./shared/settings-utils";
-import {
-	AgentEnvVar,
-	GeminiAgentSettings,
-	ClaudeAgentSettings,
-	CodexAgentSettings,
-	CustomAgentSettings,
-} from "./domain/models/agent-config";
+import { AgentEnvVar, AgentProfile } from "./domain/models/agent-config";
+import { getAgentModuleById } from "./domain/agents/agent-modules";
 
 // Re-export for backward compatibility
-export type { AgentEnvVar, CustomAgentSettings };
+export type { AgentEnvVar, AgentProfile };
 
 /**
  * Send message shortcut configuration.
@@ -30,10 +25,7 @@ export type { AgentEnvVar, CustomAgentSettings };
 export type SendMessageShortcut = "enter" | "cmd-enter";
 
 export interface CCHubPluginSettings {
-	gemini: GeminiAgentSettings;
-	claude: ClaudeAgentSettings;
-	codex: CodexAgentSettings;
-	customAgents: CustomAgentSettings[];
+	agents: AgentProfile[];
 	activeAgentId: string;
 	autoApproveRead: boolean;
 	autoApproveList: boolean;
@@ -59,31 +51,38 @@ export interface CCHubPluginSettings {
 }
 
 const DEFAULT_SETTINGS: CCHubPluginSettings = {
-	claude: {
-		id: "claude-code-acp",
-		displayName: "Claude Code",
-		apiKey: "",
-		command: "",
-		args: [],
-		env: [],
-	},
-	codex: {
-		id: "codex-acp",
-		displayName: "Codex",
-		apiKey: "",
-		command: "",
-		args: [],
-		env: [],
-	},
-	gemini: {
-		id: "gemini-cli",
-		displayName: "Gemini CLI",
-		apiKey: "",
-		command: "",
-		args: ["--experimental-acp"],
-		env: [],
-	},
-	customAgents: [],
+	agents: [
+		{
+			id: "claude-code-acp",
+			displayName: "Claude Code",
+			moduleId: "acp:claude",
+			enabled: true,
+			command: "",
+			args: [],
+			env: [],
+			auth: { apiKey: "" },
+		},
+		{
+			id: "codex-acp",
+			displayName: "Codex",
+			moduleId: "mcp:codex",
+			enabled: true,
+			command: "",
+			args: [],
+			env: [],
+			auth: { apiKey: "" },
+		},
+		{
+			id: "gemini-cli",
+			displayName: "Gemini CLI",
+			moduleId: "acp:gemini",
+			enabled: true,
+			command: "",
+			args: [],
+			env: [],
+			auth: { apiKey: "" },
+		},
+	],
 	activeAgentId: "claude-code-acp",
 	autoApproveRead: false,
 	autoApproveList: false,
@@ -194,30 +193,15 @@ export default class CCHubPlugin extends Plugin {
 	}
 
 	/**
-	 * Get all available agents (claude, codex, gemini, custom)
+	 * Get all available agents from settings.
 	 */
 	private getAvailableAgents(): Array<{ id: string; displayName: string }> {
-		return [
-			{
-				id: this.settings.claude.id,
-				displayName:
-					this.settings.claude.displayName || this.settings.claude.id,
-			},
-			{
-				id: this.settings.codex.id,
-				displayName:
-					this.settings.codex.displayName || this.settings.codex.id,
-			},
-			{
-				id: this.settings.gemini.id,
-				displayName:
-					this.settings.gemini.displayName || this.settings.gemini.id,
-			},
-			...this.settings.customAgents.map((agent) => ({
+		return this.settings.agents
+			.filter((agent) => agent.enabled)
+			.map((agent) => ({
 				id: agent.id,
 				displayName: agent.displayName || agent.id,
-			})),
-		];
+			}));
 	}
 
 	/**
@@ -377,17 +361,6 @@ export default class CCHubPlugin extends Plugin {
 		const resolvedCodexEnv = normalizeEnvVars(codexFromRaw.env);
 		const resolvedGeminiArgs = sanitizeArgs(geminiFromRaw.args);
 		const resolvedGeminiEnv = normalizeEnvVars(geminiFromRaw.env);
-		const customAgents = Array.isArray(rawSettings.customAgents)
-			? ensureUniqueCustomAgentIds(
-					rawSettings.customAgents.map((agent: unknown) => {
-						const agentObj =
-							typeof agent === "object" && agent !== null
-								? (agent as Record<string, unknown>)
-								: {};
-						return normalizeCustomAgent(agentObj);
-					}),
-				)
-			: [];
 		const legacyAutoAllow =
 			typeof rawSettings.autoAllowPermissions === "boolean"
 				? rawSettings.autoAllowPermissions
@@ -462,12 +435,239 @@ export default class CCHubPlugin extends Plugin {
 			return baseSettings;
 		})();
 
-		const availableAgentIds = [
-			DEFAULT_SETTINGS.claude.id,
-			DEFAULT_SETTINGS.codex.id,
-			DEFAULT_SETTINGS.gemini.id,
-			...customAgents.map((agent) => agent.id),
-		];
+		const defaultAgentsById = new Map(
+			DEFAULT_SETTINGS.agents.map((agent) => [agent.id, agent]),
+		);
+
+		const resolveCodexModuleId = (
+			command: string,
+			args: string[],
+		): string => {
+			const normalizedCommand = command.trim().toLowerCase();
+			if (normalizedCommand.includes("codex-acp")) {
+				return "acp:codex";
+			}
+			const normalizedArgs = args.map((arg) => arg.toLowerCase());
+			if (normalizedArgs.some((arg) => arg.includes("acp"))) {
+				return "acp:codex";
+			}
+			return "mcp:codex";
+		};
+
+		const guessModuleId = (profile: AgentProfile): string => {
+			const idLower = profile.id.toLowerCase();
+			if (idLower.includes("claude")) {
+				return "acp:claude";
+			}
+			if (idLower.includes("gemini")) {
+				return "acp:gemini";
+			}
+			if (idLower.includes("codex")) {
+				return resolveCodexModuleId(profile.command, profile.args);
+			}
+			return "acp:custom";
+		};
+
+		const ensureValidModuleId = (profile: AgentProfile): AgentProfile => {
+			if (getAgentModuleById(profile.moduleId)) {
+				return profile;
+			}
+			return { ...profile, moduleId: guessModuleId(profile) };
+		};
+
+		const resolvedAgents = (() => {
+			if (Array.isArray(rawSettings.agents)) {
+				const normalized = rawSettings.agents.map((agent) => {
+					const agentObj =
+						typeof agent === "object" && agent !== null
+							? (agent as Record<string, unknown>)
+							: {};
+					const fallbackId =
+						typeof agentObj.id === "string"
+							? agentObj.id.trim()
+							: "";
+					const fallback = fallbackId
+						? defaultAgentsById.get(fallbackId)
+						: undefined;
+					const normalizedProfile = normalizeAgentProfile(
+						agentObj,
+						fallback,
+					);
+					return ensureValidModuleId(normalizedProfile);
+				});
+				return ensureUniqueAgentIds(normalized);
+			}
+
+			const defaultClaude = DEFAULT_SETTINGS.agents.find(
+				(agent) => agent.moduleId === "acp:claude",
+			);
+			const defaultCodex = DEFAULT_SETTINGS.agents.find(
+				(agent) => agent.moduleId === "mcp:codex",
+			);
+			const defaultGemini = DEFAULT_SETTINGS.agents.find(
+				(agent) => agent.moduleId === "acp:gemini",
+			);
+
+			const claudeDisplayName =
+				typeof claudeFromRaw.displayName === "string" &&
+				claudeFromRaw.displayName.trim().length > 0
+					? claudeFromRaw.displayName.trim()
+					: defaultClaude?.displayName || "Claude Code";
+			const claudeApiKey =
+				typeof claudeFromRaw.apiKey === "string"
+					? claudeFromRaw.apiKey
+					: legacyClaudeApiKey || defaultClaude?.auth?.apiKey || "";
+			const claudeCommand =
+				typeof claudeFromRaw.command === "string" &&
+				claudeFromRaw.command.trim().length > 0
+					? claudeFromRaw.command.trim()
+					: legacyClaudeCommand
+						? legacyClaudeCommand
+						: typeof rawSettings.claudeCodeAcpCommandPath ===
+									"string" &&
+							  rawSettings.claudeCodeAcpCommandPath.trim()
+									.length > 0
+							? rawSettings.claudeCodeAcpCommandPath.trim()
+							: defaultClaude?.command || "";
+			const claudeArgs =
+				resolvedClaudeArgs.length > 0
+					? resolvedClaudeArgs
+					: legacyClaudeArgs.length > 0
+						? legacyClaudeArgs
+						: [];
+
+			const codexDisplayName =
+				typeof codexFromRaw.displayName === "string" &&
+				codexFromRaw.displayName.trim().length > 0
+					? codexFromRaw.displayName.trim()
+					: defaultCodex?.displayName || "Codex";
+			const codexApiKey =
+				typeof codexFromRaw.apiKey === "string"
+					? codexFromRaw.apiKey
+					: legacyCodexApiKey || defaultCodex?.auth?.apiKey || "";
+			const codexCommand =
+				typeof codexFromRaw.command === "string" &&
+				codexFromRaw.command.trim().length > 0
+					? codexFromRaw.command.trim()
+					: legacyCodexCommand
+						? legacyCodexCommand
+						: defaultCodex?.command || "";
+			const codexArgs =
+				resolvedCodexArgs.length > 0
+					? resolvedCodexArgs
+					: legacyCodexArgs.length > 0
+						? legacyCodexArgs
+						: [];
+			const codexModuleId = resolveCodexModuleId(codexCommand, codexArgs);
+
+			const geminiDisplayName =
+				typeof geminiFromRaw.displayName === "string" &&
+				geminiFromRaw.displayName.trim().length > 0
+					? geminiFromRaw.displayName.trim()
+					: defaultGemini?.displayName || "Gemini CLI";
+			const geminiApiKey =
+				typeof geminiFromRaw.apiKey === "string"
+					? geminiFromRaw.apiKey
+					: legacyGeminiApiKey || defaultGemini?.auth?.apiKey || "";
+			const geminiCommand =
+				typeof geminiFromRaw.command === "string" &&
+				geminiFromRaw.command.trim().length > 0
+					? geminiFromRaw.command.trim()
+					: legacyGeminiCommand
+						? legacyGeminiCommand
+						: typeof rawSettings.geminiCommandPath === "string" &&
+							  rawSettings.geminiCommandPath.trim().length > 0
+							? rawSettings.geminiCommandPath.trim()
+							: defaultGemini?.command || "";
+			const geminiArgs =
+				resolvedGeminiArgs.length > 0
+					? resolvedGeminiArgs
+					: legacyGeminiArgs.length > 0
+						? legacyGeminiArgs
+						: [];
+
+			const claudeProfile: AgentProfile = {
+				id: defaultClaude?.id || "claude-code-acp",
+				displayName: claudeDisplayName,
+				moduleId: "acp:claude",
+				enabled: true,
+				command: claudeCommand,
+				args: claudeArgs,
+				env: resolvedClaudeEnv.length > 0 ? resolvedClaudeEnv : [],
+				auth: { apiKey: claudeApiKey },
+			};
+			const codexProfile: AgentProfile = {
+				id: defaultCodex?.id || "codex-acp",
+				displayName: codexDisplayName,
+				moduleId: codexModuleId,
+				enabled: true,
+				command: codexCommand,
+				args: codexArgs,
+				env: resolvedCodexEnv.length > 0 ? resolvedCodexEnv : [],
+				auth: { apiKey: codexApiKey },
+			};
+			const geminiProfile: AgentProfile = {
+				id: defaultGemini?.id || "gemini-cli",
+				displayName: geminiDisplayName,
+				moduleId: "acp:gemini",
+				enabled: true,
+				command: geminiCommand,
+				args: geminiArgs,
+				env: resolvedGeminiEnv.length > 0 ? resolvedGeminiEnv : [],
+				auth: { apiKey: geminiApiKey },
+			};
+
+			const customFallback: Partial<AgentProfile> = {
+				id: "custom-agent",
+				displayName: "Custom agent",
+				moduleId: "acp:custom",
+				enabled: true,
+				command: "",
+				args: [],
+				env: [],
+			};
+			const legacyCustomAgents = Array.isArray(rawSettings.customAgents)
+				? rawSettings.customAgents.map((agent: unknown) => {
+						const agentObj =
+							typeof agent === "object" && agent !== null
+								? (agent as Record<string, unknown>)
+								: {};
+						const normalizedProfile = normalizeAgentProfile(
+							agentObj,
+							customFallback,
+						);
+						return ensureValidModuleId(normalizedProfile);
+					})
+				: [];
+
+			return ensureUniqueAgentIds([
+				claudeProfile,
+				codexProfile,
+				geminiProfile,
+				...legacyCustomAgents,
+			]);
+		})();
+
+		const normalizedAgents =
+			resolvedAgents.length > 0
+				? resolvedAgents
+				: DEFAULT_SETTINGS.agents.map((agent) => ({
+						...agent,
+						args: [...agent.args],
+						env: [...agent.env],
+						auth: agent.auth ? { ...agent.auth } : undefined,
+					}));
+
+		const enabledAgentIds = normalizedAgents
+			.filter((agent) => agent.enabled)
+			.map((agent) => agent.id)
+			.filter((id) => id.length > 0);
+		const availableAgentIds =
+			enabledAgentIds.length > 0
+				? enabledAgentIds
+				: normalizedAgents
+						.map((agent) => agent.id)
+						.filter((id) => id.length > 0);
 		const rawActiveId =
 			typeof rawSettings.activeAgentId === "string"
 				? rawSettings.activeAgentId.trim()
@@ -478,15 +678,16 @@ export default class CCHubPlugin extends Plugin {
 				: "";
 		const legacyActiveAgentId =
 			legacyActiveAgent === "claude"
-				? DEFAULT_SETTINGS.claude.id
+				? "claude-code-acp"
 				: legacyActiveAgent === "codex"
-					? DEFAULT_SETTINGS.codex.id
+					? "codex-acp"
 					: legacyActiveAgent === "gemini"
-						? DEFAULT_SETTINGS.gemini.id
+						? "gemini-cli"
 						: "";
 		const fallbackActiveId =
 			availableAgentIds.find((id) => id.length > 0) ||
-			DEFAULT_SETTINGS.claude.id;
+			DEFAULT_SETTINGS.agents[0]?.id ||
+			"";
 		const candidateActiveId =
 			rawActiveId.length > 0 ? rawActiveId : legacyActiveAgentId;
 		const activeAgentId =
@@ -496,95 +697,7 @@ export default class CCHubPlugin extends Plugin {
 				: fallbackActiveId;
 
 		this.settings = {
-			claude: {
-				id: DEFAULT_SETTINGS.claude.id,
-				displayName:
-					typeof claudeFromRaw.displayName === "string" &&
-					claudeFromRaw.displayName.trim().length > 0
-						? claudeFromRaw.displayName.trim()
-						: DEFAULT_SETTINGS.claude.displayName,
-				apiKey:
-					typeof claudeFromRaw.apiKey === "string"
-						? claudeFromRaw.apiKey
-						: legacyClaudeApiKey || DEFAULT_SETTINGS.claude.apiKey,
-				command:
-					typeof claudeFromRaw.command === "string" &&
-					claudeFromRaw.command.trim().length > 0
-						? claudeFromRaw.command.trim()
-						: legacyClaudeCommand
-							? legacyClaudeCommand
-							: typeof rawSettings.claudeCodeAcpCommandPath ===
-										"string" &&
-								  rawSettings.claudeCodeAcpCommandPath.trim()
-										.length > 0
-								? rawSettings.claudeCodeAcpCommandPath.trim()
-								: DEFAULT_SETTINGS.claude.command,
-				args:
-					resolvedClaudeArgs.length > 0
-						? resolvedClaudeArgs
-						: legacyClaudeArgs.length > 0
-							? legacyClaudeArgs
-							: [],
-				env: resolvedClaudeEnv.length > 0 ? resolvedClaudeEnv : [],
-			},
-			codex: {
-				id: DEFAULT_SETTINGS.codex.id,
-				displayName:
-					typeof codexFromRaw.displayName === "string" &&
-					codexFromRaw.displayName.trim().length > 0
-						? codexFromRaw.displayName.trim()
-						: DEFAULT_SETTINGS.codex.displayName,
-				apiKey:
-					typeof codexFromRaw.apiKey === "string"
-						? codexFromRaw.apiKey
-						: legacyCodexApiKey || DEFAULT_SETTINGS.codex.apiKey,
-				command:
-					typeof codexFromRaw.command === "string" &&
-					codexFromRaw.command.trim().length > 0
-						? codexFromRaw.command.trim()
-						: legacyCodexCommand
-							? legacyCodexCommand
-							: DEFAULT_SETTINGS.codex.command,
-				args:
-					resolvedCodexArgs.length > 0
-						? resolvedCodexArgs
-						: legacyCodexArgs.length > 0
-							? legacyCodexArgs
-							: [],
-				env: resolvedCodexEnv.length > 0 ? resolvedCodexEnv : [],
-			},
-			gemini: {
-				id: DEFAULT_SETTINGS.gemini.id,
-				displayName:
-					typeof geminiFromRaw.displayName === "string" &&
-					geminiFromRaw.displayName.trim().length > 0
-						? geminiFromRaw.displayName.trim()
-						: DEFAULT_SETTINGS.gemini.displayName,
-				apiKey:
-					typeof geminiFromRaw.apiKey === "string"
-						? geminiFromRaw.apiKey
-						: legacyGeminiApiKey || DEFAULT_SETTINGS.gemini.apiKey,
-				command:
-					typeof geminiFromRaw.command === "string" &&
-					geminiFromRaw.command.trim().length > 0
-						? geminiFromRaw.command.trim()
-						: legacyGeminiCommand
-							? legacyGeminiCommand
-							: typeof rawSettings.geminiCommandPath ===
-										"string" &&
-								  rawSettings.geminiCommandPath.trim().length >
-										0
-								? rawSettings.geminiCommandPath.trim()
-								: DEFAULT_SETTINGS.gemini.command,
-				args:
-					resolvedGeminiArgs.length > 0
-						? resolvedGeminiArgs
-						: legacyGeminiArgs.length > 0
-							? legacyGeminiArgs
-							: DEFAULT_SETTINGS.gemini.args,
-				env: resolvedGeminiEnv.length > 0 ? resolvedGeminiEnv : [],
-			},
-			customAgents: customAgents,
+			agents: normalizedAgents,
 			activeAgentId,
 			autoApproveRead:
 				typeof rawSettings.autoApproveRead === "boolean"
@@ -645,26 +758,27 @@ export default class CCHubPlugin extends Plugin {
 	ensureActiveAgentId(): void {
 		const availableIds = this.collectAvailableAgentIds();
 		if (availableIds.length === 0) {
-			this.settings.activeAgentId = DEFAULT_SETTINGS.claude.id;
+			this.settings.activeAgentId = DEFAULT_SETTINGS.agents[0]?.id || "";
 			return;
 		}
 		if (!availableIds.includes(this.settings.activeAgentId)) {
 			this.settings.activeAgentId =
-				availableIds[0] || DEFAULT_SETTINGS.claude.id;
+				availableIds[0] || DEFAULT_SETTINGS.agents[0]?.id || "";
 		}
 	}
 
 	private collectAvailableAgentIds(): string[] {
-		const ids = new Set<string>();
-		ids.add(this.settings.claude.id);
-		ids.add(this.settings.codex.id);
-		ids.add(this.settings.gemini.id);
-		for (const agent of this.settings.customAgents) {
-			if (agent.id && agent.id.length > 0) {
-				ids.add(agent.id);
-			}
+		const enabledIds = this.settings.agents
+			.filter((agent) => agent.enabled)
+			.map((agent) => agent.id)
+			.filter((id) => id.length > 0);
+		if (enabledIds.length > 0) {
+			return Array.from(new Set(enabledIds));
 		}
-		return Array.from(ids);
+		const allIds = this.settings.agents
+			.map((agent) => agent.id)
+			.filter((id) => id.length > 0);
+		return Array.from(new Set(allIds));
 	}
 
 	private resolveVaultBasePath(): string {

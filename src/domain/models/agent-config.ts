@@ -30,18 +30,36 @@ export interface AgentEnvVar {
 // ============================================================================
 
 /**
- * Base configuration shared by all agent types.
- *
- * Defines the common properties needed to launch and communicate
- * with any ACP-compatible agent, regardless of the specific
- * implementation (Claude Code, Gemini CLI, custom agents, etc.).
+ * Agent protocol used by the runtime.
  */
-export interface BaseAgentSettings {
-	/** Unique identifier for this agent (e.g., "claude", "gemini", "custom-1") */
+export type AgentProtocol = "acp" | "mcp";
+
+/**
+ * Authentication configuration for an agent profile.
+ */
+export interface AgentAuthSettings {
+	/** API key used by modules that require it */
+	apiKey?: string;
+}
+
+/**
+ * Persisted agent profile stored in settings.
+ *
+ * Each profile references a module definition and carries the
+ * user-configurable values (command, args, env, auth).
+ */
+export interface AgentProfile {
+	/** Unique identifier for this agent instance */
 	id: string;
 
 	/** Human-readable display name shown in UI */
 	displayName: string;
+
+	/** Module identifier (e.g., "acp:claude", "mcp:codex") */
+	moduleId: string;
+
+	/** Whether the agent is available for selection */
+	enabled: boolean;
 
 	/** Command to execute (full path to executable or command name) */
 	command: string;
@@ -51,42 +69,7 @@ export interface BaseAgentSettings {
 
 	/** Environment variables for the agent process */
 	env: AgentEnvVar[];
-}
 
-/**
- * Configuration for Gemini CLI agent.
- *
- * Extends base settings with Gemini-specific requirements.
- */
-export interface GeminiAgentSettings extends BaseAgentSettings {
-	/** Google API key for Gemini (GOOGLE_API_KEY) */
-	apiKey: string;
+	/** Optional auth settings (e.g., API keys) */
+	auth?: AgentAuthSettings;
 }
-
-/**
- * Configuration for Claude Code agent.
- *
- * Extends base settings with Claude-specific requirements.
- */
-export interface ClaudeAgentSettings extends BaseAgentSettings {
-	/** Anthropic API key for Claude (ANTHROPIC_API_KEY) */
-	apiKey: string;
-}
-
-/**
- * Configuration for Codex CLI agent.
- *
- * Extends base settings with Codex-specific requirements.
- */
-export interface CodexAgentSettings extends BaseAgentSettings {
-	/** OpenAI API key for Codex (OPENAI_API_KEY) */
-	apiKey: string;
-}
-
-/**
- * Configuration for custom ACP-compatible agents.
- *
- * Uses only the base settings, allowing users to configure
- * any agent that implements the Agent Client Protocol.
- */
-export type CustomAgentSettings = BaseAgentSettings;

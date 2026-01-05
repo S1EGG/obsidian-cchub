@@ -1,6 +1,7 @@
 import * as React from "react";
 import { Claude, Gemini, OpenAI } from "@lobehub/icons";
 import { HeaderButton } from "./HeaderButton";
+import { getAgentModuleById } from "../../domain/agents/agent-modules";
 
 /**
  * Props for ChatHeader component
@@ -10,6 +11,8 @@ export interface ChatHeaderProps {
 	agentId: string;
 	/** Display name of the active agent */
 	agentLabel: string;
+	/** Module id for the active agent */
+	agentModuleId?: string;
 	/** Whether the session is ready for user input */
 	isSessionReady: boolean;
 	/** Conversation title for display (placeholder until wired) */
@@ -33,13 +36,19 @@ export interface ChatHeaderProps {
 export function ChatHeader({
 	agentId,
 	agentLabel,
+	agentModuleId,
 	isSessionReady,
 	conversationTitle,
 	onNewChat,
 	onExportChat,
 	onOpenSettings,
 }: ChatHeaderProps) {
-	const badge = buildAgentBadge(agentId, agentLabel, !isSessionReady);
+	const badge = buildAgentBadge(
+		agentId,
+		agentLabel,
+		agentModuleId,
+		!isSessionReady,
+	);
 	const statusLabel = isSessionReady
 		? conversationTitle?.trim() || "Untitled conversation"
 		: "Loading...";
@@ -74,9 +83,10 @@ export function ChatHeader({
 function buildAgentBadge(
 	agentId: string,
 	agentLabel: string,
+	agentModuleId: string | undefined,
 	isLoading: boolean,
 ) {
-	const icon = getAgentIcon(agentId);
+	const icon = getAgentIcon(agentModuleId);
 	const isBuiltin = icon !== null;
 	const trimmed = agentLabel.trim();
 	const monogram =
@@ -102,22 +112,22 @@ function buildAgentBadge(
 			{isBuiltin ? (
 				<span className="sr-only">{trimmed}</span>
 			) : (
-				<span className="cchub-agent-label">
-					{trimmed || agentId}
-				</span>
+				<span className="cchub-agent-label">{trimmed || agentId}</span>
 			)}
 		</div>
 	);
 }
 
-function getAgentIcon(agentId: string) {
+function getAgentIcon(agentModuleId?: string) {
+	const module = agentModuleId ? getAgentModuleById(agentModuleId) : null;
+	const iconId = module?.iconId;
 	const iconSize = 16;
-	switch (agentId) {
-		case "claude-code-acp":
+	switch (iconId) {
+		case "claude":
 			return <Claude size={iconSize} />;
-		case "codex-acp":
+		case "openai":
 			return <OpenAI size={iconSize} />;
-		case "gemini-cli":
+		case "gemini":
 			return <Gemini size={iconSize} />;
 		default:
 			return null;

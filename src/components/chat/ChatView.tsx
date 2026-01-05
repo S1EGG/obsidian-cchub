@@ -31,6 +31,11 @@ import { useAgentSession } from "../../hooks/useAgentSession";
 import { useChat } from "../../hooks/useChat";
 import { usePermission } from "../../hooks/usePermission";
 import { useAutoExport } from "../../hooks/useAutoExport";
+import {
+	getActiveAgentId,
+	getAgentDisplayName,
+	getAgentModuleId,
+} from "../../hooks/session/session-helpers";
 
 // Type definitions for Obsidian internal APIs
 interface VaultAdapterWithBasePath {
@@ -153,26 +158,11 @@ function ChatComponent({
 	// Computed Values
 	// ============================================================
 	const activeAgentLabel = useMemo(() => {
-		const activeId = session.agentId;
-		if (activeId === plugin.settings.claude.id) {
-			return (
-				plugin.settings.claude.displayName || plugin.settings.claude.id
-			);
-		}
-		if (activeId === plugin.settings.codex.id) {
-			return (
-				plugin.settings.codex.displayName || plugin.settings.codex.id
-			);
-		}
-		if (activeId === plugin.settings.gemini.id) {
-			return (
-				plugin.settings.gemini.displayName || plugin.settings.gemini.id
-			);
-		}
-		const custom = plugin.settings.customAgents.find(
-			(agent) => agent.id === activeId,
-		);
-		return custom?.displayName || custom?.id || activeId;
+		return getAgentDisplayName(plugin.settings, session.agentId);
+	}, [session.agentId, plugin.settings]);
+
+	const activeAgentModuleId = useMemo(() => {
+		return getAgentModuleId(plugin.settings, session.agentId);
 	}, [session.agentId, plugin.settings]);
 
 	// ============================================================
@@ -327,7 +317,7 @@ function ChatComponent({
 
 	// Monitor agent changes from settings when messages are empty
 	useEffect(() => {
-		const newActiveAgentId = settings.activeAgentId || settings.claude.id;
+		const newActiveAgentId = getActiveAgentId(settings);
 		if (messages.length === 0 && newActiveAgentId !== session.agentId) {
 			void agentSession.switchAgent(newActiveAgentId);
 		}
@@ -453,6 +443,7 @@ function ChatComponent({
 			<ChatHeader
 				agentId={session.agentId}
 				agentLabel={activeAgentLabel}
+				agentModuleId={activeAgentModuleId}
 				isSessionReady={isSessionReady}
 				onNewChat={() => void handleNewChat()}
 				onExportChat={() => void handleExportChat()}

@@ -12,6 +12,7 @@
  */
 
 import type { PermissionOption } from "../models/chat-message";
+import type { AgentProtocol } from "../models/agent-config";
 import type {
 	AuthenticationMethod,
 	SessionModeState,
@@ -25,13 +26,13 @@ import type { PromptContent } from "../models/prompt-content";
  * Runtime configuration for launching an AI agent process.
  *
  * This is the execution-time configuration used when spawning an agent process,
- * as opposed to BaseAgentSettings which is the storage format in plugin settings.
+ * as opposed to AgentProfile which is the storage format in plugin settings.
  *
- * Key differences from BaseAgentSettings:
+ * Key differences from AgentProfile:
  * - env is converted to Record<string, string> format for process.spawn()
  * - workingDirectory is added for the session execution context
  *
- * Adapters are responsible for converting BaseAgentSettings → AgentConfig
+ * Adapters are responsible for converting AgentProfile → AgentConfig
  * before launching the agent process.
  */
 export interface AgentConfig {
@@ -40,6 +41,12 @@ export interface AgentConfig {
 
 	/** Display name for the agent */
 	displayName: string;
+
+	/** Agent protocol used by the runtime */
+	protocol: AgentProtocol;
+
+	/** Module identifier for this agent */
+	moduleId?: string;
 
 	/** Command to execute (full path to executable) */
 	command: string;

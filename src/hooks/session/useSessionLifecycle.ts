@@ -8,8 +8,8 @@ import type { ISettingsAccess } from "../../domain/ports/settings-access.port";
 import {
 	getActiveAgentId,
 	getCurrentAgent,
-	findAgentSettings,
-	buildAgentConfigWithApiKey,
+	findAgentProfile,
+	buildAgentRuntimeConfigFromProfile,
 } from "./session-helpers";
 import {
 	TimeoutError,
@@ -77,9 +77,13 @@ export function useSessionLifecycle(
 		}));
 		onErrorUpdate(null);
 
+		let resolvedRuntime: ReturnType<
+			typeof buildAgentRuntimeConfigFromProfile
+		> | null = null;
+
 		try {
 			// Find agent settings
-			const agentSettings = findAgentSettings(settings, activeAgentId);
+			const agentSettings = findAgentProfile(settings, activeAgentId);
 			console.debug(
 				"[useSessionLifecycle] agentSettings:",
 				agentSettings,
@@ -97,13 +101,24 @@ export function useSessionLifecycle(
 			}
 
 			// Build agent configuration
-			const agentConfig = buildAgentConfigWithApiKey(
-				settings,
+			resolvedRuntime = buildAgentRuntimeConfigFromProfile(
 				agentSettings,
-				activeAgentId,
 				workingDirectory,
 			);
+			const agentConfig = resolvedRuntime.config;
 			console.debug("[useSessionLifecycle] agentConfig:", agentConfig);
+
+			if (!agentConfig.command) {
+				onSessionUpdate((prev) => ({ ...prev, state: "error" }));
+				onErrorUpdate({
+					title: "Agent Command Missing",
+					message: `Agent "${agentConfig.displayName}" has no command configured.`,
+					suggestion:
+						resolvedRuntime?.module.setupHint ||
+						"Please configure the agent command in settings.",
+				});
+				return;
+			}
 
 			// Check if initialization is needed
 			const isInit = cchubClient.isInitialized();
@@ -171,18 +186,19 @@ export function useSessionLifecycle(
 
 			if (error instanceof TimeoutError) {
 				const isInit = error.step === "initialize";
-				const isCodex = activeAgentId === settings.codex.id;
+				const isMcp = resolvedRuntime?.module.protocol === "mcp";
 				onErrorUpdate({
 					title: isInit
 						? "Agent Initialization Timeout"
 						: "Session Creation Timeout",
 					message: isInit
-						? isCodex
-							? "Codex did not respond during MCP initialization in time."
+						? isMcp
+							? "The agent did not respond during MCP initialization in time."
 							: "The agent did not respond to the ACP handshake in time."
 						: "The agent did not respond to session creation in time.",
 					suggestion:
-						"Please confirm the agent command is correct: Claude Code uses codex-acp/claude-code-acp, Gemini needs --experimental-acp, and Codex CLI should be the codex binary (MCP).",
+						resolvedRuntime?.module.setupHint ||
+						"Please confirm the agent command is correct.",
 				});
 				return;
 			}

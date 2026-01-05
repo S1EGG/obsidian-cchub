@@ -1,18 +1,17 @@
 import { accessSync, constants } from "fs";
 import { delimiter, join } from "path";
 import { Platform } from "obsidian";
-import type { AcpCliProfile } from "./acp-cli-profiles";
 
 export interface DetectedCliCommand {
 	command: string;
 	detectedFrom: string;
 }
 
-export class AcpCliDetector {
+export class CliDetector {
 	private cache = new Map<string, string | null>();
 
-	detect(profile: AcpCliProfile): DetectedCliCommand | null {
-		for (const candidate of profile.commandCandidates) {
+	detect(commandCandidates: string[]): DetectedCliCommand | null {
+		for (const candidate of commandCandidates) {
 			const resolved = this.resolveCandidate(candidate);
 			if (resolved) {
 				return {

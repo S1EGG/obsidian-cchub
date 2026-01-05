@@ -1,13 +1,9 @@
 import type { CCHubPluginSettings } from "../../plugin";
-import type {
-	BaseAgentSettings,
-	ClaudeAgentSettings,
-	CodexAgentSettings,
-	GeminiAgentSettings,
-} from "../../domain/models/agent-config";
-import type { AgentConfig } from "../../domain/ports/cchub.port";
-import { toAgentConfig } from "../../shared/settings-utils";
-import { resolveAcpAgentCommand } from "../../adapters/acp/acp-command-resolver";
+import type { AgentProfile } from "../../domain/models/agent-config";
+import {
+	buildAgentRuntimeConfig,
+	type ResolvedAgentRuntimeConfig,
+} from "../../domain/agents/agent-runtime";
 
 /**
  * Agent information for display.
@@ -15,13 +11,14 @@ import { resolveAcpAgentCommand } from "../../adapters/acp/acp-command-resolver"
 export interface AgentInfo {
 	id: string;
 	displayName: string;
+	moduleId: string;
 }
 
 /**
  * Get the currently active agent ID from settings.
  */
 export function getActiveAgentId(settings: CCHubPluginSettings): string {
-	return settings.activeAgentId || settings.claude.id;
+	return settings.activeAgentId || settings.agents[0]?.id || "";
 }
 
 /**
@@ -30,38 +27,26 @@ export function getActiveAgentId(settings: CCHubPluginSettings): string {
 export function getAvailableAgentsFromSettings(
 	settings: CCHubPluginSettings,
 ): AgentInfo[] {
-	return [
-		{
-			id: settings.claude.id,
-			displayName: settings.claude.displayName || settings.claude.id,
-		},
-		{
-			id: settings.codex.id,
-			displayName: settings.codex.displayName || settings.codex.id,
-		},
-		{
-			id: settings.gemini.id,
-			displayName: settings.gemini.displayName || settings.gemini.id,
-		},
-		...settings.customAgents.map((agent) => ({
-			id: agent.id,
-			displayName: agent.displayName || agent.id,
-		})),
-	];
+	const enabled = settings.agents.filter((agent) => agent.enabled);
+	const source = enabled.length > 0 ? enabled : settings.agents;
+	return source.map((agent) => ({
+		id: agent.id,
+		displayName: agent.displayName || agent.id,
+		moduleId: agent.moduleId,
+	}));
 }
 
 /**
  * Get the currently active agent information from settings.
  */
-export function getCurrentAgent(
-	settings: CCHubPluginSettings,
-): AgentInfo {
+export function getCurrentAgent(settings: CCHubPluginSettings): AgentInfo {
 	const activeId = getActiveAgentId(settings);
 	const agents = getAvailableAgentsFromSettings(settings);
 	return (
 		agents.find((agent) => agent.id === activeId) || {
 			id: activeId,
 			displayName: activeId,
+			moduleId: "",
 		}
 	);
 }
@@ -69,79 +54,35 @@ export function getCurrentAgent(
 /**
  * Find agent settings by ID from plugin settings.
  */
-export function findAgentSettings(
+export function findAgentProfile(
 	settings: CCHubPluginSettings,
 	agentId: string,
-): BaseAgentSettings | null {
-	if (agentId === settings.claude.id) {
-		return settings.claude;
-	}
-	if (agentId === settings.codex.id) {
-		return settings.codex;
-	}
-	if (agentId === settings.gemini.id) {
-		return settings.gemini;
-	}
-	// Search in custom agents
-	const customAgent = settings.customAgents.find(
-		(agent) => agent.id === agentId,
-	);
-	return customAgent || null;
+): AgentProfile | null {
+	return settings.agents.find((agent) => agent.id === agentId) || null;
 }
 
 /**
- * Build AgentConfig with API key injection for known agents.
+ * Build AgentConfig from profile with module resolution applied.
  */
-export function buildAgentConfigWithApiKey(
-	settings: CCHubPluginSettings,
-	agentSettings: BaseAgentSettings,
-	agentId: string,
+export function buildAgentRuntimeConfigFromProfile(
+	profile: AgentProfile,
 	workingDirectory: string,
-): AgentConfig {
-	const resolvedCommand = resolveAcpAgentCommand(
-		settings,
-		agentSettings,
-		agentId,
-	);
-	const normalizedSettings: BaseAgentSettings = {
-		...agentSettings,
-		command: resolvedCommand.command,
-		args: resolvedCommand.args,
-	};
-	const baseConfig = toAgentConfig(normalizedSettings, workingDirectory);
+): ResolvedAgentRuntimeConfig {
+	return buildAgentRuntimeConfig(profile, workingDirectory);
+}
 
-	// Add API keys to environment for Claude, Codex, and Gemini
-	if (agentId === settings.claude.id) {
-		const claudeSettings = agentSettings as ClaudeAgentSettings;
-		return {
-			...baseConfig,
-			env: {
-				...baseConfig.env,
-				ANTHROPIC_API_KEY: claudeSettings.apiKey,
-			},
-		};
-	}
-	if (agentId === settings.codex.id) {
-		const codexSettings = agentSettings as CodexAgentSettings;
-		return {
-			...baseConfig,
-			env: {
-				...baseConfig.env,
-				OPENAI_API_KEY: codexSettings.apiKey,
-			},
-		};
-	}
-	if (agentId === settings.gemini.id) {
-		const geminiSettings = agentSettings as GeminiAgentSettings;
-		return {
-			...baseConfig,
-			env: {
-				...baseConfig.env,
-				GOOGLE_API_KEY: geminiSettings.apiKey,
-			},
-		};
-	}
+export function getAgentDisplayName(
+	settings: CCHubPluginSettings,
+	agentId: string,
+): string {
+	const agent = findAgentProfile(settings, agentId);
+	return agent?.displayName || agent?.id || agentId;
+}
 
-	// Custom agents - no API key injection
-	return baseConfig;
+export function getAgentModuleId(
+	settings: CCHubPluginSettings,
+	agentId: string,
+): string {
+	const agent = findAgentProfile(settings, agentId);
+	return agent?.moduleId || "";
 }

@@ -1,4 +1,9 @@
 import type { CCHubPluginSettings } from "../../plugin";
+import {
+	FALLBACK_AGENT_MODULE,
+	getAgentModuleById,
+} from "../../domain/agents/agent-modules";
+import { findAgentProfile } from "./session-helpers";
 
 /**
  * Timeout error for session operations.
@@ -23,10 +28,10 @@ export function getInitializeTimeoutMs(
 	settings: CCHubPluginSettings,
 	agentId: string,
 ): number {
-	if (agentId === settings.codex.id) {
-		return 60000; // Codex needs more time
-	}
-	return INITIALIZE_TIMEOUT_MS;
+	const agent = findAgentProfile(settings, agentId);
+	const module =
+		(agent && getAgentModuleById(agent.moduleId)) || FALLBACK_AGENT_MODULE;
+	return module.timeouts?.initializeMs ?? INITIALIZE_TIMEOUT_MS;
 }
 
 /**
@@ -36,10 +41,10 @@ export function getNewSessionTimeoutMs(
 	settings: CCHubPluginSettings,
 	agentId: string,
 ): number {
-	if (agentId === settings.codex.id) {
-		return 120000; // Codex needs much more time for MCP server startup and session creation
-	}
-	return NEW_SESSION_TIMEOUT_MS;
+	const agent = findAgentProfile(settings, agentId);
+	const module =
+		(agent && getAgentModuleById(agent.moduleId)) || FALLBACK_AGENT_MODULE;
+	return module.timeouts?.newSessionMs ?? NEW_SESSION_TIMEOUT_MS;
 }
 
 /**

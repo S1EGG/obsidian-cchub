@@ -1,5 +1,9 @@
-import type { AgentEnvVar, CustomAgentSettings } from "../plugin";
-import type { BaseAgentSettings } from "../domain/models/agent-config";
+import type {
+	AgentAuthSettings,
+	AgentEnvVar,
+	AgentProfile,
+	AgentProtocol,
+} from "../domain/models/agent-config";
 import type { AgentConfig } from "../domain/ports/cchub.port";
 
 export const sanitizeArgs = (value: unknown): string[] => {
@@ -62,50 +66,81 @@ export const normalizeEnvVars = (value: unknown): AgentEnvVar[] => {
 	});
 };
 
-// Rebuild a custom agent entry with defaults and cleaned values
-export const normalizeCustomAgent = (
+// Rebuild an agent profile entry with defaults and cleaned values
+export const normalizeAgentProfile = (
 	agent: Record<string, unknown>,
-): CustomAgentSettings => {
+	fallback: Partial<AgentProfile> = {},
+): AgentProfile => {
 	const rawId =
 		agent && typeof agent.id === "string" && agent.id.trim().length > 0
 			? agent.id.trim()
-			: "custom-agent";
+			: fallback.id || "agent";
 	const rawDisplayName =
 		agent &&
 		typeof agent.displayName === "string" &&
 		agent.displayName.trim().length > 0
 			? agent.displayName.trim()
-			: rawId;
+			: fallback.displayName || rawId;
+	const rawModuleId =
+		agent &&
+		typeof agent.moduleId === "string" &&
+		agent.moduleId.trim().length > 0
+			? agent.moduleId.trim()
+			: fallback.moduleId || "acp:custom";
+	const enabled =
+		typeof agent.enabled === "boolean"
+			? agent.enabled
+			: (fallback.enabled ?? true);
+	const command =
+		agent && typeof agent.command === "string"
+			? agent.command.trim()
+			: fallback.command || "";
+	const args = sanitizeArgs(
+		"args" in agent ? agent.args : (fallback.args ?? []),
+	);
+	const env = normalizeEnvVars(
+		"env" in agent
+			? agent.env
+			: "envVars" in agent
+				? agent.envVars
+				: fallback.env,
+	);
+	const rawAuth =
+		"auth" in agent && agent.auth && typeof agent.auth === "object"
+			? (agent.auth as Record<string, unknown>)
+			: {};
+	const rawApiKey =
+		typeof rawAuth.apiKey === "string"
+			? rawAuth.apiKey
+			: typeof agent.apiKey === "string"
+				? agent.apiKey
+				: fallback.auth?.apiKey;
+	const shouldKeepAuth =
+		"auth" in agent || "apiKey" in agent || fallback.auth !== undefined;
+	const auth: AgentAuthSettings | undefined = shouldKeepAuth
+		? { apiKey: rawApiKey || "" }
+		: undefined;
+
 	return {
 		id: rawId,
 		displayName: rawDisplayName,
-		command:
-			agent &&
-			typeof agent.command === "string" &&
-			agent.command.trim().length > 0
-				? agent.command.trim()
-				: "",
-		args: sanitizeArgs(agent?.args),
-		env: normalizeEnvVars(
-			"env" in agent
-				? agent.env
-				: "envVars" in agent
-					? agent.envVars
-					: undefined,
-		),
+		moduleId: rawModuleId,
+		enabled,
+		command,
+		args,
+		env,
+		auth,
 	};
 };
 
-// Ensure custom agent IDs are unique within the collection
-export const ensureUniqueCustomAgentIds = (
-	agents: CustomAgentSettings[],
-): CustomAgentSettings[] => {
+// Ensure agent IDs are unique within the collection
+export const ensureUniqueAgentIds = (
+	agents: AgentProfile[],
+): AgentProfile[] => {
 	const seen = new Set<string>();
 	return agents.map((agent) => {
 		const base =
-			agent.id && agent.id.trim().length > 0
-				? agent.id.trim()
-				: "custom-agent";
+			agent.id && agent.id.trim().length > 0 ? agent.id.trim() : "agent";
 		let candidate = base;
 		let suffix = 2;
 		while (seen.has(candidate)) {
@@ -118,9 +153,9 @@ export const ensureUniqueCustomAgentIds = (
 };
 
 /**
- * Convert BaseAgentSettings to AgentConfig for process execution.
+ * Convert AgentProfile to AgentConfig for process execution.
  *
- * Transforms the storage format (BaseAgentSettings) to the runtime format (AgentConfig)
+ * Transforms the storage format (AgentProfile) to the runtime format (AgentConfig)
  * needed by ICCHubClient.initialize().
  *
  * @param settings - Agent settings from plugin configuration
@@ -128,24 +163,32 @@ export const ensureUniqueCustomAgentIds = (
  * @returns AgentConfig ready for agent process spawning
  */
 export const toAgentConfig = (
-	settings: BaseAgentSettings,
+	settings: AgentProfile,
 	workingDirectory: string,
+	protocol: AgentProtocol,
+	moduleId: string,
+	envOverride?: Record<string, string>,
 ): AgentConfig => {
 	// Convert AgentEnvVar[] to Record<string, string> for process.spawn()
-	const env = settings.env.reduce(
-		(acc, { key, value }) => {
-			acc[key] = value;
-			return acc;
-		},
-		{} as Record<string, string>,
-	);
+	const env = envOverride
+		? envOverride
+		: settings.env.reduce(
+				(acc, { key, value }) => {
+					acc[key] = value;
+					return acc;
+				},
+				{} as Record<string, string>,
+			);
+	const resolvedEnv = Object.keys(env).length > 0 ? env : undefined;
 
 	return {
 		id: settings.id,
 		displayName: settings.displayName,
 		command: settings.command,
 		args: settings.args,
-		env,
+		env: resolvedEnv,
 		workingDirectory,
+		protocol,
+		moduleId,
 	};
 };

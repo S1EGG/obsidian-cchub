@@ -6,14 +6,23 @@ import {
 	Platform,
 } from "obsidian";
 import type CCHubPlugin from "../../plugin";
-import type { CustomAgentSettings, AgentEnvVar } from "../../plugin";
+import type {
+	AgentEnvVar,
+	AgentProfile,
+} from "../../domain/models/agent-config";
 import { normalizeEnvVars } from "../../shared/settings-utils";
+import {
+	getAgentModuleById,
+	listAgentModules,
+	type AgentModuleDefinition,
+} from "../../domain/agents/agent-modules";
 
 /* eslint-disable obsidianmd/ui/sentence-case */
 export class CCHubSettingTab extends PluginSettingTab {
 	plugin: CCHubPlugin;
 	private agentSelector: DropdownComponent | null = null;
 	private unsubscribe: (() => void) | null = null;
+	private newAgentModuleId = "acp:custom";
 
 	constructor(app: App, plugin: CCHubPlugin) {
 		super(app, plugin);
@@ -178,15 +187,9 @@ export class CCHubSettingTab extends PluginSettingTab {
 			}
 		}
 
-		new Setting(containerEl).setName("Built-in agents").setHeading();
+		new Setting(containerEl).setName("Agents").setHeading();
 
-		this.renderClaudeSettings(containerEl);
-		this.renderCodexSettings(containerEl);
-		this.renderGeminiSettings(containerEl);
-
-		new Setting(containerEl).setName("Custom agents").setHeading();
-
-		this.renderCustomAgents(containerEl);
+		this.renderAgents(containerEl);
 
 		new Setting(containerEl).setName("Export").setHeading();
 
@@ -420,36 +423,11 @@ export class CCHubSettingTab extends PluginSettingTab {
 	}
 
 	private getAgentOptions(): { id: string; label: string }[] {
-		const toOption = (id: string, displayName: string) => ({
-			id,
-			label: `${displayName} (${id})`,
-		});
-		const options: { id: string; label: string }[] = [
-			toOption(
-				this.plugin.settings.claude.id,
-				this.plugin.settings.claude.displayName ||
-					this.plugin.settings.claude.id,
-			),
-			toOption(
-				this.plugin.settings.codex.id,
-				this.plugin.settings.codex.displayName ||
-					this.plugin.settings.codex.id,
-			),
-			toOption(
-				this.plugin.settings.gemini.id,
-				this.plugin.settings.gemini.displayName ||
-					this.plugin.settings.gemini.id,
-			),
-		];
-		for (const agent of this.plugin.settings.customAgents) {
-			if (agent.id && agent.id.length > 0) {
-				const labelSource =
-					agent.displayName && agent.displayName.length > 0
-						? agent.displayName
-						: agent.id;
-				options.push(toOption(agent.id, labelSource));
-			}
-		}
+		const options: { id: string; label: string }[] =
+			this.getSelectableAgents().map((agent) => ({
+				id: agent.id,
+				label: `${agent.displayName || agent.id} (${agent.id})`,
+			}));
 		const seen = new Set<string>();
 		return options.filter(({ id }) => {
 			if (seen.has(id)) {
@@ -460,258 +438,67 @@ export class CCHubSettingTab extends PluginSettingTab {
 		});
 	}
 
-	private renderGeminiSettings(sectionEl: HTMLElement) {
-		const gemini = this.plugin.settings.gemini;
-
-		new Setting(sectionEl)
-			.setName(gemini.displayName || "Gemini CLI")
-			.setHeading();
-
-		new Setting(sectionEl)
-			.setName("API key")
-			.setDesc(
-				"Gemini API key. Required if not logging in with a Google account. (Stored as plain text)",
-			)
-			.addText((text) => {
-				text.setPlaceholder("Enter your Gemini API key")
-					.setValue(gemini.apiKey)
-					.onChange(async (value) => {
-						this.plugin.settings.gemini.apiKey = value.trim();
-						await this.plugin.saveSettings();
-					});
-				text.inputEl.type = "password";
-			});
-
-		new Setting(sectionEl)
-			.setName("Path")
-			.setDesc(
-				'Absolute path to the Gemini CLI. On macOS/Linux, use "which gemini", and on Windows, use "where gemini" to find it.',
-			)
-			.addText((text) => {
-				text.setPlaceholder("Absolute path to gemini")
-					.setValue(gemini.command)
-					.onChange(async (value) => {
-						this.plugin.settings.gemini.command = value.trim();
-						await this.plugin.saveSettings();
-					});
-			});
-
-		new Setting(sectionEl)
-			.setName("Arguments")
-			.setDesc(
-				'Enter one argument per line. Leave empty to run without arguments.(Currently, the Gemini CLI requires the "--experimental-acp" option.)',
-			)
-			.addTextArea((text) => {
-				text.setPlaceholder("")
-					.setValue(this.formatArgs(gemini.args))
-					.onChange(async (value) => {
-						this.plugin.settings.gemini.args =
-							this.parseArgs(value);
-						await this.plugin.saveSettings();
-					});
-				text.inputEl.rows = 3;
-			});
-
-		new Setting(sectionEl)
-			.setName("Environment variables")
-			.setDesc(
-				"Enter KEY=VALUE pairs, one per line. Required to authenticate with Vertex AI. GEMINI_API_KEY is derived from the field above.(Stored as plain text)",
-			)
-			.addTextArea((text) => {
-				text.setPlaceholder("GOOGLE_CLOUD_PROJECT=...")
-					.setValue(this.formatEnv(gemini.env))
-					.onChange(async (value) => {
-						this.plugin.settings.gemini.env = this.parseEnv(value);
-						await this.plugin.saveSettings();
-					});
-				text.inputEl.rows = 3;
-			});
+	private getSelectableAgents(): AgentProfile[] {
+		const enabled = this.plugin.settings.agents.filter(
+			(agent) => agent.enabled,
+		);
+		return enabled.length > 0 ? enabled : this.plugin.settings.agents;
 	}
 
-	private renderClaudeSettings(sectionEl: HTMLElement) {
-		const claude = this.plugin.settings.claude;
-
-		new Setting(sectionEl)
-			.setName(claude.displayName || "Claude Code (ACP)")
-			.setHeading();
-
-		new Setting(sectionEl)
-			.setName("API key")
-			.setDesc(
-				"Anthropic API key. Required if not logging in with an Anthropic account. (Stored as plain text)",
-			)
-			.addText((text) => {
-				text.setPlaceholder("Enter your Anthropic API key")
-					.setValue(claude.apiKey)
-					.onChange(async (value) => {
-						this.plugin.settings.claude.apiKey = value.trim();
-						await this.plugin.saveSettings();
-					});
-				text.inputEl.type = "password";
-			});
-
-		new Setting(sectionEl)
-			.setName("Path")
-			.setDesc(
-				'Absolute path to the claude-code-acp. On macOS/Linux, use "which claude-code-acp", and on Windows, use "where claude-code-acp" to find it.',
-			)
-			.addText((text) => {
-				text.setPlaceholder("Absolute path to claude-code-acp")
-					.setValue(claude.command)
-					.onChange(async (value) => {
-						this.plugin.settings.claude.command = value.trim();
-						await this.plugin.saveSettings();
-					});
-			});
-
-		new Setting(sectionEl)
-			.setName("Arguments")
-			.setDesc(
-				"Enter one argument per line. Leave empty to run without arguments.",
-			)
-			.addTextArea((text) => {
-				text.setPlaceholder("")
-					.setValue(this.formatArgs(claude.args))
-					.onChange(async (value) => {
-						this.plugin.settings.claude.args =
-							this.parseArgs(value);
-						await this.plugin.saveSettings();
-					});
-				text.inputEl.rows = 3;
-			});
-
-		new Setting(sectionEl)
-			.setName("Environment variables")
-			.setDesc(
-				"Enter KEY=VALUE pairs, one per line. ANTHROPIC_API_KEY is derived from the field above.",
-			)
-			.addTextArea((text) => {
-				text.setPlaceholder("")
-					.setValue(this.formatEnv(claude.env))
-					.onChange(async (value) => {
-						this.plugin.settings.claude.env = this.parseEnv(value);
-						await this.plugin.saveSettings();
-					});
-				text.inputEl.rows = 3;
-			});
-	}
-
-	private renderCodexSettings(sectionEl: HTMLElement) {
-		const codex = this.plugin.settings.codex;
-
-		new Setting(sectionEl)
-			.setName(codex.displayName || "Codex")
-			.setHeading();
-
-		new Setting(sectionEl)
-			.setName("API key")
-			.setDesc(
-				"OpenAI API key. Required if not logging in with an OpenAI account. (Stored as plain text)",
-			)
-			.addText((text) => {
-				text.setPlaceholder("Enter your OpenAI API key")
-					.setValue(codex.apiKey)
-					.onChange(async (value) => {
-						this.plugin.settings.codex.apiKey = value.trim();
-						await this.plugin.saveSettings();
-					});
-				text.inputEl.type = "password";
-			});
-
-		new Setting(sectionEl)
-			.setName("Path")
-			.setDesc(
-				'Absolute path to the Codex CLI (codex) or codex-acp. On macOS/Linux, use "which codex" (or "which codex-acp"), and on Windows, use "where codex" to find it.',
-			)
-			.addText((text) => {
-				text.setPlaceholder("Absolute path to codex or codex-acp")
-					.setValue(codex.command)
-					.onChange(async (value) => {
-						this.plugin.settings.codex.command = value.trim();
-						await this.plugin.saveSettings();
-					});
-			});
-
-		new Setting(sectionEl)
-			.setName("Arguments")
-			.setDesc(
-				"Enter one argument per line. Leave empty to run without arguments.",
-			)
-			.addTextArea((text) => {
-				text.setPlaceholder("")
-					.setValue(this.formatArgs(codex.args))
-					.onChange(async (value) => {
-						this.plugin.settings.codex.args = this.parseArgs(value);
-						await this.plugin.saveSettings();
-					});
-				text.inputEl.rows = 3;
-			});
-
-		new Setting(sectionEl)
-			.setName("Environment variables")
-			.setDesc(
-				"Enter KEY=VALUE pairs, one per line. OPENAI_API_KEY is derived from the field above.",
-			)
-			.addTextArea((text) => {
-				text.setPlaceholder("")
-					.setValue(this.formatEnv(codex.env))
-					.onChange(async (value) => {
-						this.plugin.settings.codex.env = this.parseEnv(value);
-						await this.plugin.saveSettings();
-					});
-				text.inputEl.rows = 3;
-			});
-	}
-
-	private renderCustomAgents(containerEl: HTMLElement) {
-		if (this.plugin.settings.customAgents.length === 0) {
+	private renderAgents(containerEl: HTMLElement) {
+		if (this.plugin.settings.agents.length === 0) {
 			containerEl.createEl("p", {
-				text: "No custom agents configured yet.",
+				text: "No agents configured yet.",
 			});
 		} else {
-			this.plugin.settings.customAgents.forEach((agent, index) => {
-				this.renderCustomAgent(containerEl, agent, index);
+			this.plugin.settings.agents.forEach((agent, index) => {
+				this.renderAgentProfile(containerEl, agent, index);
 			});
 		}
 
-		new Setting(containerEl).addButton((button) => {
-			button
-				.setButtonText("Add custom agent")
-				.setCta()
-				.onClick(async () => {
-					const newId = this.generateCustomAgentId();
-					const newDisplayName =
-						this.generateCustomAgentDisplayName();
-					this.plugin.settings.customAgents.push({
-						id: newId,
-						displayName: newDisplayName,
-						command: "",
-						args: [],
-						env: [],
-					});
-					this.plugin.ensureActiveAgentId();
-					await this.plugin.saveSettings();
-					this.display();
-				});
-		});
+		this.renderAddAgentControls(containerEl);
 	}
 
-	private renderCustomAgent(
+	private renderAgentProfile(
 		containerEl: HTMLElement,
-		agent: CustomAgentSettings,
+		agent: AgentProfile,
 		index: number,
 	) {
-		const getAgentAtIndex = () => this.plugin.settings.customAgents[index];
+		const getAgentAtIndex = () => this.plugin.settings.agents[index];
+		const module = getAgentModuleById(agent.moduleId);
+		const moduleLabel = module
+			? this.getModuleOptionLabel(module)
+			: agent.moduleId;
 
 		const blockEl = containerEl.createDiv({
 			cls: "cchub-custom-agent",
 		});
 
+		new Setting(blockEl)
+			.setName(agent.displayName || agent.id || "Agent")
+			.setHeading();
+
+		new Setting(blockEl)
+			.setName("Enabled")
+			.setDesc("Include this agent in the selection list.")
+			.addToggle((toggle) =>
+				toggle.setValue(agent.enabled).onChange(async (value) => {
+					const current = getAgentAtIndex();
+					if (!current) {
+						return;
+					}
+					current.enabled = value;
+					this.plugin.ensureActiveAgentId();
+					await this.plugin.saveSettings();
+					this.refreshAgentDropdown();
+				}),
+			);
+
 		const idSetting = new Setting(blockEl)
 			.setName("Agent ID")
 			.setDesc("Unique identifier used to reference this agent.")
 			.addText((text) => {
-				text.setPlaceholder("custom-agent")
+				text.setPlaceholder(this.makeAgentIdBase(agent.moduleId))
 					.setValue(agent.id)
 					.onChange(async (value) => {
 						const current = getAgentAtIndex();
@@ -719,15 +506,17 @@ export class CCHubSettingTab extends PluginSettingTab {
 							return;
 						}
 						const previousId = current.id;
-						const trimmed = value.trim();
-						let nextId = trimmed;
-						if (nextId.length === 0) {
-							nextId = this.generateCustomAgentId();
-							text.setValue(nextId);
-						}
+						const nextId = this.ensureUniqueAgentId(
+							value.trim(),
+							index,
+							current.moduleId,
+						);
 						current.id = nextId;
 						if (this.plugin.settings.activeAgentId === previousId) {
 							this.plugin.settings.activeAgentId = nextId;
+						}
+						if (nextId !== value.trim()) {
+							text.setValue(nextId);
 						}
 						this.plugin.ensureActiveAgentId();
 						await this.plugin.saveSettings();
@@ -740,7 +529,7 @@ export class CCHubSettingTab extends PluginSettingTab {
 				.setIcon("trash")
 				.setTooltip("Delete this agent")
 				.onClick(async () => {
-					this.plugin.settings.customAgents.splice(index, 1);
+					this.plugin.settings.agents.splice(index, 1);
 					this.plugin.ensureActiveAgentId();
 					await this.plugin.saveSettings();
 					this.display();
@@ -751,7 +540,7 @@ export class CCHubSettingTab extends PluginSettingTab {
 			.setName("Display name")
 			.setDesc("Shown in menus and headers.")
 			.addText((text) => {
-				text.setPlaceholder("Custom agent")
+				text.setPlaceholder(module?.label || "Agent")
 					.setValue(agent.displayName || agent.id)
 					.onChange(async (value) => {
 						const current = getAgentAtIndex();
@@ -767,10 +556,63 @@ export class CCHubSettingTab extends PluginSettingTab {
 			});
 
 		new Setting(blockEl)
+			.setName("Module")
+			.setDesc(module?.description || "Select the agent backend module.")
+			.addDropdown((dropdown) => {
+				for (const moduleOption of listAgentModules()) {
+					dropdown.addOption(
+						moduleOption.id,
+						this.getModuleOptionLabel(moduleOption),
+					);
+				}
+				dropdown.setValue(agent.moduleId);
+				dropdown.onChange(async (value) => {
+					const current = getAgentAtIndex();
+					if (!current) {
+						return;
+					}
+					current.moduleId = value;
+					const nextModule = getAgentModuleById(value);
+					if (nextModule?.auth && !current.auth) {
+						current.auth = { apiKey: "" };
+					}
+					await this.plugin.saveSettings();
+					this.refreshAgentDropdown();
+					this.display();
+				});
+			});
+
+		new Setting(blockEl)
+			.setName("Module summary")
+			.setDesc(`当前模块: ${moduleLabel}`);
+
+		const auth = module?.auth;
+		if (auth?.type === "apiKey") {
+			new Setting(blockEl)
+				.setName(auth.label)
+				.setDesc(`${auth.description} (Stored as plain text)`)
+				.addText((text) => {
+					text.setPlaceholder(auth.placeholder || "")
+						.setValue(agent.auth?.apiKey || "")
+						.onChange(async (value) => {
+							const current = getAgentAtIndex();
+							if (!current) {
+								return;
+							}
+							current.auth = {
+								apiKey: value.trim(),
+							};
+							await this.plugin.saveSettings();
+						});
+					text.inputEl.type = "password";
+				});
+		}
+
+		new Setting(blockEl)
 			.setName("Path")
-			.setDesc("Absolute path to the custom agent.")
+			.setDesc(this.getCommandDesc(module))
 			.addText((text) => {
-				text.setPlaceholder("Absolute path to custom agent")
+				text.setPlaceholder(this.getCommandPlaceholder(module))
 					.setValue(agent.command)
 					.onChange(async (value) => {
 						const current = getAgentAtIndex();
@@ -784,9 +626,7 @@ export class CCHubSettingTab extends PluginSettingTab {
 
 		new Setting(blockEl)
 			.setName("Arguments")
-			.setDesc(
-				"Enter one argument per line. Leave empty to run without arguments.",
-			)
+			.setDesc(this.getArgsDesc(module))
 			.addTextArea((text) => {
 				text.setPlaceholder("--flag\n--another=value")
 					.setValue(this.formatArgs(agent.args))
@@ -803,11 +643,9 @@ export class CCHubSettingTab extends PluginSettingTab {
 
 		new Setting(blockEl)
 			.setName("Environment variables")
-			.setDesc(
-				"Enter KEY=VALUE pairs, one per line. (Stored as plain text)",
-			)
+			.setDesc(this.getEnvDesc(module))
 			.addTextArea((text) => {
-				text.setPlaceholder("TOKEN=...")
+				text.setPlaceholder("KEY=VALUE")
 					.setValue(this.formatEnv(agent.env))
 					.onChange(async (value) => {
 						const current = getAgentAtIndex();
@@ -821,41 +659,77 @@ export class CCHubSettingTab extends PluginSettingTab {
 			});
 	}
 
-	private generateCustomAgentDisplayName(): string {
-		const base = "Custom agent";
-		const existing = new Set<string>();
-		existing.add(
-			this.plugin.settings.claude.displayName ||
-				this.plugin.settings.claude.id,
-		);
-		existing.add(
-			this.plugin.settings.codex.displayName ||
-				this.plugin.settings.codex.id,
-		);
-		existing.add(
-			this.plugin.settings.gemini.displayName ||
-				this.plugin.settings.gemini.id,
-		);
-		for (const item of this.plugin.settings.customAgents) {
-			existing.add(item.displayName || item.id);
-		}
-		if (!existing.has(base)) {
-			return base;
-		}
-		let counter = 2;
-		let candidate = `${base} ${counter}`;
-		while (existing.has(candidate)) {
-			counter += 1;
-			candidate = `${base} ${counter}`;
-		}
-		return candidate;
+	private renderAddAgentControls(containerEl: HTMLElement) {
+		new Setting(containerEl)
+			.setName("Add agent")
+			.setDesc("Create a new agent profile from a module.")
+			.addDropdown((dropdown) => {
+				const modules = listAgentModules();
+				const fallbackModuleId =
+					modules[0]?.id || this.newAgentModuleId;
+				if (!getAgentModuleById(this.newAgentModuleId)) {
+					this.newAgentModuleId = fallbackModuleId;
+				}
+				for (const moduleOption of modules) {
+					dropdown.addOption(
+						moduleOption.id,
+						this.getModuleOptionLabel(moduleOption),
+					);
+				}
+				dropdown.setValue(this.newAgentModuleId);
+				dropdown.onChange((value) => {
+					this.newAgentModuleId = value;
+				});
+			})
+			.addButton((button) => {
+				button
+					.setButtonText("Add agent")
+					.setCta()
+					.onClick(async () => {
+						const profile = this.createAgentProfileForModule(
+							this.newAgentModuleId,
+						);
+						this.plugin.settings.agents.push(profile);
+						this.plugin.ensureActiveAgentId();
+						await this.plugin.saveSettings();
+						this.display();
+					});
+			});
 	}
 
-	// Create a readable ID for new custom agents and avoid collisions
-	private generateCustomAgentId(): string {
-		const base = "custom-agent";
+	private createAgentProfileForModule(moduleId: string): AgentProfile {
+		const module = getAgentModuleById(moduleId);
+		const baseId = this.makeAgentIdBase(moduleId);
+		const id = this.ensureUniqueAgentId(baseId);
+		return {
+			id,
+			displayName: module?.label || "Custom agent",
+			moduleId: moduleId,
+			enabled: true,
+			command: "",
+			args: [],
+			env: [],
+			auth: module?.auth ? { apiKey: "" } : undefined,
+		};
+	}
+
+	private ensureUniqueAgentId(
+		rawId: string,
+		excludeIndex?: number,
+		moduleId?: string,
+	): string {
+		const base =
+			rawId && rawId.trim().length > 0
+				? rawId.trim()
+				: this.makeAgentIdBase(moduleId);
 		const existing = new Set(
-			this.plugin.settings.customAgents.map((item) => item.id),
+			this.plugin.settings.agents
+				.filter((_, index) =>
+					typeof excludeIndex === "number"
+						? index !== excludeIndex
+						: true,
+				)
+				.map((agent) => agent.id),
 		);
 		if (!existing.has(base)) {
 			return base;
@@ -867,6 +741,57 @@ export class CCHubSettingTab extends PluginSettingTab {
 			candidate = `${base}-${counter}`;
 		}
 		return candidate;
+	}
+
+	private makeAgentIdBase(moduleId?: string): string {
+		if (!moduleId) {
+			return "agent";
+		}
+		const parts = moduleId.split(":");
+		const base = parts[1] || parts[0] || "agent";
+		return base === "custom" ? "custom-agent" : base;
+	}
+
+	private getModuleOptionLabel(module: AgentModuleDefinition): string {
+		return `${module.label} (${module.protocol.toUpperCase()})`;
+	}
+
+	private getCommandPlaceholder(
+		module: AgentModuleDefinition | null,
+	): string {
+		if (!module || !module.commandCandidates?.length) {
+			return "Absolute path to command";
+		}
+		return `Absolute path to ${module.commandCandidates[0]}`;
+	}
+
+	private getCommandDesc(module: AgentModuleDefinition | null): string {
+		const base =
+			'Absolute path to the agent command. On macOS/Linux use \"which <command>\", and on Windows use \"where <command>\".';
+		if (!module?.commandCandidates?.length) {
+			return base;
+		}
+		return `${base} Leave empty to auto-detect: ${module.commandCandidates.join(", ")}.`;
+	}
+
+	private getArgsDesc(module: AgentModuleDefinition | null): string {
+		const base =
+			"Enter one argument per line. Leave empty to run without arguments.";
+		if (!module?.requiredArgs?.length) {
+			return base;
+		}
+		const placement =
+			module.argsPlacement === "prepend" ? "prepended" : "appended";
+		return `${base} Required args will be ${placement}: ${module.requiredArgs.join(" ")}.`;
+	}
+
+	private getEnvDesc(module: AgentModuleDefinition | null): string {
+		const base =
+			"Enter KEY=VALUE pairs, one per line. (Stored as plain text)";
+		if (!module?.auth?.envKey) {
+			return base;
+		}
+		return `${base} ${module.auth.envKey} is derived from the API key above.`;
 	}
 
 	private formatArgs(args: string[]): string {
