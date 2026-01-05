@@ -1,4 +1,4 @@
-import type CCHubPlugin from "../plugin";
+import type CCHubPlugin from "../../plugin";
 
 export class Logger {
 	constructor(private plugin: CCHubPlugin) {}

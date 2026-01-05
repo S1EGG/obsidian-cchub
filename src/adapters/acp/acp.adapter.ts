@@ -21,8 +21,8 @@ import {
 	type AcpProcessErrorEvent,
 	type AcpProcessExitEvent,
 } from "./acp.connection";
-import { TerminalManager } from "../../shared/terminal-manager";
-import { Logger } from "../../shared/logger";
+import { TerminalManager } from "./terminal-manager";
+import { Logger } from "../obsidian/logger";
 import { AcpPermissionHandler } from "./acp-permission-handler";
 import { AcpMessageHandler } from "./acp-message-handler";
 import type CCHubPlugin from "../../plugin";

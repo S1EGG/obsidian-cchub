@@ -9,8 +9,8 @@ import type { IVaultAccess } from "../domain/ports/vault-access.port";
 import type { AuthenticationMethod } from "../domain/models/chat-session";
 import type { ErrorInfo } from "../domain/models/agent-error";
 import type { ImagePromptContent } from "../domain/models/prompt-content";
-import type { IMentionService } from "../shared/mention-utils";
-import { preparePrompt, sendPreparedPrompt } from "../shared/message-service";
+import type { IMentionService } from "../adapters/obsidian/mention-utils";
+import { preparePrompt, sendPreparedPrompt } from "./message-service";
 import { Platform } from "obsidian";
 
 // ============================================================================

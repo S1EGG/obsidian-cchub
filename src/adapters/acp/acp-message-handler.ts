@@ -2,7 +2,7 @@ import * as acp from "@agentclientprotocol/sdk";
 import type { SessionUpdate } from "../../domain/models/session-update";
 import type { SlashCommand } from "../../domain/models/chat-session";
 import { AcpTypeConverter } from "./acp-type-converter";
-import type { Logger } from "../../shared/logger";
+import type { Logger } from "../obsidian/logger";
 
 /**
  * Callback type for session updates.

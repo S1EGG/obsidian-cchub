@@ -9,13 +9,13 @@ import type { ISettingsAccess } from "../domain/ports/settings-access.port";
 import {
 	useSessionLifecycle,
 	type SessionErrorInfo,
-} from "./session/useSessionLifecycle";
-import { useSessionMode } from "./session/useSessionMode";
+} from "./useSessionLifecycle";
+import { useSessionMode } from "./useSessionMode";
 import {
 	getActiveAgentId,
 	getCurrentAgent,
 	type AgentInfo,
-} from "./session/session-helpers";
+} from "./session-helpers";
 
 // ============================================================================
 // Types

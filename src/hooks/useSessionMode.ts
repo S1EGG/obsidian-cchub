@@ -1,7 +1,7 @@
 import { useCallback } from "react";
-import type { ChatSession, SlashCommand } from "../../domain/models/chat-session";
-import type { ICCHubClient } from "../../domain/ports/cchub.port";
-import type { ISettingsAccess } from "../../domain/ports/settings-access.port";
+import type { ChatSession, SlashCommand } from "../domain/models/chat-session";
+import type { ICCHubClient } from "../domain/ports/cchub.port";
+import type { ISettingsAccess } from "../domain/ports/settings-access.port";
 import { getAvailableAgentsFromSettings } from "./session-helpers";
 import type { AgentInfo } from "./session-helpers";
 
@@ -32,7 +32,11 @@ export function useSessionMode(
 	 * Set the session mode.
 	 */
 	const setMode = useCallback(
-		async (sessionId: string | null, currentModeId: string | undefined, modeId: string) => {
+		async (
+			sessionId: string | null,
+			currentModeId: string | undefined,
+			modeId: string,
+		) => {
 			if (!sessionId) {
 				console.warn("Cannot set mode: no active session");
 				return;
@@ -78,7 +82,11 @@ export function useSessionMode(
 	 * Set the session model.
 	 */
 	const setModel = useCallback(
-		async (sessionId: string | null, currentModelId: string | undefined, modelId: string) => {
+		async (
+			sessionId: string | null,
+			currentModelId: string | undefined,
+			modelId: string,
+		) => {
 			if (!sessionId) {
 				console.warn("Cannot set model: no active session");
 				return;

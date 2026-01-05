@@ -19,8 +19,11 @@ import type {
 	PromptContent,
 	ImagePromptContent,
 } from "../domain/models/prompt-content";
-import { extractMentionedNotes, type IMentionService } from "./mention-utils";
-import { convertWindowsPathToWsl } from "./wsl-utils";
+import {
+	extractMentionedNotes,
+	type IMentionService,
+} from "../adapters/obsidian/mention-utils";
+import { convertWindowsPathToWsl } from "../shared/wsl-utils";
 
 // ============================================================================
 // Types

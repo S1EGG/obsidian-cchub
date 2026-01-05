@@ -1,6 +1,6 @@
 import * as React from "react";
 const { useRef, useEffect, useMemo } = React;
-import { Logger } from "../../shared/logger";
+import { Logger } from "../../adapters/obsidian/logger";
 import type CCHubPlugin from "../../plugin";
 import type { ChatView } from "./ChatView";
 import type { NoteMetadata } from "../../domain/ports/vault-access.port";

@@ -1,8 +1,8 @@
-import type { CCHubPluginSettings } from "../../plugin";
+import type { CCHubPluginSettings } from "../plugin";
 import {
 	FALLBACK_AGENT_MODULE,
 	getAgentModuleById,
-} from "../../domain/agents/agent-modules";
+} from "../domain/agents/agent-modules";
 import { findAgentProfile } from "./session-helpers";
 
 /**

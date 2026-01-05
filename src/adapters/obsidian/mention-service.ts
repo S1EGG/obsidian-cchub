@@ -1,6 +1,6 @@
 import { TFile, prepareFuzzySearch } from "obsidian";
 import type CCHubPlugin from "../../plugin";
-import { Logger } from "../../shared/logger";
+import { Logger } from "./logger";
 
 // Note mention service for @-mention functionality
 export class NoteMentionService {

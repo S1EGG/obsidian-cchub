@@ -15,7 +15,7 @@ import type { UseMentionsReturn } from "../../hooks/useMentions";
 import type { UseSlashCommandsReturn } from "../../hooks/useSlashCommands";
 import { SuggestionDropdown } from "./SuggestionDropdown";
 import { ImagePreviewStrip, type AttachedImage } from "./ImagePreviewStrip";
-import { Logger } from "../../shared/logger";
+import { Logger } from "../../adapters/obsidian/logger";
 import { useSettings } from "../../hooks/useSettings";
 
 // ============================================================================
@@ -451,9 +451,7 @@ export function ChatInput({
 				const hasContent =
 					inputValue.trim() !== "" || attachedImages.length > 0;
 				svg.classList.add(
-					hasContent
-						? "cchub-icon-active"
-						: "cchub-icon-inactive",
+					hasContent ? "cchub-icon-active" : "cchub-icon-inactive",
 				);
 			}
 		},
@@ -971,16 +969,11 @@ export function ChatInput({
 						rows={1}
 					/>
 					{hintText && (
-						<div
-							className="cchub-hint-overlay"
-							aria-hidden="true"
-						>
+						<div className="cchub-hint-overlay" aria-hidden="true">
 							<span className="cchub-invisible">
 								{commandText}
 							</span>
-							<span className="cchub-hint-text">
-								{hintText}
-							</span>
+							<span className="cchub-hint-text">{hintText}</span>
 						</div>
 					)}
 				</div>

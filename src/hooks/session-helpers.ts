@@ -1,9 +1,9 @@
-import type { CCHubPluginSettings } from "../../plugin";
-import type { AgentProfile } from "../../domain/models/agent-config";
+import type { CCHubPluginSettings } from "../plugin";
+import type { AgentProfile } from "../domain/models/agent-config";
 import {
 	buildAgentRuntimeConfig,
 	type ResolvedAgentRuntimeConfig,
-} from "../../domain/agents/agent-runtime";
+} from "../domain/agents/agent-runtime";
 
 /**
  * Agent information for display.

@@ -2,9 +2,9 @@ import { useCallback } from "react";
 import type {
 	ChatSession,
 	AuthenticationMethod,
-} from "../../domain/models/chat-session";
-import type { ICCHubClient } from "../../domain/ports/cchub.port";
-import type { ISettingsAccess } from "../../domain/ports/settings-access.port";
+} from "../domain/models/chat-session";
+import type { ICCHubClient } from "../domain/ports/cchub.port";
+import type { ISettingsAccess } from "../domain/ports/settings-access.port";
 import {
 	getActiveAgentId,
 	getAgentDisplayName,

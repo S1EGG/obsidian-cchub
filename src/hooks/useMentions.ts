@@ -7,7 +7,7 @@ import {
 	detectMention,
 	replaceMention,
 	type MentionContext,
-} from "../shared/mention-utils";
+} from "../adapters/obsidian/mention-utils";
 import type CCHubPlugin from "../plugin";
 
 export interface UseMentionsReturn {

@@ -4,7 +4,7 @@ import { Platform } from "obsidian";
 
 import type CCHubPlugin from "../../plugin";
 import type { AgentConfig } from "../../domain/ports/cchub.port";
-import type { Logger } from "../../shared/logger";
+import type { Logger } from "../obsidian/logger";
 import { resolveCommandDirectory } from "../../shared/path-utils";
 import { wrapCommandForPlatform } from "../../shared/platform/platform-command-wrapper";
 import { buildProcessEnv } from "../../shared/platform/platform-env-builder";

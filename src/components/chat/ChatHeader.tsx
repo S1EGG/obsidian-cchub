@@ -3,7 +3,7 @@ import { setIcon } from "obsidian";
 import { Claude, Gemini, OpenAI } from "@lobehub/icons";
 import { HeaderButton } from "./HeaderButton";
 import { getAgentModuleById } from "../../domain/agents/agent-modules";
-import type { AgentInfo } from "../../hooks/session/session-helpers";
+import type { AgentInfo } from "../../hooks/session-helpers";
 
 /**
  * Props for ChatHeader component

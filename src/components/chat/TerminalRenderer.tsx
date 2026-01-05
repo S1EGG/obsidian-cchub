@@ -1,7 +1,7 @@
 import * as React from "react";
 const { useState, useRef, useEffect, useMemo } = React;
 import type { IAcpClient } from "../../adapters/acp/acp.adapter";
-import { Logger } from "../../shared/logger";
+import { Logger } from "../../adapters/obsidian/logger";
 import type CCHubPlugin from "../../plugin";
 
 interface TerminalRendererProps {

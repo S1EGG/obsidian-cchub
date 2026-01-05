@@ -14,8 +14,8 @@ import { ChatInput } from "./ChatInput";
 import { NoteMentionService } from "../../adapters/obsidian/mention-service";
 
 // Utility imports
-import { Logger } from "../../shared/logger";
-import { ChatExporter } from "../../shared/chat-exporter";
+import { Logger } from "../../adapters/obsidian/logger";
+import { ChatExporter } from "../../adapters/obsidian/chat-exporter";
 
 // Adapter imports
 import { AcpAdapter, type IAcpClient } from "../../adapters/acp/acp.adapter";
@@ -34,7 +34,7 @@ import {
 	getAvailableAgentsFromSettings,
 	getAgentDisplayName,
 	getAgentModuleId,
-} from "../../hooks/session/session-helpers";
+} from "../../hooks/session-helpers";
 
 // Type definitions for Obsidian internal APIs
 interface VaultAdapterWithBasePath {

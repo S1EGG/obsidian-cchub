@@ -1,6 +1,6 @@
 import { TFile } from "obsidian";
 import { Logger } from "./logger";
-import type CCHubPlugin from "../plugin";
+import type CCHubPlugin from "../../plugin";
 
 // Interface for mention service to avoid circular dependency
 export interface IMentionService {

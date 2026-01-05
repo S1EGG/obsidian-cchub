@@ -5,7 +5,7 @@ import type {
 	ToolCallStatus,
 	ToolKind,
 } from "../../domain/models/chat-message";
-import type { Logger } from "../../shared/logger";
+import type { Logger } from "../obsidian/logger";
 import type CCHubPlugin from "../../plugin";
 
 /**

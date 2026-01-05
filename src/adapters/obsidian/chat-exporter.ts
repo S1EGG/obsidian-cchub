@@ -1,8 +1,8 @@
-import type CCHubPlugin from "../plugin";
+import type CCHubPlugin from "../../plugin";
 import type {
 	ChatMessage,
 	MessageContent,
-} from "../domain/models/chat-message";
+} from "../../domain/models/chat-message";
 import { Logger } from "./logger";
 import { TFile } from "obsidian";
 

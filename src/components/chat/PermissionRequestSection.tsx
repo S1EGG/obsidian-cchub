@@ -1,7 +1,7 @@
 import * as React from "react";
 const { useMemo } = React;
 import type CCHubPlugin from "../../plugin";
-import { Logger } from "../../shared/logger";
+import { Logger } from "../../adapters/obsidian/logger";
 import * as acp from "@agentclientprotocol/sdk";
 
 interface PermissionRequestSectionProps {

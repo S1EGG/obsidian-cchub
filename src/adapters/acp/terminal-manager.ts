@@ -2,17 +2,17 @@ import { spawn, ChildProcess, SpawnOptions } from "child_process";
 import * as acp from "@agentclientprotocol/sdk";
 import { Platform } from "obsidian";
 
-import type CCHubPlugin from "../plugin";
-import { Logger } from "./logger";
+import type CCHubPlugin from "../../plugin";
+import { Logger } from "../obsidian/logger";
 import {
 	wrapCommandForPlatform,
 	wrapInShellIfNeeded,
-} from "./platform/platform-command-wrapper";
+} from "../../shared/platform/platform-command-wrapper";
 import {
 	buildProcessEnv,
 	envArrayToRecord,
-} from "./platform/platform-env-builder";
-import { resolveCommandDirectory } from "./path-utils";
+} from "../../shared/platform/platform-env-builder";
+import { resolveCommandDirectory } from "../../shared/path-utils";
 
 /**
  * Terminal process state.
