@@ -137,7 +137,7 @@ function ChatComponent({
 		},
 	);
 
-	const { messages, isSending } = chat;
+	const { messages, isSending, isAwaitingResponse } = chat;
 
 	const permission = usePermission(cchubClient, messages);
 
@@ -454,6 +454,7 @@ function ChatComponent({
 			<ChatMessages
 				messages={messages}
 				isSending={isSending}
+				isAwaitingResponse={isAwaitingResponse}
 				errorInfo={errorInfo}
 				plugin={plugin}
 				view={view}

@@ -7,7 +7,10 @@ import type {
 import type { AgentError } from "../../domain/models/agent-error";
 import type { PromptContent } from "../../domain/models/prompt-content";
 import type { SessionUpdate } from "../../domain/models/session-update";
-import type { PermissionOption } from "../../domain/models/chat-message";
+import type {
+	PermissionOption,
+	ToolKind,
+} from "../../domain/models/chat-message";
 import { Platform } from "obsidian";
 import { Logger } from "../../shared/logger";
 import { resolveCommandDirectory } from "../../shared/path-utils";
@@ -18,7 +21,7 @@ interface PermissionRequestEntry {
 	requestId: string;
 	toolCallId: string;
 	callId: string;
-	kind: "execute" | "edit";
+	kind: "execute" | "apply_patch" | "generic";
 	options: PermissionOption[];
 	sessionId: string;
 	changes?: Record<string, unknown>;
@@ -237,14 +240,14 @@ export class CodexAdapter implements ICCHubClient {
 			return;
 		}
 
-		const approved = entry.options.some(
-			(option) =>
-				option.optionId === optionId &&
-				(option.kind === "allow_once" ||
-					option.kind === "allow_always"),
+		const selectedOption = entry.options.find(
+			(option) => option.optionId === optionId,
 		);
+		const approved =
+			selectedOption?.kind === "allow_once" ||
+			selectedOption?.kind === "allow_always";
 
-		if (entry.kind === "edit") {
+		if (entry.kind === "apply_patch") {
 			await this.connection.request(
 				"apply_patch_approval_response",
 				{
@@ -255,10 +258,12 @@ export class CodexAdapter implements ICCHubClient {
 				60000,
 			);
 		} else {
-			this.connection.respondElicitation(
-				entry.callId,
-				approved ? "approved" : "denied",
-			);
+			const decision = approved
+				? selectedOption?.kind === "allow_always"
+					? "approved_for_session"
+					: "approved"
+				: "denied";
+			this.connection.respondElicitation(entry.callId, decision);
 		}
 
 		this.sessionUpdateCallback?.({
@@ -298,7 +303,19 @@ export class CodexAdapter implements ICCHubClient {
 	}
 
 	private handleEvent(event: CodexEventEnvelope): void {
+		if (event.method.endsWith("elicitation/create")) {
+			const params = event.params as Record<string, unknown> | null;
+			if (params) {
+				this.handleElicitationCreate(params, event.id);
+			}
+			return;
+		}
+
 		if (event.method !== "codex/event") {
+			const params = event.params as Record<string, unknown> | null;
+			if (params && this.hasPermissionOptions(params)) {
+				this.handleElicitationCreate(params, event.id);
+			}
 			return;
 		}
 
@@ -361,6 +378,20 @@ export class CodexAdapter implements ICCHubClient {
 				break;
 			}
 			default:
+				if (
+					msg.type &&
+					typeof msg.type === "string" &&
+					msg.type.endsWith("_approval_request")
+				) {
+					this.handlePermissionRequest(msg, sessionId);
+				} else if (
+					msg.type &&
+					typeof msg.type === "string" &&
+					this.isPermissionRequestType(msg.type) &&
+					this.hasPermissionOptions(msg)
+				) {
+					this.handlePermissionRequest(msg, sessionId);
+				}
 				break;
 		}
 	}
@@ -372,11 +403,25 @@ export class CodexAdapter implements ICCHubClient {
 		const callId = typeof msg.call_id === "string" ? msg.call_id : "";
 		const requestId = crypto.randomUUID();
 		const toolCallId = callId || requestId;
-		const isExec = msg.type === "exec_approval_request";
-		const options = this.getPermissionOptions();
-		const kind: PermissionRequestEntry["kind"] = isExec
-			? "execute"
-			: "edit";
+		if (
+			callId &&
+			Array.from(this.pendingPermissionRequests.values()).some(
+				(entry) => entry.toolCallId === toolCallId,
+			)
+		) {
+			return;
+		}
+		const msgType = typeof msg.type === "string" ? msg.type : "";
+		const isExec = msgType === "exec_approval_request";
+		const isApplyPatch = msgType === "apply_patch_approval_request";
+		const options = this.normalizePermissionOptions(msg.options);
+		const kind: PermissionRequestEntry["kind"] = isApplyPatch
+			? "apply_patch"
+			: isExec
+				? "execute"
+				: "generic";
+		const title = this.getPermissionTitle(msg, msgType);
+		const toolKind = this.inferToolKind(msgType, msg);
 
 		const entry: PermissionRequestEntry = {
 			requestId,
@@ -397,14 +442,49 @@ export class CodexAdapter implements ICCHubClient {
 			sessionId,
 			toolCallId,
 			status: "pending",
-			kind: isExec ? "execute" : "edit",
-			title: isExec ? "Exec command" : "Apply patch",
+			kind: toolKind,
+			title,
 			permissionRequest: {
 				requestId,
 				options,
 				isActive,
 			},
 		});
+	}
+
+	private handleElicitationCreate(
+		params: Record<string, unknown>,
+		rpcId?: number,
+	): void {
+		const sessionId =
+			this.currentSessionId || this.currentConfig?.id || "codex";
+		const callId =
+			(typeof params.codex_call_id === "string" &&
+				params.codex_call_id) ||
+			(typeof params.call_id === "string" && params.call_id) ||
+			(typeof rpcId === "number" ? `elicitation_${rpcId}` : "");
+
+		if (!callId) {
+			return;
+		}
+
+		const msg: Record<string, unknown> = {
+			type: "elicitation_create",
+			call_id: callId,
+			title: params.title,
+			options: params.options,
+		};
+
+		this.handlePermissionRequest(msg, sessionId);
+	}
+
+	private hasPermissionOptions(params: Record<string, unknown>): boolean {
+		return Array.isArray(params.options) || Array.isArray(params.choices);
+	}
+
+	private isPermissionRequestType(value: string): boolean {
+		const lowered = value.toLowerCase();
+		return lowered.includes("approval") || lowered.includes("permission");
 	}
 
 	private activateNextPermission(): void {
@@ -445,6 +525,111 @@ export class CodexAdapter implements ICCHubClient {
 				kind: "reject_once",
 			},
 		];
+	}
+
+	private normalizePermissionOptions(options: unknown): PermissionOption[] {
+		if (!Array.isArray(options)) {
+			if (options && typeof options === "object") {
+				const record = options as Record<string, unknown>;
+				if (Array.isArray(record.options)) {
+					return this.normalizePermissionOptions(record.options);
+				}
+				if (Array.isArray(record.choices)) {
+					return this.normalizePermissionOptions(record.choices);
+				}
+			}
+			return this.getPermissionOptions();
+		}
+
+		const normalized = options
+			.map((option, index) => {
+				if (!option || typeof option !== "object") {
+					return null;
+				}
+
+				const record = option as Record<string, unknown>;
+				const optionId =
+					(typeof record.optionId === "string" && record.optionId) ||
+					(typeof record.id === "string" && record.id) ||
+					`option_${index}`;
+				const name =
+					(typeof record.name === "string" && record.name) ||
+					(typeof record.label === "string" && record.label) ||
+					(typeof record.title === "string" && record.title) ||
+					String(optionId);
+				const kind = this.normalizePermissionKind(
+					record.kind ?? record.type ?? record.name ?? record.id,
+				);
+
+				return {
+					optionId,
+					name,
+					kind,
+				} as PermissionOption;
+			})
+			.filter((option): option is PermissionOption => option !== null);
+
+		return normalized.length > 0 ? normalized : this.getPermissionOptions();
+	}
+
+	private normalizePermissionKind(
+		rawKind: unknown,
+	): PermissionOption["kind"] {
+		const value = String(rawKind ?? "").toLowerCase();
+		const isReject = value.includes("reject") || value.includes("deny");
+		const isAlways = value.includes("always") || value.includes("session");
+
+		if (isReject) {
+			return isAlways ? "reject_always" : "reject_once";
+		}
+		if (value.includes("allow") || value.includes("approve")) {
+			return isAlways ? "allow_always" : "allow_once";
+		}
+		return "allow_once";
+	}
+
+	private getPermissionTitle(
+		msg: Record<string, unknown>,
+		msgType: string,
+	): string {
+		if (typeof msg.title === "string" && msg.title.trim()) {
+			return msg.title.trim();
+		}
+		if (typeof msg.label === "string" && msg.label.trim()) {
+			return msg.label.trim();
+		}
+		if (msgType === "exec_approval_request") {
+			return "Exec command";
+		}
+		if (msgType === "apply_patch_approval_request") {
+			return "Apply patch";
+		}
+		return msgType ? msgType.replace(/_/g, " ") : "Permission request";
+	}
+
+	private inferToolKind(
+		msgType: string,
+		msg: Record<string, unknown>,
+	): ToolKind {
+		const raw =
+			(typeof msg.kind === "string" && msg.kind) ||
+			(typeof msg.tool === "string" && msg.tool) ||
+			msgType;
+		const value = raw.toLowerCase();
+		if (value.includes("exec") || value.includes("command")) {
+			return "execute";
+		}
+		if (
+			value.includes("write") ||
+			value.includes("edit") ||
+			value.includes("patch")
+		) {
+			return "edit";
+		}
+		if (value.includes("read")) {
+			return "read";
+		}
+		return "other";
 	}
 
 	private extractPatchChanges(

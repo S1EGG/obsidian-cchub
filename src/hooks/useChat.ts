@@ -38,6 +38,8 @@ export interface UseChatReturn {
 	messages: ChatMessage[];
 	/** Whether a message is currently being sent */
 	isSending: boolean;
+	/** Whether we are waiting for the first agent response */
+	isAwaitingResponse: boolean;
 	/** Last user message (can be restored after cancel) */
 	lastUserMessage: string | null;
 	/** Error information from message operations */
@@ -190,6 +192,7 @@ export function useChat(
 	// Message state
 	const [messages, setMessages] = useState<ChatMessage[]>([]);
 	const [isSending, setIsSending] = useState(false);
+	const [isAwaitingResponse, setIsAwaitingResponse] = useState(false);
 	const [lastUserMessage, setLastUserMessage] = useState<string | null>(null);
 	const [errorInfo, setErrorInfo] = useState<ErrorInfo | null>(null);
 
@@ -274,18 +277,41 @@ export function useChat(
 			if (content.type !== "tool_call") return;
 
 			setMessages((prev) =>
-				prev.map((message) => ({
-					...message,
-					content: message.content.map((c) => {
-						if (
-							c.type === "tool_call" &&
-							c.toolCallId === toolCallId
-						) {
-							return mergeToolCallContent(c, content);
-						}
-						return c;
-					}),
-				})),
+				(() => {
+					let found = false;
+					const updated = prev.map((message) => ({
+						...message,
+						content: message.content.map((c) => {
+							if (
+								c.type === "tool_call" &&
+								c.toolCallId === toolCallId
+							) {
+								found = true;
+								return mergeToolCallContent(c, content);
+							}
+							return c;
+						}),
+					}));
+
+					if (found) {
+						return updated;
+					}
+
+					const safeContent: MessageContent = {
+						...content,
+						status: content.status ?? "pending",
+					};
+
+					return [
+						...prev,
+						{
+							id: crypto.randomUUID(),
+							role: "assistant" as const,
+							content: [safeContent],
+							timestamp: new Date(),
+						},
+					];
+				})(),
 			);
 		},
 		[],
@@ -349,6 +375,7 @@ export function useChat(
 		(update: SessionUpdate): void => {
 			switch (update.type) {
 				case "agent_message_chunk":
+					setIsAwaitingResponse(false);
 					updateLastMessage({
 						type: "text",
 						text: update.text,
@@ -356,6 +383,7 @@ export function useChat(
 					break;
 
 				case "agent_thought_chunk":
+					setIsAwaitingResponse(false);
 					updateLastMessage({
 						type: "agent_thought",
 						text: update.text,
@@ -364,6 +392,7 @@ export function useChat(
 
 				case "tool_call":
 				case "tool_call_update":
+					setIsAwaitingResponse(false);
 					upsertToolCall(update.toolCallId, {
 						type: "tool_call",
 						toolCallId: update.toolCallId,
@@ -377,6 +406,7 @@ export function useChat(
 					break;
 
 				case "plan":
+					setIsAwaitingResponse(false);
 					updateLastMessage({
 						type: "plan",
 						entries: update.entries,
@@ -400,6 +430,7 @@ export function useChat(
 		setMessages([]);
 		setLastUserMessage(null);
 		setIsSending(false);
+		setIsAwaitingResponse(false);
 		setErrorInfo(null);
 	}, []);
 
@@ -474,6 +505,7 @@ export function useChat(
 			// Phase 3: Set sending state and store original message
 			setIsSending(true);
 			setLastUserMessage(content);
+			setIsAwaitingResponse(true);
 
 			// Phase 4: Send prepared prompt to agent using message-service
 			try {
@@ -494,6 +526,7 @@ export function useChat(
 				} else {
 					// Error from message-service
 					setIsSending(false);
+					setIsAwaitingResponse(false);
 					setErrorInfo(
 						result.error
 							? {
@@ -510,6 +543,7 @@ export function useChat(
 			} catch (error) {
 				// Unexpected error
 				setIsSending(false);
+				setIsAwaitingResponse(false);
 				setErrorInfo({
 					title: "Send Message Failed",
 					message: `Failed to send message: ${error instanceof Error ? error.message : String(error)}`,
@@ -530,6 +564,7 @@ export function useChat(
 	return {
 		messages,
 		isSending,
+		isAwaitingResponse,
 		lastUserMessage,
 		errorInfo,
 		sendMessage,

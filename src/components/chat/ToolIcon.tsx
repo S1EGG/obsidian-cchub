@@ -1,7 +1,7 @@
 import * as React from "react";
 import type { ToolKind } from "../../domain/models/chat-message";
 
-type ToolIconKind = ToolKind | "other";
+type ToolIconKind = ToolKind | "other" | "chevron-down";
 
 interface ToolIconProps {
 	kind?: ToolIconKind;
@@ -61,9 +61,9 @@ const iconMap: Record<ToolIconKind, React.ReactNode> = {
 	),
 	think: (
 		<>
+			<path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-1 1.5-2 1.5-3.5 0-3.3-2.7-6-6-6s-6 2.7-6 6c0 1.5.5 2.5 1.5 3.5.8.8 1.3 1.5 1.5 2.5" />
 			<path d="M9 18h6" />
 			<path d="M10 22h4" />
-			<path d="M12 2a7 7 0 0 0-4 12c1 1 1 2 1 3h6c0-1 0-2 1-3a7 7 0 0 0-4-12z" />
 		</>
 	),
 	fetch: (
@@ -86,6 +86,11 @@ const iconMap: Record<ToolIconKind, React.ReactNode> = {
 			<circle cx="12" cy="12" r="7" />
 			<path d="M12 8v4" />
 			<path d="M12 16h.01" />
+		</>
+	),
+	"chevron-down": (
+		<>
+			<path d="m6 9 6 6 6-6" />
 		</>
 	),
 };

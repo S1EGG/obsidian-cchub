@@ -40,6 +40,7 @@ export class CodexConnection {
 	private pending = new Map<number, PendingRequest>();
 	private elicitationMap = new Map<string, number>();
 	private detectedVersion: string | null = null;
+	private stdoutBuffer = Buffer.alloc(0);
 
 	public onEvent: (evt: CodexEventEnvelope) => void = () => {};
 	public onError: (error: CodexConnectionError) => void = () => {};
@@ -110,7 +111,6 @@ export class CodexConnection {
 					);
 				});
 
-				let buffer = "";
 				let stderrBuffer = "";
 				let hasExited = false;
 				let exitCode: number | null = null;
@@ -152,34 +152,7 @@ export class CodexConnection {
 				});
 
 				this.child.stdout?.on("data", (data: Buffer | string) => {
-					const chunk = data.toString();
-					console.debug(
-						"[CodexConnection] stdout chunk:",
-						chunk.slice(0, 500),
-					);
-					buffer += chunk;
-					const lines = buffer.split("\n");
-					buffer = lines.pop() || "";
-					for (const line of lines) {
-						const trimmed = line.trim();
-						if (!trimmed) {
-							continue;
-						}
-						console.debug(
-							"[CodexConnection] stdout line:",
-							trimmed.slice(0, 200),
-						);
-						if (trimmed.startsWith("{") && trimmed.endsWith("}")) {
-							try {
-								const msg = JSON.parse(trimmed) as
-									| JsonRpcRequest
-									| JsonRpcResponse;
-								this.handleIncoming(msg);
-							} catch {
-								// Ignore parse errors
-							}
-						}
-					}
+					this.processStdoutChunk(data);
 				});
 
 				// Check process status with longer timeout and better error messages
@@ -416,6 +389,80 @@ export class CodexConnection {
 		}
 	}
 
+	private processStdoutChunk(data: Buffer | string): void {
+		const chunkBuffer = Buffer.isBuffer(data) ? data : Buffer.from(data);
+		this.stdoutBuffer = Buffer.concat([this.stdoutBuffer, chunkBuffer]);
+
+		while (this.stdoutBuffer.length > 0) {
+			const headerIndex = this.stdoutBuffer.indexOf("Content-Length:");
+			let hasHeader = false;
+			if (headerIndex === 0) {
+				hasHeader = true;
+			} else if (headerIndex > 0) {
+				const prefix = this.stdoutBuffer
+					.slice(0, headerIndex)
+					.toString("utf8");
+				if (/^[\r\n\s]*$/.test(prefix)) {
+					this.stdoutBuffer = this.stdoutBuffer.slice(headerIndex);
+					hasHeader = true;
+				}
+			}
+
+			if (hasHeader) {
+				const headerEnd = this.stdoutBuffer.indexOf("\r\n\r\n");
+				if (headerEnd === -1) {
+					return;
+				}
+				const headerText = this.stdoutBuffer
+					.slice(0, headerEnd)
+					.toString("utf8");
+				const match = /content-length:\s*(\d+)/i.exec(headerText);
+				if (!match) {
+					this.stdoutBuffer = this.stdoutBuffer.slice(headerEnd + 4);
+					continue;
+				}
+				const length = Number(match[1]);
+				const totalLength = headerEnd + 4 + length;
+				if (this.stdoutBuffer.length < totalLength) {
+					return;
+				}
+				const body = this.stdoutBuffer
+					.slice(headerEnd + 4, totalLength)
+					.toString("utf8");
+				this.stdoutBuffer = this.stdoutBuffer.slice(totalLength);
+				this.tryHandleRawMessage(body);
+				continue;
+			}
+
+			const newlineIndex = this.stdoutBuffer.indexOf("\n");
+			if (newlineIndex === -1) {
+				return;
+			}
+			const line = this.stdoutBuffer.slice(0, newlineIndex);
+			this.stdoutBuffer = this.stdoutBuffer.slice(newlineIndex + 1);
+			const trimmed = line.toString("utf8").trim();
+			if (!trimmed) {
+				continue;
+			}
+			this.tryHandleRawMessage(trimmed);
+		}
+	}
+
+	private tryHandleRawMessage(raw: string): void {
+		if (!raw.startsWith("{")) {
+			return;
+		}
+		try {
+			const msg = JSON.parse(raw) as JsonRpcRequest | JsonRpcResponse;
+			this.handleIncoming(msg);
+		} catch {
+			console.debug(
+				"[CodexConnection] Failed to parse JSON:",
+				raw.slice(0, 200),
+			);
+		}
+	}
+
 	private handleIncoming(msg: JsonRpcRequest | JsonRpcResponse): void {
 		if (msg && typeof msg === "object") {
 			if ("id" in msg && ("result" in msg || "error" in msg)) {
@@ -463,11 +510,12 @@ export class CodexConnection {
 			return;
 		}
 
-		if (envelope.method === "elicitation/create") {
+		if (envelope.method.endsWith("elicitation/create")) {
 			const params = envelope.params as Record<string, unknown> | null;
 			const callId =
 				(params?.codex_call_id as string | undefined) ||
-				(params?.call_id as string | undefined);
+				(params?.call_id as string | undefined) ||
+				`elicitation_${envelope.id}`;
 			if (callId) {
 				this.elicitationMap.set(callId, envelope.id);
 			}

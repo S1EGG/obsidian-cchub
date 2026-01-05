@@ -44,7 +44,6 @@ export function ChatHeader({
 	agentLabel,
 	agentModuleId,
 	availableAgents,
-	defaultAgentId,
 	isSessionReady,
 	conversationTitle,
 	onNewChat,
@@ -151,8 +150,6 @@ export function ChatHeader({
 											? trimmed.slice(0, 1).toUpperCase()
 											: "?";
 									const icon = getAgentIcon(agent.moduleId);
-									const isDefault =
-										agent.id === defaultAgentId;
 									const isCurrent = agent.id === agentId;
 									return (
 										<button
@@ -177,11 +174,6 @@ export function ChatHeader({
 												{label}
 											</span>
 											<span className="cchub-header-dropdown-tags">
-												{isDefault ? (
-													<span className="cchub-header-dropdown-tag">
-														Default
-													</span>
-												) : null}
 												{isCurrent ? (
 													<span className="cchub-header-dropdown-tag cchub-header-dropdown-tag--current">
 														Current

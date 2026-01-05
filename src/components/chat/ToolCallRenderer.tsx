@@ -7,7 +7,7 @@ import { TerminalRenderer } from "./TerminalRenderer";
 import { PermissionRequestSection } from "./PermissionRequestSection";
 import * as Diff from "diff";
 import { ToolIcon } from "./ToolIcon";
-// import { MarkdownTextRenderer } from "./MarkdownTextRenderer";
+import { MarkdownTextRenderer } from "./MarkdownTextRenderer";
 
 interface ToolCallRendererProps {
 	content: Extract<MessageContent, { type: "tool_call" }>;
@@ -102,12 +102,13 @@ export function ToolCallRenderer({
 								/>
 							);
 						}
-						/*
 						if (item.type === "content") {
-							// Handle content blocks (text, image, etc.)
-							if ("text" in item.content) {
+							if (item.content.type === "text") {
 								return (
-									<div key={index} className="cchub-tool-call-content">
+									<div
+										key={index}
+										className="cchub-tool-call-content"
+									>
 										<MarkdownTextRenderer
 											text={item.content.text}
 											app={plugin.app}
@@ -115,7 +116,23 @@ export function ToolCallRenderer({
 									</div>
 								);
 							}
-							}*/
+							if (item.content.type === "image") {
+								return (
+									<div
+										key={index}
+										className="cchub-tool-call-content"
+									>
+										<div className="cchub-message-image">
+											<img
+												src={`data:${item.content.mimeType};base64,${item.content.data}`}
+												alt="Tool output image"
+												className="cchub-message-image-thumbnail"
+											/>
+										</div>
+									</div>
+								);
+							}
+						}
 						return null;
 					})}
 				</div>

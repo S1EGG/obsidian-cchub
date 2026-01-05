@@ -28,7 +28,9 @@ export function CollapsibleThought({
 					<ToolIcon kind="think" />
 				</span>
 				<span className="cchub-tool-label">Thinking</span>
-				<span className="cchub-collapsible-thought-icon">v</span>
+				<span className="cchub-collapsible-thought-icon">
+					<ToolIcon kind="chevron-down" />
+				</span>
 			</div>
 			{isExpanded && (
 				<div className="cchub-collapsible-thought-content">

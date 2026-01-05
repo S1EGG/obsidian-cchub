@@ -7,6 +7,8 @@
  * between these domain types and ACP protocol types.
  */
 
+import type { PromptContent } from "./prompt-content";
+
 // ============================================================================
 // Core Types
 // ============================================================================
@@ -45,9 +47,9 @@ export type ToolKind =
 
 /**
  * Content that can be included in a tool call result.
- * Currently supports diffs and terminal output.
+ * Supports diffs, terminal output, and content blocks.
  */
-export type ToolCallContent = DiffContent | TerminalContent;
+export type ToolCallContent = DiffContent | TerminalContent | ToolContentBlock;
 
 /**
  * Represents a file modification with before/after content.
@@ -65,6 +67,14 @@ export interface DiffContent {
 export interface TerminalContent {
 	type: "terminal";
 	terminalId: string;
+}
+
+/**
+ * Displayable content returned by a tool call (text or image).
+ */
+export interface ToolContentBlock {
+	type: "content";
+	content: PromptContent;
 }
 
 // ============================================================================

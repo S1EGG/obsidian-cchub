@@ -24,6 +24,8 @@ export interface ChatMessagesProps {
 	messages: ChatMessage[];
 	/** Whether a message is currently being sent */
 	isSending: boolean;
+	/** Whether we are waiting for the first agent response */
+	isAwaitingResponse: boolean;
 	/** Error information (if any) */
 	errorInfo: ErrorInfo | null;
 	/** Plugin instance */
@@ -54,6 +56,7 @@ export interface ChatMessagesProps {
 export function ChatMessages({
 	messages,
 	isSending,
+	isAwaitingResponse,
 	errorInfo,
 	plugin,
 	view,
@@ -116,6 +119,9 @@ export function ChatMessages({
 
 	const lastMessageId =
 		messages.length > 0 ? messages[messages.length - 1]?.id : null;
+	const lastMessage = messages[messages.length - 1];
+	const shouldShowThinkingPlaceholder =
+		isAwaitingResponse && (!lastMessage || lastMessage.role === "user");
 
 	return (
 		<div ref={containerRef} className="cchub-chat-view-messages">
@@ -154,26 +160,26 @@ export function ChatMessages({
 							onApprovePermission={onApprovePermission}
 						/>
 					))}
-					{isSending && (
-						<div className="cchub-loading-indicator">
-							<div className="cchub-loading-pill">
-								<span
-									className="cchub-loading-spark"
-									aria-hidden="true"
-								/>
-								<span className="cchub-loading-text">
-									Thinking
-								</span>
-								<span
-									className="cchub-loading-ellipsis"
-									aria-hidden="true"
-								>
-									<span />
-									<span />
-									<span />
-								</span>
-							</div>
-						</div>
+					{shouldShowThinkingPlaceholder && (
+						<MessageRenderer
+							key="cchub-thinking-placeholder"
+							message={{
+								id: "cchub-thinking-placeholder",
+								role: "assistant",
+								content: [
+									{
+										type: "agent_thought",
+										text: "",
+									},
+								],
+								timestamp: new Date(),
+							}}
+							plugin={plugin}
+							acpClient={acpClient}
+							isLatest={true}
+							isSending={true}
+							onApprovePermission={onApprovePermission}
+						/>
 					)}
 				</>
 			)}

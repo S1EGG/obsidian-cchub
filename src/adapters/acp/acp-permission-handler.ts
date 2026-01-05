@@ -1,5 +1,10 @@
 import * as acp from "@agentclientprotocol/sdk";
-import type { PermissionOption } from "../../domain/models/chat-message";
+import type {
+	PermissionOption,
+	ToolCallLocation,
+	ToolCallStatus,
+	ToolKind,
+} from "../../domain/models/chat-message";
 import type { Logger } from "../../shared/logger";
 import type CCHubPlugin from "../../plugin";
 
@@ -29,7 +34,10 @@ export type UpdateMessageCallback = (
 	content: {
 		type: "tool_call";
 		toolCallId: string;
-		status?: string;
+		title?: string;
+		kind?: ToolKind;
+		status?: ToolCallStatus;
+		locations?: ToolCallLocation[] | null;
 		permissionRequest?: {
 			requestId: string;
 			options: PermissionOption[];
@@ -253,6 +261,14 @@ export class AcpPermissionHandler {
 	): Promise<acp.RequestPermissionResponse> {
 		const requestId = crypto.randomUUID();
 		const toolCallId = params.toolCall?.toolCallId || crypto.randomUUID();
+		const toolCall = params.toolCall;
+		const kind = toolCall?.kind
+			? (String(toolCall.kind) as ToolKind)
+			: undefined;
+		const status = (toolCall?.status || "pending") as ToolCallStatus;
+		const title =
+			typeof toolCall?.title === "string" ? toolCall.title : undefined;
+		const locations = toolCall?.locations ?? undefined;
 
 		// Normalize options
 		const normalizedOptions: PermissionOption[] = params.options.map(
@@ -294,6 +310,10 @@ export class AcpPermissionHandler {
 		this.updateMessageCallback(toolCallId, {
 			type: "tool_call",
 			toolCallId,
+			title,
+			kind,
+			status,
+			locations,
 			permissionRequest: permissionRequestData,
 		});
 
