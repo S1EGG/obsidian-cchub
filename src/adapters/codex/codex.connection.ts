@@ -85,7 +85,7 @@ export class CodexConnection {
 			spawnArgs = ["-l", "-c", commandString];
 		}
 
-		console.log("[CodexConnection] Starting with:", {
+		console.debug("[CodexConnection] Starting with:", {
 			spawnCommand,
 			spawnArgs,
 			cwd,
@@ -117,7 +117,7 @@ export class CodexConnection {
 				let exitSignal: string | null = null;
 
 				this.child.on("exit", (code, signal) => {
-					console.log("[CodexConnection] Process exited:", {
+					console.debug("[CodexConnection] Process exited:", {
 						code,
 						signal,
 					});
@@ -134,10 +134,10 @@ export class CodexConnection {
 					this.stop();
 				});
 
-				this.child.stderr?.on("data", (data) => {
+				this.child.stderr?.on("data", (data: Buffer | string) => {
 					const errorMsg = data.toString();
 					stderrBuffer += errorMsg;
-					console.log("[CodexConnection] stderr:", errorMsg);
+					console.debug("[CodexConnection] stderr:", errorMsg);
 				});
 
 				this.child.stdin?.on("error", (error) => {
@@ -151,9 +151,9 @@ export class CodexConnection {
 					this.logger.error("[CodexConnection] stdin error:", error);
 				});
 
-				this.child.stdout?.on("data", (data) => {
+				this.child.stdout?.on("data", (data: Buffer | string) => {
 					const chunk = data.toString();
-					console.log(
+					console.debug(
 						"[CodexConnection] stdout chunk:",
 						chunk.slice(0, 500),
 					);
@@ -165,7 +165,7 @@ export class CodexConnection {
 						if (!trimmed) {
 							continue;
 						}
-						console.log(
+						console.debug(
 							"[CodexConnection] stdout line:",
 							trimmed.slice(0, 200),
 						);
@@ -266,7 +266,7 @@ export class CodexConnection {
 			params,
 		};
 
-		console.log("[CodexConnection] Sending request:", { id, method });
+		console.debug("[CodexConnection] Sending request:", { id, method });
 
 		return new Promise<T>((resolve, reject) => {
 			const timeoutId = setTimeout(() => {
@@ -419,8 +419,8 @@ export class CodexConnection {
 	private handleIncoming(msg: JsonRpcRequest | JsonRpcResponse): void {
 		if (msg && typeof msg === "object") {
 			if ("id" in msg && ("result" in msg || "error" in msg)) {
-				const response = msg as JsonRpcResponse;
-				console.log(
+				const response = msg;
+				console.debug(
 					"[CodexConnection] Received response for id:",
 					response.id,
 					"pending ids:",
@@ -428,7 +428,7 @@ export class CodexConnection {
 				);
 				const pending = this.pending.get(response.id);
 				if (!pending) {
-					console.log(
+					console.debug(
 						"[CodexConnection] No pending request for id:",
 						response.id,
 					);

@@ -54,7 +54,7 @@ export class AcpConnection {
 	isConnected(): boolean {
 		const connected =
 			this.connection !== null && this.agentProcess !== null;
-		console.log("[AcpConnection] isConnected check:", {
+		console.debug("[AcpConnection] isConnected check:", {
 			hasConnection: this.connection !== null,
 			hasProcess: this.agentProcess !== null,
 			processPid: this.agentProcess?.pid,
@@ -241,7 +241,7 @@ export class AcpConnection {
 		});
 
 		agentProcess.on("exit", (code, signal) => {
-			console.log(
+			console.debug(
 				`[AcpConnection] ${agentLabel} exited (code: ${code}, signal: ${signal}, pid: ${agentProcess.pid})`,
 			);
 			this.events.onProcessExit?.({
@@ -252,13 +252,13 @@ export class AcpConnection {
 			});
 			// Only clear connection if this is the current process
 			if (this.agentProcess === agentProcess) {
-				console.log(
+				console.debug(
 					"[AcpConnection] Clearing connection for exited process",
 				);
 				this.connection = null;
 				this.agentProcess = null;
 			} else {
-				console.log(
+				console.debug(
 					"[AcpConnection] Ignoring exit from old process (current pid:",
 					this.agentProcess?.pid,
 					")",

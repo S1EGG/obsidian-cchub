@@ -9,6 +9,7 @@ import type AgentClientPlugin from "../../plugin";
 import type { CustomAgentSettings, AgentEnvVar } from "../../plugin";
 import { normalizeEnvVars } from "../../shared/settings-utils";
 
+/* eslint-disable obsidianmd/ui/sentence-case */
 export class AgentClientSettingTab extends PluginSettingTab {
 	plugin: AgentClientPlugin;
 	private agentSelector: DropdownComponent | null = null;

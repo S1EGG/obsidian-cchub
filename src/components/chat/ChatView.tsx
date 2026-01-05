@@ -194,7 +194,8 @@ function ChatComponent({
 
 			// Skip if already empty AND not switching agents
 			if (messages.length === 0 && !isAgentSwitch) {
-				new Notice("[CCHub] Already a new session");
+				// eslint-disable-next-line obsidianmd/ui/sentence-case
+				new Notice("CCHub: Already a new session");
 				return;
 			}
 
@@ -238,7 +239,8 @@ function ChatComponent({
 
 	const handleExportChat = useCallback(async () => {
 		if (messages.length === 0) {
-			new Notice("[CCHub] No messages to export");
+			// eslint-disable-next-line obsidianmd/ui/sentence-case
+			new Notice("CCHub: No messages to export");
 			return;
 		}
 
@@ -253,9 +255,10 @@ function ChatComponent({
 				session.createdAt,
 				openFile,
 			);
-			new Notice(`[CCHub] Chat exported to ${filePath}`);
+			new Notice(`CCHub: Chat exported to ${filePath}`);
 		} catch (error) {
-			new Notice("[CCHub] Failed to export chat");
+			// eslint-disable-next-line obsidianmd/ui/sentence-case
+			new Notice("CCHub: Failed to export chat");
 			logger.error("Export error:", error);
 		}
 	}, [messages, session, plugin, logger]);
@@ -460,7 +463,8 @@ function ChatComponent({
 				void (async () => {
 					const success = await permission.approveActivePermission();
 					if (!success) {
-						new Notice("[CCHub] No active permission request");
+						// eslint-disable-next-line obsidianmd/ui/sentence-case
+						new Notice("CCHub: No active permission request");
 					}
 				})();
 			},
@@ -472,7 +476,8 @@ function ChatComponent({
 				void (async () => {
 					const success = await permission.rejectActivePermission();
 					if (!success) {
-						new Notice("[CCHub] No active permission request");
+						// eslint-disable-next-line obsidianmd/ui/sentence-case
+						new Notice("CCHub: No active permission request");
 					}
 				})();
 			},
@@ -559,6 +564,7 @@ export class ChatView extends ItemView {
 	}
 
 	getDisplayText() {
+		// eslint-disable-next-line obsidianmd/ui/sentence-case
 		return "CCHub";
 	}
 

@@ -80,7 +80,10 @@ export function useSessionLifecycle(
 		try {
 			// Find agent settings
 			const agentSettings = findAgentSettings(settings, activeAgentId);
-			console.log("[useSessionLifecycle] agentSettings:", agentSettings);
+			console.debug(
+				"[useSessionLifecycle] agentSettings:",
+				agentSettings,
+			);
 
 			if (!agentSettings) {
 				onSessionUpdate((prev) => ({ ...prev, state: "error" }));
@@ -100,13 +103,13 @@ export function useSessionLifecycle(
 				activeAgentId,
 				workingDirectory,
 			);
-			console.log("[useSessionLifecycle] agentConfig:", agentConfig);
+			console.debug("[useSessionLifecycle] agentConfig:", agentConfig);
 
 			// Check if initialization is needed
 			const isInit = agentClient.isInitialized();
 			const currentAgentId = agentClient.getCurrentAgentId();
 			const needsInitialize = !isInit || currentAgentId !== activeAgentId;
-			console.log("[useSessionLifecycle] needsInitialize check:", {
+			console.debug("[useSessionLifecycle] needsInitialize check:", {
 				isInit,
 				currentAgentId,
 				activeAgentId,
@@ -124,7 +127,7 @@ export function useSessionLifecycle(
 
 			// Initialize if needed
 			if (needsInitialize) {
-				console.log("[useSessionLifecycle] Calling initialize...");
+				console.debug("[useSessionLifecycle] Calling initialize...");
 				const initResult = await withTimeout(
 					agentClient.initialize(agentConfig),
 					getInitializeTimeoutMs(settings, activeAgentId),
@@ -133,7 +136,7 @@ export function useSessionLifecycle(
 						void agentClient.disconnect();
 					},
 				);
-				console.log("[useSessionLifecycle] Initialize completed");
+				console.debug("[useSessionLifecycle] Initialize completed");
 				authMethods = initResult.authMethods;
 				promptCapabilities = initResult.promptCapabilities;
 			}

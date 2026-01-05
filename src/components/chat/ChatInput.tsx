@@ -221,7 +221,7 @@ export function ChatInput({
 					addedCount++;
 				} catch (error) {
 					console.error("Failed to convert image:", error);
-					new Notice("[CCHub] Failed to attach image");
+					new Notice("Failed to attach image");
 				}
 			}
 		},
@@ -254,9 +254,7 @@ export function ChatInput({
 			e.preventDefault();
 
 			if (!supportsImages) {
-				new Notice(
-					"[CCHub] This agent does not support image attachments",
-				);
+				new Notice("This agent does not support image attachments");
 				return;
 			}
 
@@ -320,9 +318,7 @@ export function ChatInput({
 			e.preventDefault();
 
 			if (!supportsImages) {
-				new Notice(
-					"[CCHub] This agent does not support image attachments",
-				);
+				new Notice("This agent does not support image attachments");
 				return;
 			}
 
@@ -695,9 +691,8 @@ export function ChatInput({
 	const updateDropdownWidth = useCallback(
 		(containerEl: HTMLDivElement | null) => {
 			if (!containerEl) return;
-			const select = containerEl.querySelector(
-				"select.dropdown",
-			) as HTMLSelectElement | null;
+			const select =
+				containerEl.querySelector<HTMLSelectElement>("select.dropdown");
 			if (!select) return;
 			const selectedOption = select.selectedOptions[0];
 			const label = selectedOption?.text ?? "";

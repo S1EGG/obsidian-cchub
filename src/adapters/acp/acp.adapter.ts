@@ -112,13 +112,13 @@ export class AcpAdapter implements IAgentClient, IAcpClient {
 	 * Initialize connection to an AI agent.
 	 */
 	async initialize(config: AgentConfig): Promise<InitializeResult> {
-		console.log("[AcpAdapter] Starting initialization:", config.id);
+		console.debug("[AcpAdapter] Starting initialization:", config.id);
 		this.currentConfig = config;
 
 		try {
 			const initResult = await this.acpConnection.initialize(config);
 
-			console.log(
+			console.debug(
 				`[AcpAdapter] ✅ Connected (protocol v${initResult.protocolVersion})`,
 			);
 
@@ -135,7 +135,7 @@ export class AcpAdapter implements IAgentClient, IAcpClient {
 			// Mark as initialized
 			this.isInitializedFlag = true;
 			this.currentAgentId = config.id;
-			console.log(
+			console.debug(
 				"[AcpAdapter] isInitializedFlag set to true, currentAgentId:",
 				config.id,
 			);

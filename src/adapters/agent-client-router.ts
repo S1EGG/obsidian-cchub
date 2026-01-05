@@ -100,7 +100,7 @@ export class AgentClientRouter implements IAgentClient {
 	}
 
 	private selectClient(config: AgentConfig): IAgentClient {
-		console.log("[AgentClientRouter] selectClient:", {
+		console.debug("[AgentClientRouter] selectClient:", {
 			configId: config.id,
 			codexId: this.plugin.settings.codex.id,
 			command: config.command,
@@ -108,15 +108,15 @@ export class AgentClientRouter implements IAgentClient {
 		});
 		if (config.id === this.plugin.settings.codex.id) {
 			if (this.isCodexAcpCommand(config.command)) {
-				console.log(
+				console.debug(
 					"[AgentClientRouter] Using AcpAdapter for Codex (codex-acp command)",
 				);
 				return this.acpAdapter;
 			}
-			console.log("[AgentClientRouter] Using CodexAdapter");
+			console.debug("[AgentClientRouter] Using CodexAdapter");
 			return this.codexAdapter;
 		}
-		console.log("[AgentClientRouter] Using AcpAdapter (default)");
+		console.debug("[AgentClientRouter] Using AcpAdapter (default)");
 		return this.acpAdapter;
 	}
 

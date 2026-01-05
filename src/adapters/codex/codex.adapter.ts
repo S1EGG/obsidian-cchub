@@ -47,7 +47,7 @@ export class CodexAdapter implements IAgentClient {
 	}
 
 	async initialize(config: AgentConfig): Promise<InitializeResult> {
-		console.log("[CodexAdapter] initialize called with config:", {
+		console.debug("[CodexAdapter] initialize called with config:", {
 			id: config.id,
 			command: config.command,
 			args: config.args,
@@ -100,7 +100,7 @@ export class CodexAdapter implements IAgentClient {
 		// So we skip waitForServerReady and initialize, and go directly to tools/list
 		try {
 			await this.connection.request("tools/list", {}, 15000);
-			console.log("[CodexAdapter] tools/list succeeded");
+			console.debug("[CodexAdapter] tools/list succeeded");
 		} catch (error) {
 			console.error("[CodexAdapter] tools/list failed:", error);
 			throw error;
@@ -309,9 +309,7 @@ export class CodexAdapter implements IAgentClient {
 		}
 
 		const sessionId =
-			(this.currentSessionId as string | null) ||
-			this.currentConfig?.id ||
-			"codex";
+			this.currentSessionId || this.currentConfig?.id || "codex";
 
 		switch (msg.type) {
 			case "agent_message_delta": {

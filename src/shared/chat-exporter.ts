@@ -254,7 +254,7 @@ tags: [agent-client]
 					return `![[${fileName}]]\n\n`;
 				} catch (error) {
 					this.logger.error(
-						`Failed to save image as attachment: ${error}`,
+						`Failed to save image as attachment: ${String(error)}`,
 					);
 					// Fallback to base64 embedding
 					return `![Image](data:${content.mimeType};base64,${content.data})\n\n`;

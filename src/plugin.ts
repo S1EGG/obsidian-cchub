@@ -131,6 +131,7 @@ export default class AgentClientPlugin extends Plugin {
 
 		const ribbonIconEl = this.addRibbonIcon(
 			"bot-message-square",
+			// eslint-disable-next-line obsidianmd/ui/sentence-case
 			"Open CCHub",
 			(_evt: MouseEvent) => {
 				void this.activateView();
@@ -140,6 +141,7 @@ export default class AgentClientPlugin extends Plugin {
 
 		this.addCommand({
 			id: "open-chat-view",
+			// eslint-disable-next-line obsidianmd/ui/sentence-case
 			name: "Open CCHub",
 			callback: () => {
 				void this.activateView();

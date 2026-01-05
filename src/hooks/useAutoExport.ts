@@ -139,7 +139,7 @@ export function useAutoExport(plugin: AgentClientPlugin): UseAutoExportReturn {
 
 				if (filePath) {
 					// Show success notification
-					new Notice(`[CCHub] Chat exported to ${filePath}`);
+					new Notice(`CCHub: Chat exported to ${filePath}`);
 
 					// Log success
 					const context =
@@ -150,7 +150,8 @@ export function useAutoExport(plugin: AgentClientPlugin): UseAutoExportReturn {
 				}
 			} catch {
 				// Show error notification
-				new Notice("[CCHub] Failed to export chat");
+				// eslint-disable-next-line obsidianmd/ui/sentence-case
+				new Notice("CCHub: Failed to export chat");
 				// Error already logged in exportChat
 			}
 		},
